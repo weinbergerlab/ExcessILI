@@ -34,9 +34,9 @@ nrevss_flu_import<-function(){
   return(clin3)
 }
 
-reshape_ds<-function(ds2=combo2.sub){
-  ili.m<-melt(ds2, id.vars=c(geo,agevar,datevar,'MMWRyear','MMWRweek'))
-  form1<-as.formula(paste(paste0(datevar,"+MMWRyear+MMWRweek"), geo, agevar,'variable', sep='~' ) )
+reshape_ds<-function(ds2,...){
+  ili.m<-melt(ds2, id.vars=c(geovar,agevar,datevar,'MMWRyear','MMWRweek'))
+  form1<-as.formula(paste(paste0(datevar,"+MMWRyear+MMWRweek"), geovar, agevar,'variable', sep='~' ) )
   ili.a<-acast(ili.m, form1 , fun.aggregate = sum )
   dimnames(ili.a)[[1]]<-substr(dimnames(ili.a)[[1]],1,10)
 return(ili.a)
