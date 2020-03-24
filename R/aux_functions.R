@@ -44,7 +44,7 @@ return(ili.a)
 
 
 ## Evaluate results after controlling for flu and RSV
-glm.func<-function(ds, x.test, age.test, denom.var,syndrome){
+glm.func<-function(ds, x.test, age.test, denom.var,syndrome, time.res){
   date.string<-as.Date(dimnames(ds)[[1]])
   month<-month(date.string)
   epiyr<-year(date.string)
@@ -66,12 +66,17 @@ glm.func<-function(ds, x.test, age.test, denom.var,syndrome){
   sqrt.flu<- na.locf(sqrt.flu)  #fill in missing observations for flu at end of TS with most recent observed values
   sqrt.rsv<- na.locf(sqrt.rsv)  #fill in missing observations for RSV at end of TS with most recent observed values
   t2<-1:length(y.age)
-  sin1<-sin(2*pi*t2/365.25)
-  cos1<-cos(2*pi*t2/365.25)
-  sin2<-sin(2*pi*t2*2/365.25)
-  cos2<-cos(2*pi*t2*2/365.25)
-  sin3<-sin(2*pi*t2*3/365.25)
-  cos3<-cos(2*pi*t2*3/365.25)
+  if(time.res=='day'){
+    period=365.25
+  }else if(time.res=='week'){
+      period=52.1775 
+    }
+  sin1<-sin(2*pi*t2/period)
+  cos1<-cos(2*pi*t2/period)
+  sin2<-sin(2*pi*t2*2/period)
+  cos2<-cos(2*pi*t2*2/period)
+  sin3<-sin(2*pi*t2*3/period)
+  cos3<-cos(2*pi*t2*3/period)
  
   ds.glm<-cbind.data.frame('day.of.year'=day.of.year,'y.age'=y.age[1,],'y.age.fit'=y.age.fit,sqrt.rsv, sqrt.flu, day.of.week, t2,epiyr.index.f, sin1, sin2, cos1, cos2, sin3, cos3)
   #ds.glm<-ds.glm[complete.cases(ds.glm),]

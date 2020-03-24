@@ -33,5 +33,6 @@ excess_cases1<-excessCases(ds=combo1,
                            statevar='state',
                            denom.var='total.visits',
                            use.syndromes=c('ili','resp'), 
-                           adj.flu=F, flu.import=F)
+                           adj.flu=F, 
+                           flu.import=F)
 dashboardPlot(excess_cases1)

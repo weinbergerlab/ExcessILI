@@ -13,7 +13,7 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
   return(ds1.c)
 }
 
-excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var'){
+excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var', time.res='day'){
   if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
   ds<-as.data.frame(ds)
   ds[,datevar]<-as.Date(ds[,datevar])
@@ -47,9 +47,9 @@ excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,
  
   ages <-   dimnames(ds2)[[3]]
   geos<-dimnames(ds2)[[2]]
-  st<- pblapply(use.syndromes, function(x){
+  all.glm.res<- pblapply(use.syndromes, function(x){
     ww<- lapply(ages, function(y){
-      q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var)
+      q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res)
       names(q)<-geos
       return(q)
     }
