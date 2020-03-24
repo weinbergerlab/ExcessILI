@@ -26,4 +26,6 @@ excess_cases1<-excessCases(ds=combo1,
                            agevar='agec',
                            statevar='state',
                            denom.var='total.visits',
-                           use.syndromes=c('ili','resp') )
+                           use.syndromes=c('ili','resp'), 
+                           adj.flu=F, flu.import=F)
+shiny.dashboard.func()

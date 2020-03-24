@@ -14,12 +14,13 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
 }
 
 excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T){
+  if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
   ds<-as.data.frame(ds)
   ds[,datevar]<-as.Date(ds[,datevar])
   mmwr.date<-MMWRweek(ds[,datevar])
   ds1.df<-cbind.data.frame(ds,mmwr.date)
   
-  if(is.null(geovar)){
+  if(!exists('geovar')){
     ds1.df$geovar<-ds1.df[,statevar]
   }
   if(rsv.import){
@@ -37,7 +38,7 @@ excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,
   if(adj.rsv==F){
     ds1.df$rsv.var<-1
   }
-  if(is.null(denom.var)){
+  if(!exists("denom.var")){
     ds1.df$denom <-1
     denom.var <-'denom'
   }
@@ -48,7 +49,7 @@ excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,
   geos<-dimnames(ds2)[[2]]
   all.glm.res<- pblapply(use.syndromes, function(x){
     ww<- lapply(ages, function(y){
-      lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x)
+      lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var)
     }
     ) 
     names(ww)<- ages

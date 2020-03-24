@@ -34,7 +34,7 @@ nrevss_flu_import<-function(){
   return(clin3)
 }
 
-reshape_ds<-function(ds2,...){
+reshape_ds<-function(ds2,agevar, datevar, geovar){
   ili.m<-melt(ds2, id.vars=c(geovar,agevar,datevar,'MMWRyear','MMWRweek'))
   form1<-as.formula(paste(paste0(datevar,"+MMWRyear+MMWRweek"), geovar, agevar,'variable', sep='~' ) )
   ili.a<-acast(ili.m, form1 , fun.aggregate = sum )
@@ -44,7 +44,7 @@ return(ili.a)
 
 
 ## Evaluate results after controlling for flu and RSV
-glm.func<-function(ds, x.test, age.test, syndrome){
+glm.func<-function(ds, x.test, age.test, denom.var,syndrome){
   date.string<-as.Date(dimnames(ds)[[1]])
   month<-month(date.string)
   epiyr<-year(date.string)
@@ -87,7 +87,11 @@ glm.func<-function(ds, x.test, age.test, syndrome){
   ))
   mod1<-glm(form1, data=ds.glm, family=poisson(link='log'), offset=log(clean.array.citywide[,age.test,denom.var]))
   #500 samples total
-  pred.coefs.reg.mean<- mvrnorm(n = 100, mu=coef(mod1), Sigma=vcov( mod1))
+  coef1<-coef(mod1)
+  coef1[is.na(coef1)]<-0
+  v.cov.mat<-vcov( mod1)
+  v.cov.mat[is.na(v.cov.mat)]<-0
+  pred.coefs.reg.mean<- mvrnorm(n = 100, mu=coef1, Sigma=v.cov.mat)
   mod.mat.pred<-model.matrix(form2, data=ds.glm, family='poisson')
   preds.stage1.regmean<- mod.mat.pred %*% t(pred.coefs.reg.mean) 
   preds.stage2<-rpois(n=length(preds.stage1.regmean)*5, exp(preds.stage1.regmean))
@@ -147,21 +151,6 @@ server<-function(input, output){
           }else{
             y.range<-c(0,max(c(ili2.pred.lcl[dates.select,j,],ili2.pred.ucl[dates.select,j,],ili2.pred[dates.select,j,],obs.ili[dates.select,j,]), na.rm=T))
           }
-        }else if (input$set.prop=='Counts/100,000 people'){
-          y=obs.ili[dates.select,j,i]/pop3[dates.select,j,i]*100000
-          pred<-ili2.pred[dates.select,j,i]/pop3[dates.select,j,i]*100000
-          pred.lcl<-ili2.pred.lcl[dates.select,j,i]/pop3[dates.select,j,i]*100000
-          pred.ucl<-ili2.pred.ucl[dates.select,j,i]/pop3[dates.select,j,i]*100000
-          if(input$set.axis==F){
-            y.range<-c(0,max(c(pred.lcl,pred.ucl,pred,y), na.rm=T))
-          }else{
-            y.range<-c(0,max(c(ili2.pred.lcl[dates.select,j,]/pop3[dates.select,j,]*100000,
-                               ili2.pred.ucl[dates.select,j,]/pop3[dates.select,j,]*100000,
-                               ili2.pred[dates.select,j,]/pop3[dates.select,j,]*100000,
-                               obs.ili[dates.select,j,]/pop3[dates.select,j,]*100000
-            ), na.rm=T))
-          }
-          
         }else if (input$set.prop=='Proportion'){
           y=plot.prop[dates.select,j,i]
           denom<-obs.ili[dates.select,j,i]/y
