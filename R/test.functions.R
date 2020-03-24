@@ -17,11 +17,11 @@ combo1$total.visits<-round((combo1$denom1+combo1$denom2)/2)+1
 combo1$state<-'NY'
 combo1<-combo1[combo1$borough %in% c('Citywide','Bronx','Manhattan') & combo1$agec %in% c('1','2','3','4','5'),]
 combo1$agec<-as.character(combo1$agec)
-combo1$agec[combo1$agec=='1']<-'<5y'
+combo1$agec[combo1$agec=='1']<-'u5y'
 combo1$agec[combo1$agec=='2']<-'5-17y'
-combo1$agec[combo1$agec=='2']<-'18-64y'
-combo1$agec[combo1$agec=='2']<-'65+y'
-combo1$agec[combo1$agec=='2']<-'All ages'
+combo1$agec[combo1$agec=='3']<-'18-64y'
+combo1$agec[combo1$agec=='4']<-'65+y'
+combo1$agec[combo1$agec=='5']<-'All ages'
 
 source('./R/functions.R')
 source('./R/aux_functions.R')
@@ -33,5 +33,5 @@ excess_cases1<-excessCases(ds=combo1,
                            statevar='state',
                            denom.var='total.visits',
                            use.syndromes=c('ili','resp'), 
-                           adj.flu=T, flu.import=T)
+                           adj.flu=F, flu.import=F)
 dashboardPlot(excess_cases1)

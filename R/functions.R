@@ -13,7 +13,7 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
   return(ds1.c)
 }
 
-excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T){
+excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var'){
   if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
   ds<-as.data.frame(ds)
   ds[,datevar]<-as.Date(ds[,datevar])
@@ -47,7 +47,7 @@ excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,
  
   ages <-   dimnames(ds2)[[3]]
   geos<-dimnames(ds2)[[2]]
-  all.glm.res<- pblapply(use.syndromes, function(x){
+  st<- pblapply(use.syndromes, function(x){
     ww<- lapply(ages, function(y){
       q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var)
       names(q)<-geos
@@ -128,7 +128,7 @@ dashboardPlot<-function(all.glm.res){
               y.range<-c(0.2, 4)
             }  
           }
-          plot(dates[dates.select],y, type='n', bty='l', ylab='Fitted', main=paste(j, age.labels[as.numeric(i)]), ylim=y.range)
+          plot(dates[dates.select],y, type='n', bty='l', ylab='Fitted', main=paste(j, i), ylim=y.range)
           polygon(c(dates[dates.select],rev(dates[dates.select])), 
                   c(pred.lcl, rev(pred.ucl)), col=rgb(1,0,0,alpha=0.1), border=NA)
           lines(dates[dates.select],pred, type='l', col='red', lty=1, lwd=1.5 )
@@ -150,7 +150,7 @@ dashboardPlot<-function(all.glm.res){
         sidebarPanel(
           selectInput("set.prop", "Proportion of ED visits or count:",
                       choice=c('Proportion','Counts','Counts/100,000 people','Observed/Expected'), selected ="Proportion" ),
-          selectInput("set.borough", "Borough:",
+          selectInput("set.borough", "Geographic unit:",
                       choice=counties.to.test, selected ="Citywide" ),
           selectInput("set.syndrome", "Syndrome:",
                       choice=syndromes, selected ="ili" ),
