@@ -1,13 +1,14 @@
 ##Import auxillary data
 #Pulls in google searches for RSV in CT can get 5 years of historical data at weekly reslution (switches to monthly for >5 years)
-rsv.google.import<-function(state){
-  rsv.down<-gtrends(keyword = 'RSV', geo=paste0("US-", state), time = "today+5-y",
+rsv.google.import<-function(geo.select){
+  rsv.down<-gtrends(keyword = 'RSV', geo=paste0("US-", geo.select), time = "today+5-y",
                     gprop = c("web") , category = 0,  low_search_volume = FALSE)
-  rsv<-rsv.down$interest_over_time[,c('date','hits')]
+  rsv<-rsv.down$interest_over_time[,c('date','hits','geo')]
+  rsv$geo<-gsub('US-','', rsv$geo, fixed=T)
   rsv$date<-as.Date(rsv$date)
   mmwr.week.rsv<-MMWRweek(rsv$date)[,c('MMWRyear','MMWRweek')]
   rsv<-cbind.data.frame(rsv,mmwr.week.rsv)
-  names(rsv)<-c('date','rsv.searches','MMWRyear','MMWRweek')
+  names(rsv)<-c('date','rsv.var','state','MMWRyear','MMWRweek')
   return(rsv)
 }
 
@@ -29,14 +30,14 @@ nrevss_flu_import<-function(){
   clin3$percent_positive[is.na(clin3$percent_positive)]<-clin3$hhs_percent_positive[is.na(clin3$percent_positive)]
   clin3$state.abb<- state.abb[match(clin3$state,state.name)]
   names(clin3)<- c("hhs_region","wk_date", "state_name", "MMWRyear","MMWRweek" ,"flu_pct_pos","hhs_percent_positive", "state")
-  clin3$flu_pct_pos<-as.numeric(as.character(clin3$flu_pct_pos))
+  clin3$flu.var<-as.numeric(as.character(clin3$flu_pct_pos))
   return(clin3)
 }
 
-combine_ds<-function(ds=combo2.sub, geo=geo, agevar=agevar, datevar=datevar){
-ili.m<-melt(ds, id.vars=c(geo,agevar,datevar,'MMWRyear','MMWRweek'))
-  form1<-as.formula(paste0())
-  ili.a<-acast(ili.m, ddate+MMWRyear+MMWRweek ~geo~age~variable , fun.aggregate = sum )
+reshape_ds<-function(ds2=combo2.sub){
+  ili.m<-melt(ds2, id.vars=c(geo,agevar,datevar,'MMWRyear','MMWRweek'))
+  form1<-as.formula(paste(paste0(datevar,"+MMWRyear+MMWRweek"), geo, agevar,'variable', sep='~' ) )
+  ili.a<-acast(ili.m, form1 , fun.aggregate = sum )
   dimnames(ili.a)[[1]]<-substr(dimnames(ili.a)[[1]],1,10)
 return(ili.a)
 }
@@ -56,36 +57,22 @@ glm.func<-function(ds, x.test, age.test, syndrome){
   clean.array.citywide<-ds[,x.test,,]
   epiyr.index.f<-as.factor(epiyr.index)
   epiyr.index.f2<-as.factor(epiyr.index)
-  
-  y.age = t(clean.array.citywide[,age.test,syndrome])
+    y.age = t(clean.array.citywide[,age.test,syndrome])
   n.dates<-length(y.age)
-  
-  if(syndrome=='ili'){
-    denom<-y.age[1,]/t(clean.array.citywide[,age.test,'ili.prop'])[1,]}else{
-      denom<-y.age[1,]/t(clean.array.citywide[,age.test,'resp.prop']+0.01)[1,]
-    }
-  
   y.age.fit<-y.age[1,]
   y.age.fit[date.string>=as.Date("2020-03-01")] <- NA #extrapolate last 1 months
-  
-  sqrt.rsv =sqrt(clean.array.citywide[,age.test,'rsv.searches']) #same for all ages and boroughs
-  sqrt.flu =sqrt(clean.array.citywide[,age.test,'flu_pct_pos']) #same for all ages and boroughs
-  
-  
+  sqrt.rsv =sqrt(clean.array.citywide[,age.test,'rsv.var']) #same for all ages and boroughs
+  sqrt.flu =sqrt(clean.array.citywide[,age.test,'flu.var']) #same for all ages and boroughs
   sqrt.flu<- na.locf(sqrt.flu)  #fill in missing observations for flu at end of TS with most recent observed values
-  
   sqrt.rsv<- na.locf(sqrt.rsv)  #fill in missing observations for RSV at end of TS with most recent observed values
-  
   t2<-1:length(y.age)
-  # 
   sin1<-sin(2*pi*t2/365.25)
   cos1<-cos(2*pi*t2/365.25)
   sin2<-sin(2*pi*t2*2/365.25)
   cos2<-cos(2*pi*t2*2/365.25)
   sin3<-sin(2*pi*t2*3/365.25)
   cos3<-cos(2*pi*t2*3/365.25)
-  
-  
+ 
   ds.glm<-cbind.data.frame('day.of.year'=day.of.year,'y.age'=y.age[1,],'y.age.fit'=y.age.fit,sqrt.rsv, sqrt.flu, day.of.week, t2,epiyr.index.f, sin1, sin2, cos1, cos2, sin3, cos3)
   #ds.glm<-ds.glm[complete.cases(ds.glm),]
   form1<-as.formula(paste0('y.age.fit',"~ epiyr.index.f*sqrt.rsv +   #rsv effect varies by epiyr
@@ -98,7 +85,7 @@ glm.func<-function(ds, x.test, age.test, syndrome){
                    day.of.week+
                    sin1+cos1 +sin2+cos2+ sin3+cos3  "
   ))
-  mod1<-glm(form1, data=ds.glm, family=poisson(link='log'))
+  mod1<-glm(form1, data=ds.glm, family=poisson(link='log'), offset=log(clean.array.citywide[,age.test,denom.var]))
   #500 samples total
   pred.coefs.reg.mean<- mvrnorm(n = 100, mu=coef(mod1), Sigma=vcov( mod1))
   mod.mat.pred<-model.matrix(form2, data=ds.glm, family='poisson')
@@ -109,8 +96,11 @@ glm.func<-function(ds, x.test, age.test, syndrome){
   
   resid1<- log((ds.glm$y.age+0.5) /(preds.stage2.q[,'50%']+0.5))
   
-  out.list<-list(y=y.age[1,], pred=preds.stage2.q[,'50%'], resid1=resid1, upi=preds.stage2.q[,'97.5%'], lpi=preds.stage2.q[,'2.5%'],'ili.prop'= t(clean.array.citywide[,age.test,'ili.prop']), 'resp.prop'= t(clean.array.citywide[,age.test,'resp.prop'])
-  )
+  out.list<-list(y=y.age[1,], pred=preds.stage2.q[,'50%'], 
+                 resid1=resid1, upi=preds.stage2.q[,'97.5%'], 
+                 lpi=preds.stage2.q[,'2.5%'],
+                 'sqrt.rsv'=sqrt.rsv,'sqrt.flu'=sqrt.flu,
+                 'denom'=clean.array.citywide[,age.test,denom.var] )
   return(out.list)
 }
 

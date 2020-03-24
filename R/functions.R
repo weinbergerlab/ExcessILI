@@ -13,35 +13,46 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
   return(ds1.c)
 }
 
-excessCases<-function(ds,geo, syndromes, flu.import=T, rsv.import=T){
-  mmwr.date<-MMWRweek(ds$ddate)
+excessCases<-function(ds,geo,state='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T){
+  ds<-as.data.frame(ds)
+  ds[,datevar]<-as.Date(ds[,datevar])
+  mmwr.date<-MMWRweek(ds[,datevar])
   ds1.df<-cbind.data.frame(ds,mmwr.date)
   
   if(rsv.import){
-  rsv<-rsv.google.import(geo)
-  ds1.df<-merge(ds1.df, rsv, by=c('MMWRyear','MMWRweek'), all.x=T)
+    #TODO:API only allows pulling 5 or fewer states at a time
+  rsv<-rsv.google.import(geo.select=unique(ds1.df[,state]))
+  ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', state),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
   }
   if(flu.import){
     flu<-nrevss_flu_import()
-    ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek','state'), all.x=T)
+    ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek',state), all.x=T)
   }
-  combo2.sub<-combo2[, c('agec', 'ddate','MMWRyear', 'MMWRweek', geo, syndromes)]
-  ds2<-combine_ds()
-  
-  
-  syndromes<- dimnames(ds2)[[4]]
+  if(adj.flu==F){
+    ds1.df$flu.var<-1
+  }
+  if(adj.rsv==F){
+    ds1.df$rsv.var<-1
+  }
+  if(is.null(denom.var)){
+    ds1.df$denom <-1
+    denom.var <-'denom'
+  }
+  combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', geo, use.syndromes,denom.var, 'flu.var','rsv.var' )]
+  ds2<-reshape_ds()
+ 
   ages <-   dimnames(ds2)[[3]]
   geos<-dimnames(ds2)[[2]]
-  all.glm.res<- pblapply(syndromes, function(x){
+  all.glm.res<- pblapply(use.syndromes, function(x){
     ww<- lapply(ages, function(y){
-      lapply(geos, glm.func, age.test=y, syndrome=x)
+      lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x)
     }
     ) 
     names(ww)<- ages
     return(ww)
   }
   )
-  names(all.glm.res)<-syndromes
+  names(all.glm.res)<-use.syndromes
   return(all.glm.res)
 }
 
