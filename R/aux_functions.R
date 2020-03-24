@@ -33,15 +33,10 @@ nrevss_flu_import<-function(){
   return(clin3)
 }
 
-combine_ds<-function(syn.ds, rss.ds, flu.ds){
-  syn.ds$state<-'NY'
-  mmwr.date<-MMWRweek(syn.ds$ddate)
-  ds1.df<-cbind.data.frame(syn.ds,mmwr.date)
-  combo2<-merge(ds1.df, clin3, by=c('MMWRyear','MMWRweek','state'), all.x=T)
-  combo2<-merge(combo2, rsv, by=c('MMWRyear','MMWRweek'), all.x=T)
-  combo2.sub<-combo2[, c('agec', 'ddate','MMWRyear', 'MMWRweek', 'borough', 'ili','resp','flu_pct_pos',"rsv.searches", 'ili.prop','resp.prop')]
-  ili.m<-melt(combo2.sub, id.vars=c('borough','agec','ddate','MMWRyear','MMWRweek'))
-  ili.a<-acast(ili.m, ddate+MMWRyear+MMWRweek ~borough~agec~variable , fun.aggregate = sum )
+combine_ds<-function(ds=combo2.sub, geo=geo, agevar=agevar, datevar=datevar){
+ili.m<-melt(ds, id.vars=c(geo,agevar,datevar,'MMWRyear','MMWRweek'))
+  form1<-as.formula(paste0())
+  ili.a<-acast(ili.m, ddate+MMWRyear+MMWRweek ~geo~age~variable , fun.aggregate = sum )
   dimnames(ili.a)[[1]]<-substr(dimnames(ili.a)[[1]],1,10)
 return(ili.a)
 }
@@ -121,7 +116,7 @@ glm.func<-function(ds, x.test, age.test, syndrome){
 
 
 #SHINY dashboard functions
-
+shiny.dashboard.func<-function(){
 server<-function(input, output){
   output$countyPlot = renderPlot({
     ili.prop<-sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','ili.prop'), simplify='array')
@@ -243,4 +238,5 @@ ui<-
       )
     )
   )
+}
 

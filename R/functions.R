@@ -13,7 +13,22 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
   return(ds1.c)
 }
 
-excess_cases<-function(ds2){
+excessCases<-function(ds,geo, syndromes, flu.import=T, rsv.import=T){
+  mmwr.date<-MMWRweek(ds$ddate)
+  ds1.df<-cbind.data.frame(ds,mmwr.date)
+  
+  if(rsv.import){
+  rsv<-rsv.google.import(geo)
+  ds1.df<-merge(ds1.df, rsv, by=c('MMWRyear','MMWRweek'), all.x=T)
+  }
+  if(flu.import){
+    flu<-nrevss_flu_import()
+    ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek','state'), all.x=T)
+  }
+  combo2.sub<-combo2[, c('agec', 'ddate','MMWRyear', 'MMWRweek', geo, syndromes)]
+  ds2<-combine_ds()
+  
+  
   syndromes<- dimnames(ds2)[[4]]
   ages <-   dimnames(ds2)[[3]]
   geos<-dimnames(ds2)[[2]]
