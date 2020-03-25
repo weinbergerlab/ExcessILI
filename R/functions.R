@@ -8,33 +8,49 @@ ts_format <- function(ds1,
     # Parse dates into Date objects, and floor to the nearest day
     ds1[, datevar] <- as.Date(ds1$datevar) 
     ds1[, datevar] <- floor_date(ds1[, datevar], unit = resolution)
+
     ds1$all.visits <- 1
-    ds1.m <- melt(ds2[, c(datevar, geovar, agevar, syndromes, "all.visits", )], 
-        id.vars = c(datevar, geovar, agevar))
-    # last.date<- max(ds1.m$adate)
+
+    ds1.m <- melt(ds2[, c(datevar, geovar, agevar, syndromes, "all.visits")], 
+                  id.vars = c(datevar, geovar, agevar))
+
+    last.date <- max(ds1.m$adate)
+
     if (remove.final) {
-        ds1.m <- ds1.m[ds1.m$adate < last.date, ]  #remove last day from the dataset,assuming it is incomplete
+        # Remove last day from the dataset,assuming it is incomplete
+        ds1.m <- ds1.m[ds1.m$adate < last.date, ]  
     }
-    form1 <- as.formula(paste(agevar, datevar, geovar, "variable", sep = "~"))
-    ds1.c <- acast(ds1.m, form1, fun.aggregate = sum)
+
+    # Specify a formula based on what the age,date,geo variables are named
+    casting_formula <-
+      as.formula(paste(agevar, datevar, geovar, "variable", sep = "~"))
+
+    ds1.c <- acast(ds1.m, casting_formula, fun.aggregate = sum)
+
     return(ds1.c)
 }
 
 excessCases <- function(ds, sub.statevar = "none", statevar = "state", agevar, datevar, 
     use.syndromes, denom.var, flu.import = T, rsv.import = T, adj.flu = T, adj.rsv = T, 
     flu.var = "flu.var", rsv.var = "rsv.var", time.res = "day") {
+
     if (length(unique(ds[, statevar])) > 5 & rsv.import == T) 
-        stop("Maximum of 5 states can be used when rsv.import=T")
+        stop(paste0("Maximum of 5 states can be used when rsv.import=T.\n",
+                    "This data contained ",
+                    length(unique(ds[, statevar])),
+                    " states."))
     
     # If import the RSV or flu data, automatically adjust for it in model data
     if (flu.import == T) {
-        adj.flu = T
-        flu.var = "flu.var"
+        adj.flu <- T
+        flu.var <- "flu.var"
     }
+
     if (rsv.import == T) {
-        adj.rsv = T
+        adj.rsv <- T
         rsv.var <- "rsv.var"
     }
+
     ds <- as.data.frame(ds)
     ds[, datevar] <- as.Date(ds[, datevar])
     mmwr.date <- MMWRweek(ds[, datevar])
@@ -44,28 +60,35 @@ excessCases <- function(ds, sub.statevar = "none", statevar = "state", agevar, d
         sub.statevar <- "sub.statevar"
         ds1.df$sub.statevar <- ds1.df[, statevar]
     }
+
     if (!(agevar %in% names(ds1.df))) {
         ds1.df[, agevar] <- "1"
     }
+
     if (rsv.import) {
         rsv <- rsv.google.import(geo.select = unique(ds1.df[, statevar]))
         ds1.df <- merge(ds1.df, rsv, by.x = c("MMWRyear", "MMWRweek", statevar), 
             by.y = c("MMWRyear", "MMWRweek", "state"), all.x = T)
     }
+    
     if (flu.import) {
         flu <- nrevss_flu_import()
         ds1.df <- merge(ds1.df, flu, by = c("MMWRyear", "MMWRweek", statevar), all.x = T)
     }
+
     if (adj.flu == F) {
         ds1.df$flu.var <- 1
     }
+
     if (adj.rsv == F) {
         ds1.df$rsv.var <- 1
     }
+
     if (!exists("denom.var")) {
         ds1.df$denom <- 1
         denom.var <- "denom"
     }
+
     combo2.sub <- ds1.df[, c(agevar, datevar, "MMWRyear", "MMWRweek", sub.statevar, 
         use.syndromes, denom.var, "flu.var", "rsv.var")]
     ds2 <- reshape_ds(ds2 = combo2.sub, sub.statevar = sub.statevar, agevar = agevar, 
@@ -73,6 +96,7 @@ excessCases <- function(ds, sub.statevar = "none", statevar = "state", agevar, d
     
     ages <- dimnames(ds2)[[3]]
     geos <- dimnames(ds2)[[2]]
+
     all.glm.res <- pblapply(use.syndromes, function(x) {
         ww <- lapply(ages, function(y) {
             q <- lapply(geos, glm.func, ds = ds2, age.test = y, syndrome = x, denom.var = denom.var, 
@@ -83,6 +107,7 @@ excessCases <- function(ds, sub.statevar = "none", statevar = "state", agevar, d
         names(ww) <- ages
         return(ww)
     })
+
     names(all.glm.res) <- use.syndromes
     return(all.glm.res)
 }
