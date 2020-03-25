@@ -13,7 +13,7 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
   return(ds1.c)
 }
 
-excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var', time.res='day'){
+excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=F, adj.rsv=F, flu.var='flu.var', rsv.var='rsv.var', time.res='day'){
       if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
       
       #If import the RSV or flu data, automatically adjust for it in model  data
@@ -106,9 +106,16 @@ dashboardPlot<-function(all.glm.res){
       plot.min<-which(input$display.dates==dates)
       dates.select<-plot.min:n.times
       par(mfrow=c(2,3), mar=c(3,2,1,1))
-      for(i in ages.to.test){
-        for( j in input$set.borough){
-          if(input$set.prop=='Counts'){
+      if(input$arrange.plots=='Age'){
+        i.select<-input$set.ages
+        j.select<-input$set.borough
+      }else{
+        i.select<-input$set.ages
+        j.select<-counties.to.test
+      }
+      for(i in i.select){
+        for( j in j.select){
+            if(input$set.prop=='Counts'){
             y=obs.ili[dates.select,j,i]
             pred<-ili2.pred[dates.select,j,i]
             pred.lcl<-ili2.pred.lcl[dates.select,j,i]
@@ -169,6 +176,10 @@ dashboardPlot<-function(all.glm.res){
                       choice=syndromes, selected ="ili" ),
           checkboxInput("set.axis", "Uniform axis for all plots?:",
                         value =F ),
+          selectInput("arrange.plots", "Arrange plots by:",
+                      choice=c('Age','Region'), selected ="Age"),
+          selectInput("set.ages", "Ages:",
+                      choice=ages.to.test, selected =ages.to.test, multiple=T),
           sliderInput('display.dates', 'Earliest date to display', min=min(dates), step=7,max=dates[length(dates)-2], value=dates[length(dates)-round(length(dates)/5)]),
         ),
         mainPanel(
