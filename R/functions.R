@@ -174,13 +174,13 @@ dashboardPlot<-function(all.glm.res){
                       choice=counties.to.test, selected ="Citywide" ),
           selectInput("set.syndrome", "Syndrome:",
                       choice=syndromes, selected ="ili" ),
+          sliderInput('display.dates', 'Earliest date to display', min=min(dates), step=7,max=dates[length(dates)-2], value=dates[length(dates)-round(length(dates)/5)]),
           checkboxInput("set.axis", "Uniform axis for all plots?:",
                         value =F ),
           selectInput("arrange.plots", "Arrange plots by:",
                       choice=c('Age','Region'), selected ="Age"),
           selectInput("set.ages", "Ages:",
-                      choice=ages.to.test, selected =ages.to.test, multiple=T),
-          sliderInput('display.dates', 'Earliest date to display', min=min(dates), step=7,max=dates[length(dates)-2], value=dates[length(dates)-round(length(dates)/5)]),
+                      choice=ages.to.test, selected =ages.to.test, multiple=T)
         ),
         mainPanel(
           plotOutput("countyPlot"),
