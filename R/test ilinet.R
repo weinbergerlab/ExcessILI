@@ -23,7 +23,12 @@ excess_cases1<-excessCases(ds=ili.data,
                            statevar='state',
                            denom.var="total_patients",
                            use.syndromes=c("ilitotal"), 
-                           adj.flu=T, 
-                           flu.import=T,
+                           adj.flu=F, 
+                           flu.import=F,
                            time.res='week')
 dashboardPlot(excess_cases1)
+
+
+unexplained.cases<-excessExtract(ds=excess_cases1, syndrome='ilitotal', extract.quantity='unexplained.cases')
+excess.rr<-excessExtract(ds=excess_cases1, syndrome='ilitotal', extract.quantity='resid1')
+matplot(excess.rr[,,1])

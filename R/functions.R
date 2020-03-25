@@ -175,3 +175,8 @@ dashboardPlot<-function(all.glm.res){
     )
   shinyApp(ui, server)
 }
+
+excessExtract<-function(ds, syndrome, extract.quantity){
+  out.ds<- sapply(ds[[syndrome]], function(x) sapply(x,'[[',extract.quantity), simplify='array')
+  return(out.ds)
+}

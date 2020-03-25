@@ -36,3 +36,12 @@ excess_cases1<-excessCases(ds=combo1,
                            adj.flu=F, 
                            flu.import=F)
 dashboardPlot(excess_cases1)
+
+
+ili2.resid<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','resid1'), simplify='array')
+
+unexplained.cases<-excessExtract(ds=excess_cases1, syndrome='ilitotal', extract.quantity='unexplained.cases')
+excess.rr<-excessExtract(ds=excess_cases1, syndrome='ilitotal', extract.quantity='resid1')
+
+par(mfrow=c(1,1))
+matplot(exp(excess.rr[,,1]), type='l')
