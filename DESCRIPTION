@@ -1,0 +1,21 @@
+Package: ExcessILI
+Title: A package and RShiny app to examine excess ILI from syndromic
+    surveillance data
+Version: 0.1
+Authors@R: Daniel Weinberger (daniel.weinberger@yale.edu)
+Description: Note, OSX users may need to install the packages
+    gdal and udunits. They can be installed using brew.
+Depends: R (>= 3.1.0)
+License: LICENSE NEEDED
+LazyData: true
+Imports: 
+    lubridate,
+    MMWRweek,
+    cdcfluview,
+    gtrendsR,
+    shiny,
+    pbapply,
+    zoo,
+    MASS,
+    tidyr,
+    reshape2
