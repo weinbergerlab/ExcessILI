@@ -14,55 +14,65 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
 }
 
 excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var', time.res='day'){
-  if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
-  ds<-as.data.frame(ds)
-  ds[,datevar]<-as.Date(ds[,datevar])
-  mmwr.date<-MMWRweek(ds[,datevar])
-  ds1.df<-cbind.data.frame(ds,mmwr.date)
-  
-  if(sub.statevar=='none'){
-    sub.statevar<-'sub.statevar'
-    ds1.df$sub.statevar<-ds1.df[,statevar]
-  }
-  if( !(agevar %in% names(ds1.df))){
-    ds1.df[,agevar]<-'1'
-  }
-  if(rsv.import){
-  rsv<-rsv.google.import(geo.select=unique(ds1.df[,statevar]))
-  ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', statevar),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
-  }
-  if(flu.import){
-    flu<-nrevss_flu_import()
-    ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek',statevar), all.x=T)
-  }
-  if(adj.flu==F){
-    ds1.df$flu.var<-1
-  }
-  if(adj.rsv==F){
-    ds1.df$rsv.var<-1
-  }
-  if(!exists("denom.var")){
-    ds1.df$denom <-1
-    denom.var <-'denom'
-  }
-  combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
-  ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
- 
-  ages <-   dimnames(ds2)[[3]]
-  geos<-dimnames(ds2)[[2]]
-  all.glm.res<- pblapply(use.syndromes, function(x){
-    ww<- lapply(ages, function(y){
-      q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res)
-      names(q)<-geos
-      return(q)
-    }
-    ) 
-    names(ww)<- ages
-    return(ww)
-  }
-  )
-  names(all.glm.res)<-use.syndromes
-  return(all.glm.res)
+      if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
+      
+      #If import the RSV or flu data, automatically adjust for it in model  data
+      if(flu.import==T){
+        adj.flu=T
+        flu.var='flu.var'
+      }
+      if(rsv.import==T){
+        adj.rsv=T
+        rsv.var<-'rsv.var'
+      }
+      ds<-as.data.frame(ds)
+      ds[,datevar]<-as.Date(ds[,datevar])
+      mmwr.date<-MMWRweek(ds[,datevar])
+      ds1.df<-cbind.data.frame(ds,mmwr.date)
+      
+      if(sub.statevar=='none'){
+        sub.statevar<-'sub.statevar'
+        ds1.df$sub.statevar<-ds1.df[,statevar]
+      }
+      if( !(agevar %in% names(ds1.df))){
+        ds1.df[,agevar]<-'1'
+      }
+      if(rsv.import){
+      rsv<-rsv.google.import(geo.select=unique(ds1.df[,statevar]))
+      ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', statevar),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
+      }
+      if(flu.import){
+        flu<-nrevss_flu_import()
+        ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek',statevar), all.x=T)
+      }
+      if(adj.flu==F){
+        ds1.df$flu.var<-1
+      }
+      if(adj.rsv==F){
+        ds1.df$rsv.var<-1
+      }
+      if(!exists("denom.var")){
+        ds1.df$denom <-1
+        denom.var <-'denom'
+      }
+      combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
+      ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
+     
+      ages <-   dimnames(ds2)[[3]]
+      geos<-dimnames(ds2)[[2]]
+      all.glm.res<- pblapply(use.syndromes, function(x){
+        ww<- lapply(ages, function(y){
+          q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res)
+          names(q)<-geos
+          return(q)
+        }
+        ) 
+        names(ww)<- ages
+        return(ww)
+      }
+      )
+      names(all.glm.res)<-use.syndromes
+      return(all.glm.res)
 }
 
 dashboardPlot<-function(all.glm.res){
