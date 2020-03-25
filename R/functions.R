@@ -13,18 +13,21 @@ ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remo
   return(ds1.c)
 }
 
-excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var', time.res='day'){
+excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=T, adj.rsv=T, flu.var='flu.var', rsv.var='rsv.var', time.res='day'){
   if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
   ds<-as.data.frame(ds)
   ds[,datevar]<-as.Date(ds[,datevar])
   mmwr.date<-MMWRweek(ds[,datevar])
   ds1.df<-cbind.data.frame(ds,mmwr.date)
   
-  if(!exists('geovar')){
-    ds1.df$geovar<-ds1.df[,statevar]
+  if(sub.statevar=='none'){
+    sub.statevar<-'sub.statevar'
+    ds1.df$sub.statevar<-ds1.df[,statevar]
+  }
+  if( !(agevar %in% names(ds1.df))){
+    ds1.df[,agevar]<-'1'
   }
   if(rsv.import){
-    #TODO:API only allows pulling 5 or fewer states at a time
   rsv<-rsv.google.import(geo.select=unique(ds1.df[,statevar]))
   ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', statevar),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
   }
@@ -42,8 +45,8 @@ excessCases<-function(ds,geovar,statevar='state',agevar, datevar, use.syndromes,
     ds1.df$denom <-1
     denom.var <-'denom'
   }
-  combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', geovar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
-  ds2<-reshape_ds(ds2=combo2.sub, geovar=geovar, agevar=agevar, datevar=datevar)
+  combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
+  ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
  
   ages <-   dimnames(ds2)[[3]]
   geos<-dimnames(ds2)[[2]]
@@ -68,7 +71,7 @@ dashboardPlot<-function(all.glm.res){
   ages.to.test<-names(ds[[1]])
   age.labels<-ages.to.test
   syndromes<-names(ds)
-  dates<-as.Date(names(ds[[1]][[1]][[1]][['y']]))
+  dates<-as.Date(ds[[1]][[1]][[1]][['date']])
   n.times<-length(dates)
   last.date.format<-max(dates)
   last.date.format<-format(last.date.format,
@@ -149,14 +152,14 @@ dashboardPlot<-function(all.glm.res){
       sidebarLayout(
         sidebarPanel(
           selectInput("set.prop", "Proportion of ED visits or count:",
-                      choice=c('Proportion','Counts','Counts/100,000 people','Observed/Expected'), selected ="Proportion" ),
+                      choice=c('Proportion','Counts','Observed/Expected'), selected ="Proportion" ),
           selectInput("set.borough", "Geographic unit:",
                       choice=counties.to.test, selected ="Citywide" ),
           selectInput("set.syndrome", "Syndrome:",
                       choice=syndromes, selected ="ili" ),
           checkboxInput("set.axis", "Uniform axis for all plots?:",
                         value =F ),
-          sliderInput('display.dates', 'Earliest date to display', min=min(dates), max=max(dates)-30, value=max(dates)-180),
+          sliderInput('display.dates', 'Earliest date to display', min=min(dates), step=7,max=dates[length(dates)-2], value=dates[length(dates)-round(length(dates)/5)]),
         ),
         mainPanel(
           plotOutput("countyPlot"),

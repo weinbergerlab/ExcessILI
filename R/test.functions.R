@@ -27,7 +27,7 @@ source('./R/functions.R')
 source('./R/aux_functions.R')
 
 excess_cases1<-excessCases(ds=combo1, 
-                           geovar='borough',
+                           sub.statevar = 'borough',
                            datevar='ddate',
                            agevar='agec',
                            statevar='state',

@@ -23,7 +23,7 @@ excess_cases1<-excessCases(ds=ili.data,
                            statevar='state',
                            denom.var="total_patients",
                            use.syndromes=c("ilitotal"), 
-                           adj.flu=F, 
-                           flu.import=F,
+                           adj.flu=T, 
+                           flu.import=T,
                            time.res='week')
 dashboardPlot(excess_cases1)
