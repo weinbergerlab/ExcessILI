@@ -31,4 +31,6 @@ dashboardPlot(excess_cases1)
 
 unexplained.cases<-excessExtract(ds=excess_cases1, syndrome='ilitotal', extract.quantity='unexplained.cases')
 excess.rr<-excessExtract(ds=excess_cases1, syndrome='ilitotal', extract.quantity='resid1')
-matplot(excess.rr[,,1])
+
+par(mfrow=c(1,1))
+matplot(exp(excess.rr[,,1]), type='l')
