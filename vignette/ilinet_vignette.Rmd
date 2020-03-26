@@ -1,0 +1,112 @@
+---
+title: "excessILI vignette"
+author: "Dan Weinberger"
+date: "3/25/2020"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
+library(MMWRweek)
+library(cdcfluview)
+library(gtrendsR)
+library(shiny)
+library(pbapply)
+library(zoo)
+library(MASS)
+library(tidyr)
+library(reshape2)
+```
+
+```{r}
+source("../R/functions.R")
+source("../R/aux_functions.R")
+```
+
+## Overview
+The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets into time series and then the analysis of these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from NREVSS) and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data or formatted time series data
+
+We will now analyze ILINet data with a simple seasonal baseline, adjusting for flu
+
+## Download the data
+
+```{r}
+ili.data <- ilinet(region = c("state"))
+```
+
+
+```{r}
+ili.data$state <- state.abb[match(ili.data$region, state.name)]
+ili.data <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
+ili.data<-ili.data[!is.na(ili.data$total_patients),]
+ili.data.spl<-split(ili.data, ili.data$state)
+min<-sapply(ili.data.spl, function(x)  min(x$total_patients))
+min
+
+state.select<-names(min)[which(min>0) ]
+ili.data <- ili.data[ili.data$state %in% state.select,]
+
+
+```
+
+## Run the function, adjust for flu using NREVSS data
+
+```{r}
+excess_cases1 <-
+  excessCases(ds = ili.data,
+              datevar       = "week_start", 
+              statevar      = "state",
+              denom.var     = "total_patients",
+              use.syndromes = c("ilitotal"),
+              rsv.import       = F,
+              flu.import    = T,
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+```
+
+## Plot the results in an interactive dashboard
+
+```{r, echo=T}
+dashboardPlot(excess_cases1)
+```
+## Extract the quantities of interest
+
+```{r}
+dates <-
+  excess_cases1[[1]][[1]][[1]]$date
+  
+unexplained.cases <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "unexplained.cases")
+
+unexplained.log.rr <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "resid1")
+
+obs <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "y")
+
+pred<-  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "pred")
+
+result.object<-list('dates'=dates,'obs'=obs[,,1], 'pred'=pred[,,1],'unexplained.cases'=unexplained.cases[,,1],'unexplained.log.rr'=unexplained.log.rr[,,1] )
+
+saveRDS(result.object,'extracted.output.ilinet.rds')
+```
+
+```{r}
+matplot(exp(unexplained.log.rr[226:232,c('WA','NY','LA','MI','CA','VA'),1]), type='l', bty='l')
+
+sort(exp(unexplained.log.rr[232,,1]))
+```
+
+
+
+
