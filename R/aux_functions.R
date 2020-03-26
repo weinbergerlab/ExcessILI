@@ -33,27 +33,39 @@ nrevss_flu_import <- function() {
     cw.file <- hhs_regions
 
     clin2 <- merge(clin, cw.file, by.x = "region", by.y = "state_or_territory")
-    clin2 <- clin2[, c("region", "region_number", "year", "week", "wk_date", "percent_positive")]
+    clin2 <- clin2[, c("region", "region_number", "year", "week", "wk_date", "total_a",'total_b','total_specimens')]
 
     names(clin2)[1:2] <- c("state", "hhs_region")
 
     nrevvs_hhs <- who_nrevss(region = c("hhs"))
     clin.hhs <- nrevvs_hhs[["clinical_labs"]]
-    clin.hhs <- clin.hhs[, c("region", "wk_date", "percent_positive")]
+    clin.hhs <- clin.hhs[, c("region", "wk_date", "total_a",'total_b','total_specimens')]
     clin.hhs$region <- as.numeric(gsub("Region ", "", clin.hhs$region))
-    names(clin.hhs) <- c("hhs_region", "wk_date", "hhs_percent_positive")
+    names(clin.hhs) <- c("hhs_region", "wk_date", "hhs_total_a",'hhs_total_b','hhs_total_specimens')
 
     clin3 <- merge(clin2, clin.hhs, by = c("hhs_region", "wk_date"))
 
-    clin3$percent_positive[is.na(clin3$percent_positive)] <-
-      clin3$hhs_percent_positive[is.na(clin3$percent_positive)]
+    clin3$total_a[is.na(clin3$total_a)] <-
+      clin3$hhs_total_a[is.na(clin3$total_a)]
+    
+    clin3$total_b[is.na(clin3$total_b)] <-
+      clin3$hhs_total_b[is.na(clin3$total_b)]
+    
+    clin3$total_specimens[is.na(clin3$total_specimens)] <-
+      clin3$hhs_total_specimens[is.na(clin3$total_specimens)]
 
     clin3$state.abb <- state.abb[match(clin3$state, state.name)]
     names(clin3) <- c("hhs_region", "wk_date", "state_name", "MMWRyear",
-                      "MMWRweek", "flu_pct_pos", "hhs_percent_positive",
+                      "MMWRweek", "total_a",'total_b','total_specimens','total_a_hhs', "total_b_hhs",'total_specimens_hhs',
                       "state")
-    clin3$flu.var <- as.numeric(as.character(clin3$flu_pct_pos))
-
+    clin3$total_a<-as.numeric(clin3$total_a)
+    clin3$total_b<-as.numeric(clin3$total_b)
+    clin3$total_specimens <- as.numeric(clin3$total_specimens)
+    clin3$flu_pct_adj<-(clin3$total_a+clin3$total_b+0.5)/(clin3$total_specimens+0.5)
+    clin3$fluN<-(clin3$total_a+clin3$total_b+0.5)
+    #clin3$flu.var <- clin3$fluN
+    clin3$flu.var <- clin3$flu_pct_adj
+    
     return(clin3)
 }
 
@@ -91,8 +103,13 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
     y.age.fit <- y.age[1, ]
     y.age.fit[date.string >= as.Date("2020-03-01")] <- NA  #extrapolate last 1 months
     sqrt.rsv = sqrt(clean.array.citywide[, , age.test, "rsv.var"])  #same for all ages and boroughs
-    sqrt.flu = sqrt(clean.array.citywide[, , age.test, "flu.var"])  #same for all ages and boroughs
-    sqrt.flu <- na.locf(sqrt.flu, na.rm = F)  #fill in missing observations for flu at end of TS with most recent observed values
+    
+    if(min(clean.array.citywide[, , age.test, "flu.var"], na.rm=T)==0){
+      clean.array.citywide[, , age.test, "flu.var"]<-clean.array.citywide[, , age.test, "flu.var"]+0.001
+    }
+    
+    log.flu = log(clean.array.citywide[, , age.test, "flu.var"])  #same for all ages and boroughs
+    log.flu <- na.locf(log.flu, na.rm = F)  #fill in missing observations for flu at end of TS with most recent observed values
     sqrt.rsv <- na.locf(sqrt.rsv, na.rm = F)  #fill in missing observations for RSV at end of TS with most recent observed values
     t2 <- 1:length(y.age)
     if (time.res == "day") {
@@ -115,14 +132,14 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
         y.age = y.age[1, ],
         y.age.fit = y.age.fit,
         sqrt.rsv,
-        sqrt.flu,
+        log.flu,
         day.of.week,
         t2,
         epiyr.index.f, 
         sin1, sin2, cos1, cos2, sin3, cos3,
         log.offset)
 
-    ds.glm <- ds.glm[!is.na(ds.glm$sqrt.rsv) & !is.na(ds.glm$sqrt.flu), ]
+    ds.glm <- ds.glm[!is.na(ds.glm$sqrt.rsv) & !is.na(ds.glm$log.flu), ]
     ds.glm$epiyr.index.f <- factor(ds.glm$epiyr.index.f)
     # ds.glm<-ds.glm[complete.cases(ds.glm),]
 
@@ -130,27 +147,27 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
         # rsv effect varies by epiyr
         form1 <- as.formula(paste0("y.age.fit ~",
                                    "epiyr.index.f*sqrt.rsv +",
-                                   "epiyr.index.f*sqrt.flu +", # flu effect, varies by epiyear
+                                   "epiyr.index.f*log.flu +", # flu effect, varies by epiyear
                                    "day.of.week +",
                                    "sin1+cos1 + sin2+cos2 + sin3+cos3"))
     
         # rsv effect varies by epiyr
         form2 <- as.formula(paste0("y.age ~",
                                    "epiyr.index.f*sqrt.rsv + ",
-                                   "epiyr.index.f*sqrt.flu + ", # flu effect, varies by epiyear
+                                   "epiyr.index.f*log.flu + ", # flu effect, varies by epiyear
                                    "day.of.week + ",
                                    "sin1+cos1 + sin2+cos2 + sin3+cos3"))
     } else {
         #rsv effect varies by epiyr
         form1 <- as.formula(paste0("y.age.fit ~",
                                    "epiyr.index.f*sqrt.rsv + ",
-                                   "epiyr.index.f*sqrt.flu + ", # flu effect, varies by epiyear
+                                   "epiyr.index.f*log.flu + ", # flu effect, varies by epiyear
                                    "sin1+cos1 + sin2+cos2 + sin3+cos3 "))
 
   #rsv effect varies by epiyr
         form2 <- as.formula(paste0("y.age ~",
                                    "epiyr.index.f*sqrt.rsv + ",
-                                   "epiyr.index.f*sqrt.flu + ", #flu effect, varies by epiyear
+                                   "epiyr.index.f*log.flu + ", #flu effect, varies by epiyear
                                    "sin1+cos1 + sin2+cos2 + sin3+cos3"))
     }
 
@@ -184,7 +201,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
            upi = preds.stage2.q[, "97.5%"],
            lpi = preds.stage2.q[, "2.5%"],
            sqrt.rsv = ds.glm$sqrt.rsv,
-           sqrt.flu = ds.glm$sqrt.flu,
+           log.flu = ds.glm$log.flu,
            unexplained.cases = unexplained.cases, 
            denom = exp(ds.glm$log.offset))
 
