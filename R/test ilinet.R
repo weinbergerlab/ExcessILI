@@ -16,7 +16,7 @@ ili.data <- ilinet(region = c("state"))
 ili.data$state <- state.abb[match(ili.data$region, state.name)]
 
 ili.data <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
-ili.data <- ili.data[ili.data$state %in% c("CA", "NY", "WA", "NJ", "CT"), ]
+#ili.data <- ili.data[ili.data$state %in% c("CA", "NY", "WA", "NJ", "CT"), ]
 
 excess_cases1 <-
   excessCases(ds = ili.data,

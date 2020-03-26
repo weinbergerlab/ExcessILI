@@ -27,7 +27,7 @@ ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,
   return(ds1.c)
 }
 
-excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=F, adj.rsv=F, flu.var='flu.var', rsv.var='rsv.var', time.res='day',extrapolation.date){
+excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=F, adj.rsv=F, flu.var='flu.var', rsv.var='rsv.var', time.res='day',extrapolation.date){
       if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
       
       #If import the RSV or flu data, automatically adjust for it in model  data
@@ -51,7 +51,7 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, u
         ds1.df$sub.statevar<-ds1.df[,statevar]
       }
   
-      if( !(agevar %in% names(ds1.df))){
+      if( agevar =='none'){
         ds1.df[,agevar]<-'1'
       }
   
@@ -140,8 +140,16 @@ dashboardPlot <- function(all.glm.res){
             plot.min <- which(input$display.dates == dates)
             dates.select <- plot.min:n.times
             par(mfrow = c(2, 3), mar = c(3, 2, 1, 1))
-            for (i in ages.to.test) {
-                for (j in input$set.borough) {
+            
+            if(input$arrange.plots=='Age'){
+              i.select<-input$set.ages
+              j.select<-input$set.borough
+            }else{
+              i.select<-input$set.ages
+              j.select<-counties.to.test
+            }
+            for(i in i.select){
+              for( j in j.select){
                   if (input$set.prop == "Counts") {
                     y = obs.ili[dates.select, j, i]
                     pred <- ili2.pred[dates.select, j, i]
