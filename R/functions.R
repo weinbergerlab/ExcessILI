@@ -232,7 +232,9 @@ dashboardPlot <- function(all.glm.res){
                   }
                 }
             }
-        }, width = "auto", height = "auto")
+          }
+        }
+      }
     }
     ,
     width = "auto", height = "auto")
