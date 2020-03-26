@@ -1,15 +1,25 @@
 #Format line list data into time series
-ts_format<-function(ds1, datevar,geovar, agevar, syndromes,resolution='day',remove.final=T){
-  ds1[, datevar]<-as.Date(ds1$datevar)
+ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,resolution='day',remove.final=F){
+  ds1<-line.list
+  ds1[, datevar]<-as.Date(ds1[,datevar])
   ds1[, datevar]<-floor_date(ds1[, datevar], unit=resolution)
   ds1$all.visits<-1
-  ds1.m<-melt(ds2[,c(datevar, geovar,agevar,syndromes,'all.visits', )], id.vars=c(datevar, geovar, agevar))
-  #last.date<- max(ds1.m$adate)
-  if(remove.final){
-  ds1.m<-ds1.m[ds1.m$adate < last.date,] #remove last day from the dataset,assuming it is incomplete
+  if(!('sub.statevar' %in% names(ds1))){
+    ds1$sub.statevar<-statevar
+    sub.statevar<-'sub.statevar'
   }
-  form1<-as.formula(paste(agevar,datevar, geovar,'variable', sep='~'))
-  ds1.c<-acast(ds1.m, form1, fun.aggregate = sum)
+  
+  ds1.m<-melt(ds1[,c(datevar, statevar,sub.statevar, agevar,syndromes,'all.visits' )], id.vars=c(datevar, statevar,sub.statevar, agevar))
+  last.date<- max(ds1.m[,datevar])
+  if(remove.final){
+  ds1.m<-ds1.m[ds1.m[,datevar] < last.date,] #remove last day from the dataset,assuming it is incomplete
+  }
+  form1<-as.formula(paste0(paste(agevar,datevar, statevar,sub.statevar,sep='+' ),'~', 'variable'))
+  ds1.c<-dcast(ds1.m, form1, fun.aggregate = sum)
+
+  #all.combos<-expand(ds1.c, agevar=ds1.c[,agevar], datevar=ds1.c[,datevar], statevar=ds1.c[,statevar], sub.statevar=ds1.c[,sub.statevar])
+  #ds2<-complete(ds1.c, c())
+  #complete(Date = seq.Date(<start_date>, <end_date>, by=<date_unit>))
   return(ds1.c)
 }
 
