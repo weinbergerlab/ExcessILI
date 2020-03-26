@@ -114,46 +114,6 @@ dashboardPlot <- function(all.glm.res){
   server<-function(input, output){
     output$countyPlot = renderPlot({
       
-    ili2.resid<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','resid1'), simplify='array')
-    dimnames(ili2.resid)[[2]]<-counties.to.test
-    ili2.pred<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','pred'), simplify='array')
-    dimnames(ili2.pred)[[2]]<-counties.to.test
-    ili2.pred.lcl<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','lpi'), simplify='array')
-    dimnames(ili2.pred.lcl)[[2]]<-counties.to.test
-    ili2.pred.ucl<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','upi'), simplify='array')
-    dimnames(ili2.pred.ucl)[[2]]<-counties.to.test
-    obs.ili<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','y'), simplify='array')
-    dimnames(obs.ili)[[2]]<-counties.to.test
-    denom<- sapply(ds[[input$set.syndrome]], function(x) sapply(x,'[[','denom'), simplify='array')
-    dimnames(denom)[[2]]<-counties.to.test
-      plot.min<-which(input$display.dates==dates)
-      dates.select<-plot.min:n.times
-      par(mfrow=c(2,3), mar=c(3,2,1,1))
-      if(input$arrange.plots=='Age'){
-        i.select<-input$set.ages
-        j.select<-input$set.borough
-      }else{
-        i.select<-input$set.ages
-        j.select<-counties.to.test
-      }
-      for(i in i.select){
-        for( j in j.select){
-            if(input$set.prop=='Counts'){
-            y=obs.ili[dates.select,j,i]
-            pred<-ili2.pred[dates.select,j,i]
-            pred.lcl<-ili2.pred.lcl[dates.select,j,i]
-            pred.ucl<-ili2.pred.ucl[dates.select,j,i]
-            if(input$set.axis==F){
-              y.range<-c(0,max(c(ili2.pred.lcl[dates.select,j,i],ili2.pred.ucl[dates.select,j,i],ili2.pred[dates.select,j,i],obs.ili[dates.select,j,i]), na.rm=T))
-            }else{
-              y.range<-c(0,max(c(ili2.pred.lcl[dates.select,j,],ili2.pred.ucl[dates.select,j,],ili2.pred[dates.select,j,],obs.ili[dates.select,j,]), na.rm=T))
-            }
-          }else if (input$set.prop=='Proportion'){
-            y=obs.ili[dates.select,j,i]/denom[dates.select,j,i]
-            pred<-ili2.pred[dates.select,j,i]/denom[dates.select,j,i]
-            pred.lcl<-ili2.pred.lcl[dates.select,j,i]/denom[dates.select,j,i]
-            pred.ucl<-ili2.pred.ucl[dates.select,j,i]/denom[dates.select,j,i]
-            
             ili2.resid <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, 
                 "[[", "resid1"), simplify = "array")
             dimnames(ili2.resid)[[2]] <- counties.to.test
@@ -233,9 +193,6 @@ dashboardPlot <- function(all.glm.res){
                 }
             }
           }
-        }
-      }
-    }
     ,
     width = "auto", height = "auto")
   }
