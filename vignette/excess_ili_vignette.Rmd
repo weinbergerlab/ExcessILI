@@ -95,12 +95,29 @@ excess_cases1 <-
               statevar      = "state",
               denom.var     = "total.visits",
               use.syndromes = c("ili", "resp"),
-              rsv.import       = F,
-              flu.import    = F)
+              rsv.import       = T,
+              flu.import    = T,
+              time.res='week')
 ```
+
+## Plot the results in an interactive dashboard
 
 ```{r, echo=F}
 dashboardPlot(excess_cases1)
 ```
+## Extract the quantities of interest
+
+```{r}
+unexplained.cases <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ili",
+                extract.quantity = "unexplained.cases")
+```
+
+```{r}
+matplot(unexplained.cases[,,5], type='l', bty='l')
+```
+
+
 
 

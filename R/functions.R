@@ -79,6 +79,11 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, u
       }
   
       combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
+      
+      if(time.res=='week'){
+        combo2.sub[,datevar]<-floor_date(combo2.sub[,datevar], unit='week')
+      }
+      
       ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
      
       ages <-   dimnames(ds2)[[3]]
