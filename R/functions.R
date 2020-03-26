@@ -1,9 +1,14 @@
 #Format line list data into time series
 ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,resolution='day',remove.final=F){
+  
   ds1<-line.list
+  
+  # Parse dates into Date objects, and floor to the nearest day
   ds1[, datevar]<-as.Date(ds1[,datevar])
   ds1[, datevar]<-floor_date(ds1[, datevar], unit=resolution)
+  
   ds1$all.visits<-1
+  
   if(!('sub.statevar' %in% names(ds1))){
     ds1$sub.statevar<-statevar
     sub.statevar<-'sub.statevar'
@@ -11,15 +16,14 @@ ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,
   
   ds1.m<-melt(ds1[,c(datevar, statevar,sub.statevar, agevar,syndromes,'all.visits' )], id.vars=c(datevar, statevar,sub.statevar, agevar))
   last.date<- max(ds1.m[,datevar])
+  
   if(remove.final){
-  ds1.m<-ds1.m[ds1.m[,datevar] < last.date,] #remove last day from the dataset,assuming it is incomplete
+    ds1.m<-ds1.m[ds1.m[,datevar] < last.date,] #remove last day from the dataset,assuming it is incomplete
   }
+  
   form1<-as.formula(paste0(paste(agevar,datevar, statevar,sub.statevar,sep='+' ),'~', 'variable'))
   ds1.c<-dcast(ds1.m, form1, fun.aggregate = sum)
 
-  #all.combos<-expand(ds1.c, agevar=ds1.c[,agevar], datevar=ds1.c[,datevar], statevar=ds1.c[,statevar], sub.statevar=ds1.c[,sub.statevar])
-  #ds2<-complete(ds1.c, c())
-  #complete(Date = seq.Date(<start_date>, <end_date>, by=<date_unit>))
   return(ds1.c)
 }
 
@@ -31,10 +35,12 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, u
         adj.flu=T
         flu.var='flu.var'
       }
+  
       if(rsv.import==T){
         adj.rsv=T
         rsv.var<-'rsv.var'
       }
+  
       ds<-as.data.frame(ds)
       ds[,datevar]<-as.Date(ds[,datevar])
       mmwr.date<-MMWRweek(ds[,datevar])
@@ -44,32 +50,40 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, u
         sub.statevar<-'sub.statevar'
         ds1.df$sub.statevar<-ds1.df[,statevar]
       }
+  
       if( !(agevar %in% names(ds1.df))){
         ds1.df[,agevar]<-'1'
       }
+  
       if(rsv.import){
-      rsv<-rsv.google.import(geo.select=unique(ds1.df[,statevar]))
-      ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', statevar),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
+       rsv<-rsv.google.import(geo.select=unique(ds1.df[,statevar]))
+        ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', statevar),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
       }
+  
       if(flu.import){
         flu<-nrevss_flu_import()
         ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek',statevar), all.x=T)
       }
+  
       if(adj.flu==F){
         ds1.df$flu.var<-1
       }
+  
       if(adj.rsv==F){
         ds1.df$rsv.var<-1
       }
+  
       if(!exists("denom.var")){
         ds1.df$denom <-1
         denom.var <-'denom'
       }
+  
       combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
       ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
      
       ages <-   dimnames(ds2)[[3]]
       geos<-dimnames(ds2)[[2]]
+  
       all.glm.res<- pblapply(use.syndromes, function(x){
         ww<- lapply(ages, function(y){
           q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res)
@@ -77,25 +91,24 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar, datevar, u
           return(q)
         }
         ) 
-        names(ww)<- ages
+        names(ww)<- ages        
         return(ww)
-      }
-      )
-      names(all.glm.res)<-use.syndromes
-      return(all.glm.res)
+    })
+
+    names(all.glm.res) <- use.syndromes
+    return(all.glm.res)
 }
 
-dashboardPlot<-function(all.glm.res){
-  ds<-all.glm.res
-  counties.to.test<- names(ds[[1]][[1]])
-  ages.to.test<-names(ds[[1]])
-  age.labels<-ages.to.test
-  syndromes<-names(ds)
-  dates<-as.Date(ds[[1]][[1]][[1]][['date']])
-  n.times<-length(dates)
-  last.date.format<-max(dates)
-  last.date.format<-format(last.date.format,
-                           "%b %d, %Y")
+dashboardPlot <- function(all.glm.res){ 
+  ds <- all.glm.res
+  counties.to.test <- names(ds[[1]][[1]])
+  ages.to.test <- names(ds[[1]])
+  age.labels <- ages.to.test
+  syndromes <- names(ds)
+  dates <- as.Date(ds[[1]][[1]][[1]][['date']])
+  n.times <- length(dates)
+  last.date.format <- max(dates)
+  last.date.format <- format(last.date.format, "%b %d, %Y")
   
 
   server<-function(input, output){
@@ -141,41 +154,91 @@ dashboardPlot<-function(all.glm.res){
             pred.lcl<-ili2.pred.lcl[dates.select,j,i]/denom[dates.select,j,i]
             pred.ucl<-ili2.pred.ucl[dates.select,j,i]/denom[dates.select,j,i]
             
-            if(input$set.axis==F){
-              y.range<-c(0,max(y,na.rm=T))
-            }else{
-              y.range<-c(0, max(plot.prop[dates.select,j,], na.rm=T))
+            ili2.resid <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, 
+                "[[", "resid1"), simplify = "array")
+            dimnames(ili2.resid)[[2]] <- counties.to.test
+            ili2.pred <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, 
+                "[[", "pred"), simplify = "array")
+            dimnames(ili2.pred)[[2]] <- counties.to.test
+            ili2.pred.lcl <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, 
+                "[[", "lpi"), simplify = "array")
+            dimnames(ili2.pred.lcl)[[2]] <- counties.to.test
+            ili2.pred.ucl <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, 
+                "[[", "upi"), simplify = "array")
+            dimnames(ili2.pred.ucl)[[2]] <- counties.to.test
+            obs.ili <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, "[[", 
+                "y"), simplify = "array")
+            dimnames(obs.ili)[[2]] <- counties.to.test
+            denom <- sapply(ds[[input$set.syndrome]], function(x) sapply(x, "[[", 
+                "denom"), simplify = "array")
+            dimnames(denom)[[2]] <- counties.to.test
+            plot.min <- which(input$display.dates == dates)
+            dates.select <- plot.min:n.times
+            par(mfrow = c(2, 3), mar = c(3, 2, 1, 1))
+            for (i in ages.to.test) {
+                for (j in input$set.borough) {
+                  if (input$set.prop == "Counts") {
+                    y = obs.ili[dates.select, j, i]
+                    pred <- ili2.pred[dates.select, j, i]
+                    pred.lcl <- ili2.pred.lcl[dates.select, j, i]
+                    pred.ucl <- ili2.pred.ucl[dates.select, j, i]
+                    if (input$set.axis == F) {
+                      y.range <- c(0, max(c(ili2.pred.lcl[dates.select, j, i], ili2.pred.ucl[dates.select, 
+                        j, i], ili2.pred[dates.select, j, i], obs.ili[dates.select, 
+                        j, i]), na.rm = T))
+                    } else {
+                      y.range <- c(0, max(c(ili2.pred.lcl[dates.select, j, ], ili2.pred.ucl[dates.select, 
+                        j, ], ili2.pred[dates.select, j, ], obs.ili[dates.select, 
+                        j, ]), na.rm = T))
+                    }
+                  } else if (input$set.prop == "Proportion") {
+                    y = obs.ili[dates.select, j, i]/denom[dates.select, j, i]
+                    pred <- ili2.pred[dates.select, j, i]/denom[dates.select, j, 
+                      i]
+                    pred.lcl <- ili2.pred.lcl[dates.select, j, i]/denom[dates.select, 
+                      j, i]
+                    pred.ucl <- ili2.pred.ucl[dates.select, j, i]/denom[dates.select, 
+                      j, i]
+                    
+                    if (input$set.axis == F) {
+                      y.range <- c(0, max(y, na.rm = T))
+                    } else {
+                      y.range <- c(0, max(plot.prop[dates.select, j, ], na.rm = T))
+                    }
+                  } else {
+                    y = obs.ili[dates.select, j, i]/ili2.pred[dates.select, j, i]
+                    pred <- obs.ili[dates.select, j, i]/ili2.pred[dates.select, 
+                      j, i]
+                    pred.lcl <- obs.ili[dates.select, j, i]/ili2.pred.lcl[dates.select, 
+                      j, i]
+                    pred.ucl <- obs.ili[dates.select, j, i]/ili2.pred.ucl[dates.select, 
+                      j, i]
+                    if (input$set.axis == F) {
+                      y.range <- range(y, na.rm = T)
+                      y.range[is.infinite(y.range)] <- 10
+                    } else {
+                      y.range <- c(0.2, 4)
+                    }
+                  }
+                  plot(dates[dates.select], y, type = "n", bty = "l", ylab = "Fitted", 
+                    main = paste(j, i), ylim = y.range)
+                  polygon(c(dates[dates.select], rev(dates[dates.select])), c(pred.lcl, 
+                    rev(pred.ucl)), col = rgb(1, 0, 0, alpha = 0.1), border = NA)
+                  lines(dates[dates.select], pred, type = "l", col = "red", lty = 1, 
+                    lwd = 1.5)
+                  lines(dates[dates.select], y, lwd = 1.5)
+                  if (input$set.prop == "Observed/Expected") {
+                    abline(h = 1, col = "gray", lty = 2)
+                  }
+                }
             }
-          }else{
-            y=obs.ili[dates.select,j,i]/ili2.pred[dates.select,j,i]
-            pred<-obs.ili[dates.select,j,i]/ili2.pred[dates.select,j,i]
-            pred.lcl<-obs.ili[dates.select,j,i]/ili2.pred.lcl[dates.select,j,i]
-            pred.ucl<-obs.ili[dates.select,j,i]/ili2.pred.ucl[dates.select,j,i]
-            if(input$set.axis==F){
-              y.range<-range(y,na.rm=T)
-              y.range[is.infinite(y.range)]<-10
-            }else{
-              y.range<-c(0.2, 4)
-            }  
-          }
-          plot(dates[dates.select],y, type='n', bty='l', ylab='Fitted', main=paste(j, i), ylim=y.range)
-          polygon(c(dates[dates.select],rev(dates[dates.select])), 
-                  c(pred.lcl, rev(pred.ucl)), col=rgb(1,0,0,alpha=0.1), border=NA)
-          lines(dates[dates.select],pred, type='l', col='red', lty=1, lwd=1.5 )
-          lines(dates[dates.select],y, lwd=1.5)
-          if(input$set.prop=='Observed/Expected'){
-            abline(h=1, col='gray', lty=2)
-          }
-        }
-      }
+        }, width = "auto", height = "auto")
     }
     ,
     width = "auto", height = "auto")
   }
   
-  ui<-
-    fluidPage(
-      titlePanel(paste0('Data through ', last.date.format)),
+  ui <- fluidPage(titlePanel(paste0('Data through ', last.date.format)), 
       sidebarLayout(
         sidebarPanel(
           selectInput("set.prop", "Proportion of ED visits or count:",
@@ -207,7 +270,8 @@ dashboardPlot<-function(all.glm.res){
   shinyApp(ui, server)
 }
 
-excessExtract<-function(ds, syndrome, extract.quantity){
-  out.ds<- sapply(ds[[syndrome]], function(x) sapply(x,'[[',extract.quantity), simplify='array')
-  return(out.ds)
+excessExtract <- function(ds, syndrome, extract.quantity) {
+    out.ds <- sapply(ds[[syndrome]], function(x) sapply(x, "[[", extract.quantity), 
+        simplify = "array")
+    return(out.ds)
 }
