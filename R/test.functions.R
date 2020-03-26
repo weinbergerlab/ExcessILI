@@ -9,6 +9,7 @@ library(MASS)
 library(tidyr)
 library(reshape2)
 
+
 source("./R/functions.R")
 source("./R/aux_functions.R")
 
@@ -44,7 +45,7 @@ excess_cases1 <-
 
 dashboardPlot(excess_cases1)
 
-ili2.resid <- sapply(ds[[input$set.syndrome]],
+ili2.resid <- sapply(excess_cases1[['ili']],
                      function(x) sapply(x, "[[", "resid1"), 
                      simplify = "array")
 
@@ -58,7 +59,3 @@ excess.rr <-
                 syndrome = "ili",
                 extract.quantity = "resid1")
 
-par(mfrow = c(1, 1))
-
-matplot(exp(excess.rr[, , 1]), type = "l")
-matplot(unexplained.cases[, -2, 1], type = "l")
