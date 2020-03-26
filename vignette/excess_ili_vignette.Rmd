@@ -95,8 +95,9 @@ excess_cases1 <-
               statevar      = "state",
               denom.var     = "total.visits",
               use.syndromes = c("ili", "resp"),
-              rsv.import       = T,
-              flu.import    = T,
+              rsv.import       = F,
+              flu.import    = F,
+              extrapolation.date = "2020-03-01",
               time.res='week')
 ```
 

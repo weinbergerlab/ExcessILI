@@ -73,7 +73,7 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 
 
 ## Evaluate results after controlling for flu and RSV
-glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res) {
+glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapolation.date) {
     date.string <- as.Date(dimnames(ds)[[1]])
     month <- month(date.string)
     epiyr <- year(date.string)
