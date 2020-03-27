@@ -28,7 +28,7 @@ source("../R/aux_functions.R")
 ## Overview
 The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets into time series and then the analysis of these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from NREVSS) and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data or formatted time series data
 
-We will now analyze ILINet data with a simple seasonal baseline, adjusting for flu
+In this example, we will analyze ILINet data with a simple seasonal baseline, adjusting for flu and year-to-year variations. The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year and the amount of influenza activity. Influenza activity is captured by using the proportion of tests that were positive from the NREVSS system (log transformed in model) 
 
 ## Download the data
 
@@ -51,7 +51,7 @@ ili.data <- ili.data[ili.data$state %in% state.select,]
 
 ```
 
-## Run the function, adjust for flu using NREVSS data
+## Run the main analysis function, adjust for flu using NREVSS data
 
 ```{r}
 excess_cases1 <-
