@@ -1,0 +1,144 @@
+---
+title: "excessILI vignette"
+author: "Dan Weinberger"
+date: "3/25/2020"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(lubridate)
+library(MMWRweek)
+library(cdcfluview)
+library(gtrendsR)
+library(shiny)
+library(pbapply)
+library(zoo)
+library(MASS)
+library(tidyr)
+library(reshape2)
+```
+
+```{r}
+source("../R/functions.R")
+source("../R/aux_functions.R")
+```
+
+## Overview
+The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets into time series and then the analysis of these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from NREVSS) and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data or formatted time series data
+
+In this example, we will analyze ILINet data with a simple seasonal baseline, adjusting for flu and year-to-year variations. The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year and the amount of influenza activity. Influenza activity is captured by using the proportion of tests that were positive from the NREVSS system (log transformed in model) 
+
+## Download the data
+
+```{r, eval=T}
+ili.data <- ilinet(region = c("state"))
+```
+
+
+```{r}
+ili.data$state <- state.abb[match(ili.data$region, state.name)]
+ili.data <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
+ili.data<-ili.data[!is.na(ili.data$total_patients),]
+ili.data.spl<-split(ili.data, ili.data$state)
+min<-sapply(ili.data.spl, function(x)  min(x$total_patients))
+min
+
+state.select<-names(min)[which(min>0) ]
+ili.data <- ili.data[ili.data$state %in% state.select,]
+
+
+```
+
+## Run the main analysis function, adjust for flu using NREVSS data
+
+```{r}
+excess_cases1 <-
+  excessCases(ds = ili.data,
+              datevar       = "week_start", 
+              statevar      = "state",
+              denom.var     = "total_patients",
+              use.syndromes = c("ilitotal"),
+              rsv.import       = F,
+              flu.import    = T,
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+```
+
+## Plot the results in an interactive dashboard
+
+```{r, echo=T}
+#dashboardPlot(excess_cases1)
+```
+
+## Extract the quantities of interest
+```{r}
+dates <-
+  excess_cases1[[1]][[1]][[1]]$date
+  
+unexplained.cases <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "unexplained.cases")
+
+unexplained.log.rr <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "resid1")
+
+denom <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "denom")
+
+
+upi <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "upi")
+
+lpi <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "lpi")
+
+obs <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "y")
+
+pred<-  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "pred")
+
+result.object<-list('dates'=dates,'obs'=obs[,,1], 'pred'=pred[,,1],'unexplained.cases'=unexplained.cases[,,1],'unexplained.log.rr'=unexplained.log.rr[,,1] )
+
+saveRDS(result.object,'extracted.output.ilinet.rds')
+```
+
+
+```{r, fig.width=5, fig.height=10}
+rr<-sort(exp(unexplained.log.rr[232,,1]), decreasing=T)
+par(mfrow=c(1,1))
+plot(y=1:length(rr),x=rr, yaxt='n', col='white')
+abline(v=1, lty=2)
+text(y=1:length(rr),x=rr, names(rr), yaxt='n', cex=0.5)
+```
+
+```{r, fig.width=10, fig.height=10}
+par(mfrow=c(4,4), mar=c(2,2,1,1))
+dates<-result.object$dates
+states<-dimnames(pred)[[2]]
+for(i in 1:dim(pred)[2]){
+plot(dates[180:233],pred[180:233,i,1]/denom[180:233,i,1], type='l', col='red', bty='l', main=states[i])
+points(dates[180:233],obs[180:233,i,1]/denom[180:233,i,1], type='l', col='black')
+polygon(c(dates[180:233], rev(dates[180:233])), c(lpi[180:233,i,1]/denom[180:233,i,1], 
+                    rev(upi[180:233,i,1]/denom[180:233,i,1])), col = rgb(1, 0, 0, alpha = 0.1), border = NA)
+}
+```
+
+
+
+
