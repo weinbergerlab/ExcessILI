@@ -60,7 +60,7 @@ excessCases <-
   
       ds<-as.data.frame(ds)
       ds[,datevar]<-as.Date(ds[,datevar])
-      mmwr.date<-MMWRweek(ds[,datevar])
+      mmwr.date<-MMWRweek::MMWRweek(ds[,datevar])
       ds1.df<-cbind.data.frame(ds,mmwr.date)
       
       if(sub.statevar=='none'){
@@ -74,7 +74,12 @@ excessCases <-
   
       if(rsv.import){
         geos <- unique(ds1.df[,statevar])
-        print(geos)
+
+        if (length(geos) > 5)
+          stop(paste0("Cannot query more than 5 geographic regions/states ",
+                      "at once using the GTrends api. Your regions:\n",
+                      paste(geos, collapse=', ')))
+
         rsv <-rsv.google.import(geo.select=geos)
         ds1.df <-merge(ds1.df, rsv,
                        by.x=c('MMWRyear','MMWRweek', statevar),
@@ -100,10 +105,36 @@ excessCases <-
         denom.var <-'denom'
       }
   
-      combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
+      cols_of_interest <-
+        c(agevar, datevar,
+          'MMWRyear', 'MMWRweek',
+          sub.statevar,
+          use.syndromes,
+          denom.var,
+          'flu.var',
+          'rsv.var')
+
+      if (any( !(cols_of_interest %in% names(ds1.df)) ))
+        stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
+                    "'cols_of_interest': ", paste(cols_of_interest, collapse=', '),
+                    "\n\nnames(ds1.df): ", paste(names(ds1.df), collapse=', '),
+                    "\n\nmissing: ",
+                    paste(setdiff(
+                            cols_of_interest,
+                            intersect(names(ds1.df), cols_of_interest)),
+                          collapse=", ")))
+
+      combo2.sub <-
+        ds1.df[, c(agevar, datevar,
+                   'MMWRyear', 'MMWRweek',
+                   sub.statevar,
+                   use.syndromes,
+                   denom.var,
+                   'flu.var',
+                   'rsv.var')]
       
       if(time.res=='week'){
-        combo2.sub[,datevar]<-floor_date(combo2.sub[,datevar], unit='week')
+        combo2.sub[,datevar] <- lubridate::floor_date(combo2.sub[,datevar], unit='week')
       }
       
       ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)

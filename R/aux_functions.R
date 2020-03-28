@@ -14,7 +14,7 @@ rsv.google.import <- function(geo.select) {
     rsv$geo <- gsub("US-", "", rsv$geo, fixed = T)
     rsv$date <- as.Date(rsv$date)
 
-    mmwr.week.rsv <- MMWRweek(rsv$date)[, c("MMWRyear", "MMWRweek")]
+    mmwr.week.rsv <- MMWRweek::MMWRweek(rsv$date)[, c("MMWRyear", "MMWRweek")]
 
     rsv <- cbind.data.frame(rsv, mmwr.week.rsv)
 
@@ -92,7 +92,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
     epiyr <- lubridate::year(date.string)
     epiyr[month <= 6] <- epiyr[month <= 6] - 1
     epiyr.index <- epiyr - min(epiyr) + 1
-    weekN <- MMWRweek(date.string)[, "MMWRweek"]
+    weekN <- MMWRweek::MMWRweek(date.string)[, "MMWRweek"]
     day.of.year <- lubridate::yday(date.string)
     day.of.week <- as.factor(weekdays(date.string))
     
