@@ -1,6 +1,3 @@
-# source("./R/functions.R")
-# source("./R/aux_functions.R")
-
 ili.data <- ilinet(region = c("state"))
 ili.data$state <- state.abb[match(ili.data$region, state.name)]
 

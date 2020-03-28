@@ -9,6 +9,8 @@ Description: Note, OSX users may need to install the packages
 Depends: R (>= 3.1.0)
 License: LICENSE NEEDED
 LazyData: true
+Suggests:
+    testthat (>= 2.1.0)
 Imports: 
     lubridate,
     MMWRweek,
