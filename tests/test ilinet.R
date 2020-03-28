@@ -1,16 +1,5 @@
-library(lubridate)
-library(MMWRweek)
-library(cdcfluview)
-library(gtrendsR)
-library(shiny)
-library(pbapply)
-library(zoo)
-library(MASS)
-library(tidyr)
-library(reshape2)
-
-source("./R/functions.R")
-source("./R/aux_functions.R")
+# source("./R/functions.R")
+# source("./R/aux_functions.R")
 
 ili.data <- ilinet(region = c("state"))
 ili.data$state <- state.abb[match(ili.data$region, state.name)]

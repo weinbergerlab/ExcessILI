@@ -1,17 +1,5 @@
-library(lubridate)
-library(MMWRweek)
-library(cdcfluview)
-library(gtrendsR)
-library(shiny)
-library(pbapply)
-library(zoo)
-library(MASS)
-library(tidyr)
-library(reshape2)
-
-
-source("./R/functions.R")
-source("./R/aux_functions.R")
+# source("./R/functions.R")
+# source("./R/aux_functions.R")
 
 # Open Rproj, which sets Working directory automatically)
 combo1 <- readRDS("./Data/NYC_resp_ili_combo.rds")
