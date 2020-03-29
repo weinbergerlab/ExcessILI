@@ -64,6 +64,18 @@ ts_format <-
            syndromes,
            resolution='day',
            remove.final=F) {
+
+  is.string <- assertthat::is.string
+
+  assertthat::assert_that(is.data.frame(line.list))
+  assertthat::assert_that(is.string(datevar))
+  assertthat::assert_that(is.string(statevar))
+  assertthat::assert_that(is.string(sub.statevar))
+  assertthat::assert_that(is.string(agevar))
+  assertthat::assert_that(is.character(syndromes))
+  assertthat::assert_that(is.string(resolution))
+  assertthat::assert_that(any(resolution %in% c('day', 'week', 'month')))
+  assertthat::assert_that(is.logical(remove.final))
   
   ds1 <- line.list
   

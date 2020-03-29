@@ -78,6 +78,7 @@ test_that("NYC data is processed correctly", {
                    datevar='date',
                    agevar='agegrp',
                    statevar='state',
+                   sub.statevar='none',
                    syndromes=c('ili','resp'))
 
   expect_true(is.data.frame(ts1))
