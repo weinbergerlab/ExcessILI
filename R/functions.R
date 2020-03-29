@@ -181,117 +181,138 @@ excessCases <-
            time.res='day',
            extrapolation.date) {
 
-      if( length(unique(ds[,statevar])) > 5 && identical(rsv.import, T))
-        stop('Maximum of 5 states can be used when rsv.import=T')
-      
-      # If import the RSV or flu data, automatically adjust for it in model  data
-      if(identical(flu.import, T)){
-        adj.flu <- T
-        flu.var <- 'flu.var'
-      }
-  
-      if(identical(rsv.import, T)){
-        adj.rsv <- T
-        rsv.var <-'rsv.var'
-      }
-  
-      ds<-as.data.frame(ds)
-      ds[,datevar]<-as.Date(ds[,datevar])
-      mmwr.date<-MMWRweek::MMWRweek(ds[,datevar])
-      ds1.df<-cbind.data.frame(ds,mmwr.date)
-      
-      if(sub.statevar=='none'){
-        sub.statevar<-'sub.statevar'
-        ds1.df$sub.statevar<-ds1.df[,statevar]
-      }
-  
-      if( agevar =='none'){
-        ds1.df[,agevar]<-'1'
-      }
-  
-      if(rsv.import){
-        geos <- unique(ds1.df[,statevar])
+  is.string <- assertthat::is.string
 
-        if (length(geos) > 5)
-          stop(paste0("Cannot query more than 5 geographic regions/states ",
-                      "at once using the GTrends api. Your regions:\n",
-                      paste(geos, collapse=', ')))
+  assertthat::assert_that(is.data.frame(ds))
+  assertthat::assert_that(is.string(sub.statevar))
+  assertthat::assert_that(is.string(statevar))
+  assertthat::assert_that(is.string(datevar))
+  assertthat::assert_that(is.character(use.syndromes))
+  assertthat::assert_that(is.string(denom.var))
+  assertthat::assert_that(is.logical(flu.import))
+  assertthat::assert_that(is.logical(rsv.import))
+  assertthat::assert_that(is.logical(adj.flu))
+  assertthat::assert_that(is.logical(adj.rsv))
+  assertthat::assert_that(is.string(flu.var))
+  assertthat::assert_that(is.string(rsv.var))
+  assertthat::assert_that(is.string(time.res) &&
+                          time.res %in% c('day', 'week', 'month'))
+  # Need a better test here
+  # assertthat::assert_that(!is.null(extrapolation.date)) 
 
-        rsv <-rsv.google.import(geo.select=geos)
-        ds1.df <-merge(ds1.df, rsv,
-                       by.x=c('MMWRyear','MMWRweek', statevar),
-                       by.y=c('MMWRyear','MMWRweek', 'state'),
-                       all.x=T)
-      }
+  if( length(unique(ds[,statevar])) > 5 && identical(rsv.import, T))
+    stop('Maximum of 5 states can be used when rsv.import=T')
   
-      if(flu.import){
-        flu<-nrevss_flu_import()
-        ds1.df<-merge(ds1.df, flu, by=c('MMWRyear','MMWRweek',statevar), all.x=T)
-      }
-  
-      if(adj.flu==F){
-        ds1.df$flu.var<-1
-      }
-  
-      if(adj.rsv==F){
-        ds1.df$rsv.var<-1
-      }
-  
-      if(!exists("denom.var")){
-        ds1.df$denom <-1
-        denom.var <-'denom'
-      }
-  
-      cols_of_interest <-
-        c(agevar, datevar,
-          'MMWRyear', 'MMWRweek',
-          sub.statevar,
-          use.syndromes,
-          denom.var,
-          'flu.var',
-          'rsv.var')
+  # If import the RSV or flu data, automatically adjust for it in model  data
+  if(identical(flu.import, T)){
+    adj.flu <- T
+    flu.var <- 'flu.var'
+  }
 
-      if (any( !(cols_of_interest %in% names(ds1.df)) ))
-        stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
-                    "'cols_of_interest': ", paste(cols_of_interest, collapse=', '),
-                    "\n\nnames(ds1.df): ", paste(names(ds1.df), collapse=', '),
-                    "\n\nmissing: ",
-                    paste(setdiff(
-                            cols_of_interest,
-                            intersect(names(ds1.df), cols_of_interest)),
-                          collapse=", ")))
+  if(identical(rsv.import, T)){
+    adj.rsv <- T
+    rsv.var <-'rsv.var'
+  }
 
-      combo2.sub <-
-        ds1.df[, c(agevar, datevar,
-                   'MMWRyear', 'MMWRweek',
-                   sub.statevar,
-                   use.syndromes,
-                   denom.var,
-                   'flu.var',
-                   'rsv.var')]
-      
-      if(time.res=='week'){
-        combo2.sub[,datevar] <- lubridate::floor_date(combo2.sub[,datevar], unit='week')
-      }
-      
-      ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
-     
-      ages <-   dimnames(ds2)[[3]]
-      geos<-dimnames(ds2)[[2]]
+  ds<-as.data.frame(ds)
+  ds[,datevar]<-as.Date(ds[,datevar])
+  mmwr.date<-MMWRweek::MMWRweek(ds[,datevar])
+  ds1.df<-cbind.data.frame(ds,mmwr.date)
   
-      all.glm.res<- pbapply::pblapply(use.syndromes, function(x){
-        ww<- lapply(ages, function(y){
-          q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res,extrapolation.date=extrapolation.date)
-          names(q)<-geos
-          return(q)
-        }
-        ) 
-        names(ww)<- ages        
-        return(ww)
-    })
+  if(sub.statevar=='none'){
+    sub.statevar<-'sub.statevar'
+    ds1.df$sub.statevar<-ds1.df[,statevar]
+  }
 
-    names(all.glm.res) <- use.syndromes
-    return(all.glm.res)
+  if( agevar =='none'){
+    ds1.df[,agevar]<-'1'
+  }
+
+  if(rsv.import){
+    geos <- unique(ds1.df[,statevar])
+
+    if (length(geos) > 5)
+      stop(paste0("Cannot query more than 5 geographic regions/states ",
+                  "at once using the GTrends api. Your regions:\n",
+                  paste(geos, collapse=', ')))
+
+    rsv <-rsv.google.import(geo.select=geos)
+    ds1.df <-merge(ds1.df, rsv,
+                   by.x=c('MMWRyear','MMWRweek', statevar),
+                   by.y=c('MMWRyear','MMWRweek', 'state'),
+                   all.x=T)
+  }
+
+  if(flu.import){
+    flu<-nrevss_flu_import()
+    ds1.df<-merge(ds1.df, flu,
+                  by=c('MMWRyear','MMWRweek',statevar),
+                  all.x=T)
+  }
+
+  if(adj.flu==F){
+    ds1.df$flu.var<-1
+  }
+
+  if(adj.rsv==F){
+    ds1.df$rsv.var<-1
+  }
+
+  if(!exists("denom.var")){
+    ds1.df$denom <-1
+    denom.var <-'denom'
+  }
+
+  cols_of_interest <-
+    c(agevar, datevar,
+      'MMWRyear', 'MMWRweek',
+      sub.statevar,
+      use.syndromes,
+      denom.var,
+      'flu.var',
+      'rsv.var')
+
+  if (any( !(cols_of_interest %in% names(ds1.df)) ))
+    stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
+                "'cols_of_interest': ", paste(cols_of_interest, collapse=', '),
+                "\n\nnames(ds1.df): ", paste(names(ds1.df), collapse=', '),
+                "\n\nmissing: ",
+                paste(setdiff(
+                        cols_of_interest,
+                        intersect(names(ds1.df), cols_of_interest)),
+                      collapse=", ")))
+
+  combo2.sub <-
+    ds1.df[, c(agevar, datevar,
+               'MMWRyear', 'MMWRweek',
+               sub.statevar,
+               use.syndromes,
+               denom.var,
+               'flu.var',
+               'rsv.var')]
+  
+  if(time.res=='week'){
+    combo2.sub[,datevar] <- lubridate::floor_date(combo2.sub[,datevar], unit='week')
+  }
+  
+  ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
+ 
+  ages <-   dimnames(ds2)[[3]]
+  geos<-dimnames(ds2)[[2]]
+
+  all.glm.res<- pbapply::pblapply(use.syndromes, function(x){
+    ww<- lapply(ages, function(y){
+      q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res,extrapolation.date=extrapolation.date)
+      names(q)<-geos
+      return(q)
+    }
+    ) 
+    names(ww)<- ages        
+    return(ww)
+  })
+
+  names(all.glm.res) <- use.syndromes
+  return(all.glm.res)
 }
 
 #' ONE LINER DESCRIPTION
