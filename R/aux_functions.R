@@ -2,7 +2,8 @@
 ## of historical data at weekly reslution (switches to monthly for >5 years)
 rsv.google.import <- function(geo.select) {
 
-    rsv.down <- gtrends(keyword = "RSV",
+    rsv.down <-
+      gtrendsR::gtrends(keyword = "RSV",
                         geo = paste0("US-", geo.select),
                         time = "today+5-y",
                         gprop = c("web"),
@@ -13,7 +14,7 @@ rsv.google.import <- function(geo.select) {
     rsv$geo <- gsub("US-", "", rsv$geo, fixed = T)
     rsv$date <- as.Date(rsv$date)
 
-    mmwr.week.rsv <- MMWRweek(rsv$date)[, c("MMWRyear", "MMWRweek")]
+    mmwr.week.rsv <- MMWRweek::MMWRweek(rsv$date)[, c("MMWRyear", "MMWRweek")]
 
     rsv <- cbind.data.frame(rsv, mmwr.week.rsv)
 
@@ -70,14 +71,14 @@ nrevss_flu_import <- function() {
 }
 
 reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
-    ili.m <- melt(ds2, id.vars = c(sub.statevar, agevar, datevar, "MMWRyear", "MMWRweek"))
+    ili.m <- reshape2::melt(ds2, id.vars = c(sub.statevar, agevar, datevar, "MMWRyear", "MMWRweek"))
 
     casting_formula <-
       as.formula(paste(paste0(datevar, "+MMWRyear+MMWRweek"),
                        sub.statevar, agevar, "variable",
                        sep = "~"))
 
-    ili.a <- acast(ili.m, casting_formula, fun.aggregate = sum)
+    ili.a <- reshape2::acast(ili.m, casting_formula, fun.aggregate = sum)
     dimnames(ili.a)[[1]] <- substr(dimnames(ili.a)[[1]], 1, 10)
 
     return(ili.a)
@@ -87,12 +88,12 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 ## Evaluate results after controlling for flu and RSV
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapolation.date) {
     date.string <- as.Date(dimnames(ds)[[1]])
-    month <- month(date.string)
-    epiyr <- year(date.string)
+    month <- lubridate::month(date.string)
+    epiyr <- lubridate::year(date.string)
     epiyr[month <= 6] <- epiyr[month <= 6] - 1
     epiyr.index <- epiyr - min(epiyr) + 1
-    weekN <- MMWRweek(date.string)[, "MMWRweek"]
-    day.of.year <- yday(date.string)
+    weekN <- MMWRweek::MMWRweek(date.string)[, "MMWRweek"]
+    day.of.year <- lubridate::yday(date.string)
     day.of.week <- as.factor(weekdays(date.string))
     
     clean.array.citywide <- ds[, x.test, , , drop = F]
@@ -109,8 +110,8 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
     }
     
     log.flu = log(clean.array.citywide[, , age.test, "flu.var"])  #same for all ages and boroughs
-    log.flu <- na.locf(log.flu, na.rm = F)  #fill in missing observations for flu at end of TS with most recent observed values
-    sqrt.rsv <- na.locf(sqrt.rsv, na.rm = F)  #fill in missing observations for RSV at end of TS with most recent observed values
+    log.flu <- zoo::na.locf(log.flu, na.rm = F)  #fill in missing observations for flu at end of TS with most recent observed values
+    sqrt.rsv <- zoo::na.locf(sqrt.rsv, na.rm = F)  #fill in missing observations for RSV at end of TS with most recent observed values
     t2 <- 1:length(y.age)
     if (time.res == "day") {
         period = 365.25
@@ -178,7 +179,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,extrapo
     coef1[is.na(coef1)] <- 0
     v.cov.mat <- vcov(mod1)
     v.cov.mat[is.na(v.cov.mat)] <- 0
-    pred.coefs.reg.mean <- mvrnorm(n = 100, mu = coef1, Sigma = v.cov.mat)
+    pred.coefs.reg.mean <- MASS::mvrnorm(n = 100, mu = coef1, Sigma = v.cov.mat)
     mod.mat.pred <- model.matrix(form2, data = ds.glm, family = "poisson")
     preds.stage1.regmean <- mod.mat.pred %*% t(pred.coefs.reg.mean)
     preds.stage1.regmean <- apply(preds.stage1.regmean, 2,

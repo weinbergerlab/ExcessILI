@@ -1,11 +1,12 @@
 #Format line list data into time series
+#' @export
 ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,resolution='day',remove.final=F){
   
   ds1<-line.list
   
   # Parse dates into Date objects, and floor to the nearest day
-  ds1[, datevar]<-as.Date(ds1[,datevar])
-  ds1[, datevar]<-floor_date(ds1[, datevar], unit=resolution)
+  ds1[, datevar]<- as.Date(ds1[,datevar])
+  ds1[, datevar]<- lubridate::floor_date(ds1[, datevar], unit=resolution)
   
   ds1$all.visits<-1
   
@@ -14,7 +15,7 @@ ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,
     sub.statevar<-'sub.statevar'
   }
   
-  ds1.m<-melt(ds1[,c(datevar, statevar,sub.statevar, agevar,syndromes,'all.visits' )], id.vars=c(datevar, statevar,sub.statevar, agevar))
+  ds1.m<-reshape2::melt(ds1[,c(datevar, statevar,sub.statevar, agevar,syndromes,'all.visits' )], id.vars=c(datevar, statevar,sub.statevar, agevar))
   last.date<- max(ds1.m[,datevar])
   
   if(remove.final){
@@ -22,12 +23,28 @@ ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,
   }
   
   form1<-as.formula(paste0(paste(agevar,datevar, statevar,sub.statevar,sep='+' ),'~', 'variable'))
-  ds1.c<-dcast(ds1.m, form1, fun.aggregate = sum)
+  ds1.c<-reshape2::dcast(ds1.m, form1, fun.aggregate = sum)
 
   return(ds1.c)
 }
 
-excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', datevar, use.syndromes,denom.var, flu.import=T, rsv.import=T, adj.flu=F, adj.rsv=F, flu.var='flu.var', rsv.var='rsv.var', time.res='day',extrapolation.date){
+#' @export
+excessCases <-
+  function(ds,
+           sub.statevar='none',
+           statevar='state',
+           agevar='none',
+           datevar,
+           use.syndromes,
+           denom.var,
+           flu.import=T,
+           rsv.import=T,
+           adj.flu=F,
+           adj.rsv=F,
+           flu.var='flu.var',
+           rsv.var='rsv.var',
+           time.res='day',
+           extrapolation.date){
       if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
       
       #If import the RSV or flu data, automatically adjust for it in model  data
@@ -43,7 +60,7 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', dat
   
       ds<-as.data.frame(ds)
       ds[,datevar]<-as.Date(ds[,datevar])
-      mmwr.date<-MMWRweek(ds[,datevar])
+      mmwr.date<-MMWRweek::MMWRweek(ds[,datevar])
       ds1.df<-cbind.data.frame(ds,mmwr.date)
       
       if(sub.statevar=='none'){
@@ -56,8 +73,18 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', dat
       }
   
       if(rsv.import){
-       rsv<-rsv.google.import(geo.select=unique(ds1.df[,statevar]))
-        ds1.df<-merge(ds1.df, rsv, by.x=c('MMWRyear','MMWRweek', statevar),by.y=c('MMWRyear','MMWRweek', 'state'), all.x=T)
+        geos <- unique(ds1.df[,statevar])
+
+        if (length(geos) > 5)
+          stop(paste0("Cannot query more than 5 geographic regions/states ",
+                      "at once using the GTrends api. Your regions:\n",
+                      paste(geos, collapse=', ')))
+
+        rsv <-rsv.google.import(geo.select=geos)
+        ds1.df <-merge(ds1.df, rsv,
+                       by.x=c('MMWRyear','MMWRweek', statevar),
+                       by.y=c('MMWRyear','MMWRweek', 'state'),
+                       all.x=T)
       }
   
       if(flu.import){
@@ -78,10 +105,36 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', dat
         denom.var <-'denom'
       }
   
-      combo2.sub<-ds1.df[, c(agevar, datevar,'MMWRyear', 'MMWRweek', sub.statevar, use.syndromes,denom.var, 'flu.var','rsv.var' )]
+      cols_of_interest <-
+        c(agevar, datevar,
+          'MMWRyear', 'MMWRweek',
+          sub.statevar,
+          use.syndromes,
+          denom.var,
+          'flu.var',
+          'rsv.var')
+
+      if (any( !(cols_of_interest %in% names(ds1.df)) ))
+        stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
+                    "'cols_of_interest': ", paste(cols_of_interest, collapse=', '),
+                    "\n\nnames(ds1.df): ", paste(names(ds1.df), collapse=', '),
+                    "\n\nmissing: ",
+                    paste(setdiff(
+                            cols_of_interest,
+                            intersect(names(ds1.df), cols_of_interest)),
+                          collapse=", ")))
+
+      combo2.sub <-
+        ds1.df[, c(agevar, datevar,
+                   'MMWRyear', 'MMWRweek',
+                   sub.statevar,
+                   use.syndromes,
+                   denom.var,
+                   'flu.var',
+                   'rsv.var')]
       
       if(time.res=='week'){
-        combo2.sub[,datevar]<-floor_date(combo2.sub[,datevar], unit='week')
+        combo2.sub[,datevar] <- lubridate::floor_date(combo2.sub[,datevar], unit='week')
       }
       
       ds2<-reshape_ds(ds2=combo2.sub, sub.statevar=sub.statevar, agevar=agevar, datevar=datevar)
@@ -89,7 +142,7 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', dat
       ages <-   dimnames(ds2)[[3]]
       geos<-dimnames(ds2)[[2]]
   
-      all.glm.res<- pblapply(use.syndromes, function(x){
+      all.glm.res<- pbapply::pblapply(use.syndromes, function(x){
         ww<- lapply(ages, function(y){
           q<-lapply(geos, glm.func, ds=ds2,age.test=y, syndrome=x, denom.var=denom.var, time.res=time.res,extrapolation.date=extrapolation.date)
           names(q)<-geos
@@ -104,6 +157,7 @@ excessCases<-function(ds,sub.statevar='none',statevar='state',agevar='none', dat
     return(all.glm.res)
 }
 
+#' @export
 dashboardPlot <- function(all.glm.res){ 
   ds <- all.glm.res
   counties.to.test <- names(ds[[1]][[1]])
@@ -210,38 +264,39 @@ dashboardPlot <- function(all.glm.res){
     width = "auto", height = "auto")
   }
   
-  ui <- fluidPage(titlePanel(paste0('Data through ', last.date.format)), 
-      sidebarLayout(
-        sidebarPanel(
-          selectInput("set.prop", "Proportion of ED visits or count:",
+  ui <- shiny::fluidPage(shiny::titlePanel(paste0('Data through ', last.date.format)), 
+      shiny::sidebarLayout(
+        shiny::sidebarPanel(
+          shiny::selectInput("set.prop", "Proportion of ED visits or count:",
                       choice=c('Proportion','Counts','Observed/Expected'), selected ="Proportion" ),
-          selectInput("set.borough", "Geographic unit:",
+          shiny::selectInput("set.borough", "Geographic unit:",
                       choice=counties.to.test, selected ="Citywide" ),
-          selectInput("set.syndrome", "Syndrome:",
+          shiny::selectInput("set.syndrome", "Syndrome:",
                       choice=syndromes, selected ="ili" ),
-          sliderInput('display.dates', 'Earliest date to display', min=min(dates), step=7,max=dates[length(dates)-2], value=dates[length(dates)-round(length(dates)/5)]),
-          checkboxInput("set.axis", "Uniform axis for all plots?:",
+          shiny::sliderInput('display.dates', 'Earliest date to display', min=min(dates), step=7,max=dates[length(dates)-2], value=dates[length(dates)-round(length(dates)/5)]),
+          shiny::checkboxInput("set.axis", "Uniform axis for all plots?:",
                         value =F ),
-          selectInput("arrange.plots", "Arrange plots by:",
+          shiny::selectInput("arrange.plots", "Arrange plots by:",
                       choice=c('Age','Region'), selected ="Age"),
-          selectInput("set.ages", "Ages:",
+          shiny::selectInput("set.ages", "Ages:",
                       choice=ages.to.test, selected =ages.to.test, multiple=T)
         ),
-        mainPanel(
-          plotOutput("countyPlot"),
-          column(8, align = 'justify',
-                 hr(),
-                 span("The black line shows the observed number of ED visits per day in the indicated stratum, and the red lines denote the mean and 95% prediction intervals for a model adjusting for seasonality, influenza activity, and RSV activity"),
-                 hr(),
-                 span("This app and package were developed by The Public Health Modeling Unit and The Weinberger Lab at Yale School of Public Health. Contributors include Dan Weinberger, Alyssa Amick, Forrest Crawford, Kelsie Cassell, Marcus Rossi, Ernest Asare, Yu-Han Kao. Underlying analysis code can be found at https://github.com/weinbergerlab/ExcessILI"),
+        shiny::mainPanel(
+          shiny::plotOutput("countyPlot"),
+          shiny::column(8, align = 'justify',
+                 shiny::hr(),
+                 shiny::span("The black line shows the observed number of ED visits per day in the indicated stratum, and the red lines denote the mean and 95% prediction intervals for a model adjusting for seasonality, influenza activity, and RSV activity"),
+                 shiny::hr(),
+                 shiny::span("This app and package were developed by The Public Health Modeling Unit and The Weinberger Lab at Yale School of Public Health. Contributors include Dan Weinberger, Alyssa Amick, Forrest Crawford, Kelsie Cassell, Marcus Russi, Ernest Asare, Yu-Han Kao. Underlying analysis code can be found at https://github.com/weinbergerlab/ExcessILI"),
                  
           )
         )
       )
     )
-  shinyApp(ui, server)
+  shiny::shinyApp(ui, server)
 }
 
+#' @export
 excessExtract <- function(ds, syndrome, extract.quantity) {
     out.ds <- sapply(ds[[syndrome]], function(x) sapply(x, "[[", extract.quantity), 
         simplify = "array")
