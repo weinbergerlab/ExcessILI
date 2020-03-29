@@ -53,24 +53,32 @@ test_that("NYC data is processed correctly", {
   matplot(unexplained.cases[,-2,1], type='l')
 
   #Try out ts format package
-  n.obs<-10000
-  set.seed(123)
+  n.obs <- 10000
+  set.seed(42)
 
-  sim1<-as.data.frame(matrix(NA,nrow=n.obs, ncol=5))
+  sim1 <-
+    as.data.frame(matrix(NA, nrow=n.obs, ncol=5))
 
-  names(sim1)<-c('state','date','agegrp','ili','resp')
+  names(sim1) <- c('state','date','agegrp','ili','resp')
 
-  sim1$state<- c(rep('CT', times=n.obs*0.3), rep("NY", times=n.obs*0.7))
-  sim1$agegrp<-sample(1:5, n.obs, replace=T)
-  sim1$date<-sample(seq.Date(from=as.Date('2019-01-01'),by='day', length.out=500), 1000, replace=T)
-  sim1$ili<-rbinom(n=n.obs, size=1, prob=0.05)
-  sim1$resp<-rbinom(n=n.obs, size=1, prob=0.1)
+  sim1$state<- c( rep('CT', times=n.obs*0.3),
+                  rep("NY", times=n.obs*0.7) )
 
-  ts1<-ts_format(line.list=sim1,
-                 datevar='date',
-                 agevar='agegrp',
-                 statevar='state',
-                 syndromes=c('ili','resp'))
+  sim1$agegrp <- sample(1:5, n.obs, replace=T)
+  sim1$date   <- sample(seq.Date(from=as.Date('2019-01-01'),
+                                 by='day',
+                                 length.out=500), 
+                        1000,
+                        replace=T)
+
+  sim1$ili  <- rbinom(n=n.obs, size=1, prob=0.05)
+  sim1$resp <- rbinom(n=n.obs, size=1, prob=0.1)
+
+  ts1 <- ts_format(line.list=sim1,
+                   datevar='date',
+                   agevar='agegrp',
+                   statevar='state',
+                   syndromes=c('ili','resp'))
 
   expect_true(is.data.frame(ts1))
 })

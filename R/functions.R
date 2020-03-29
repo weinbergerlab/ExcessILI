@@ -1,33 +1,156 @@
-#Format line list data into time series
+#' Format line list data into time series
+#'
+#' \code{ts_format} DOES SOMETHING
+#'
+#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
+#' function: methods can be defined for it directly or via the
+#' \code{\link{Summary}} group generic. For this to work properly, the
+#' arguments \code{...} should be unnamed, and dispatch is on the first
+#' argument.
+#'
+#' @param line.list Input data to be reformatted. NEEDS DETAILED DESCRIPTION
+#'
+#' @param datevar A string. What variable contains the date?
+#'
+#' @param statevar A string. What variable contains the state?
+#'
+#' @param sub.statevar A string. NEEDS DOCUMENTATION
+#'
+#' @param agevar A string. What variable contains the age group? Use 'none'
+#'   if there is no age grouping in the data
+#'
+#' @param syndromes A character vector. Which variables contain counts of
+#'   syndromic data?
+#'
+#' @param resolution One of \code{c("day", "week", "month")}. What is the data
+#'   binned by?
+#'
+#' @param remove.final A logical scalar. NEEDS DOCUMENTATION.
+#'
+#' @return NEEDS DOCUMENTATION.
+#'
+#' @examples
+#'  n.obs <- 10000
+#'  set.seed(42)
+#'
+#'  simulated_data <-
+#'    as.data.frame(matrix(NA, nrow=n.obs, ncol=5))
+#'
+#'  names(sim1) <- c('state','date','agegrp','ili','resp')
+#'
+#'  sim1$state<- c( rep('CT', times=n.obs*0.3),
+#'                  rep("NY", times=n.obs*0.7) )
+#'
+#'  sim1$agegrp <- sample(1:5, n.obs, replace=T)
+#'  sim1$date   <- sample(seq.Date(from=as.Date('2019-01-01'),
+#'                                 by='day',
+#'                                 length.out=500), 
+#'                        1000,
+#'                        replace=T)
+#'
+#'  sim1$ili  <- rbinom(n=n.obs, size=1, prob=0.05)
+#'  sim1$resp <- rbinom(n=n.obs, size=1, prob=0.1)
+#'
+#'  ts1 <- ts_format(line.list=sim1,
+#'                   datevar='date',
+#'                   agevar='agegrp',
+#'                   statevar='state',
+#'                   syndromes=c('ili','resp'))
+#'
 #' @export
-ts_format<-function(line.list, datevar,statevar,sub.statevar, agevar, syndromes,resolution='day',remove.final=F){
+ts_format <-
+  function(line.list,
+           datevar, statevar, sub.statevar, agevar,
+           syndromes,
+           resolution='day',
+           remove.final=F) {
   
-  ds1<-line.list
+  ds1 <- line.list
   
   # Parse dates into Date objects, and floor to the nearest day
-  ds1[, datevar]<- as.Date(ds1[,datevar])
-  ds1[, datevar]<- lubridate::floor_date(ds1[, datevar], unit=resolution)
+  ds1[, datevar] <- as.Date(ds1[,datevar])
+  ds1[, datevar] <- lubridate::floor_date(ds1[, datevar], unit=resolution)
   
-  ds1$all.visits<-1
+  ds1$all.visits <-1
   
   if(!('sub.statevar' %in% names(ds1))){
-    ds1$sub.statevar<-statevar
-    sub.statevar<-'sub.statevar'
+    ds1$sub.statevar <- statevar
+    sub.statevar <-'sub.statevar'
   }
   
-  ds1.m<-reshape2::melt(ds1[,c(datevar, statevar,sub.statevar, agevar,syndromes,'all.visits' )], id.vars=c(datevar, statevar,sub.statevar, agevar))
-  last.date<- max(ds1.m[,datevar])
+  ds1.m <- reshape2::melt(
+    ds1[,   c(datevar, statevar, sub.statevar, agevar,syndromes,'all.visits')],
+    id.vars=c(datevar, statevar, sub.statevar, agevar)
+  )
+
+  last.date <- max(ds1.m[,datevar])
   
   if(remove.final){
-    ds1.m<-ds1.m[ds1.m[,datevar] < last.date,] #remove last day from the dataset,assuming it is incomplete
+    # remove last day from the dataset,assuming it is incomplete
+    ds1.m <- ds1.m[ ds1.m[,datevar] < last.date,] 
   }
   
-  form1<-as.formula(paste0(paste(agevar,datevar, statevar,sub.statevar,sep='+' ),'~', 'variable'))
-  ds1.c<-reshape2::dcast(ds1.m, form1, fun.aggregate = sum)
+  form1 <-
+    as.formula(
+      paste0(
+        paste(agevar, datevar, statevar, sub.statevar, sep='+'),
+        '~',
+        'variable'
+      )
+    )
+
+  ds1.c <- reshape2::dcast(ds1.m, form1, fun.aggregate = sum)
 
   return(ds1.c)
 }
 
+#' ONE LINER DESCRIPTION
+#'
+#' \code{excessCases} DOES SOMETHING
+#'
+#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
+#' function: methods can be defined for it directly or via the
+#' \code{\link{Summary}} group generic. For this to work properly, the
+#' arguments \code{...} should be unnamed, and dispatch is on the first
+#' argument.
+#'
+#' @param sub.statevar A string. NEEDS DOCUMENTATION
+#' @param statevar A string. What variable contains the state?
+#'
+#' @param agevar A string. What variable contains the age group? Use 'none'
+#'   if there is no age grouping in the data
+#'
+#' @param datevar A string. What variable contains the date?
+#'
+#' @param use.syndromes NEEDS DOCUMENTATION.
+#' @param denom.var NEEDS DOCUMENTATION.
+#' @param flu.import A logical scalar. NEEDS DOCUMENTATION.
+#' @param rsv.import A logical scalar. NEEDS DOCUMENTATION.
+#' @param adj.flu A logical scalar. NEEDS DOCUMENTATION.
+#' @param adj.rsv A logical scalar. NEEDS DOCUMENTATION.
+#' @param flu.var A string. NEEDS DOCUMENTATION.
+#' @param rsv.var A string. NEEDS DOCUMENTATION.
+#' @param time.res One of \code{c("day", "week", "month")}. What is the data
+#'   binned by?
+#' @param extrapolation.date NEEDS DOCUMENTATION.
+#'
+#' @return NEEDS DOCUMENTATION.
+#'
+#' @examples
+#'  ili.data <- ilinet(region = c("state"))
+#'  ili.data$state <- state.abb[match(ili.data$region, state.name)]
+#'
+#'  ili.data <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
+#'  ili.data <- ili.data[ili.data$state %in% c("CA", "NY", "WA", "NJ", "CT"), ]
+#'
+#'  excess_cases <-
+#'    excessCases(ds = ili.data,
+#'                datevar = "week_start",
+#'                agevar = "none",
+#'                statevar = "state",
+#'                denom.var = "total_patients",
+#'                use.syndromes = c("ilitotal"),
+#'                time.res = "week")
 #' @export
 excessCases <-
   function(ds,
@@ -44,18 +167,20 @@ excessCases <-
            flu.var='flu.var',
            rsv.var='rsv.var',
            time.res='day',
-           extrapolation.date){
-      if( length(unique(ds[,statevar]))>5 & rsv.import==T) stop('Maximum of 5 states can be used when rsv.import=T')
+           extrapolation.date) {
+
+      if( length(unique(ds[,statevar])) > 5 && identical(rsv.import, T))
+        stop('Maximum of 5 states can be used when rsv.import=T')
       
-      #If import the RSV or flu data, automatically adjust for it in model  data
-      if(flu.import==T){
-        adj.flu=T
-        flu.var='flu.var'
+      # If import the RSV or flu data, automatically adjust for it in model  data
+      if(identical(flu.import, T)){
+        adj.flu <- T
+        flu.var <- 'flu.var'
       }
   
-      if(rsv.import==T){
-        adj.rsv=T
-        rsv.var<-'rsv.var'
+      if(identical(rsv.import, T)){
+        adj.rsv <- T
+        rsv.var <-'rsv.var'
       }
   
       ds<-as.data.frame(ds)
@@ -157,6 +282,20 @@ excessCases <-
     return(all.glm.res)
 }
 
+#' ONE LINER DESCRIPTION
+#'
+#' \code{dashboardPlot} DOES SOMETHING
+#'
+#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
+#' function: methods can be defined for it directly or via the
+#' \code{\link{Summary}} group generic. For this to work properly, the
+#' arguments \code{...} should be unnamed, and dispatch is on the first
+#' argument.
+#'
+#' @param all.glm.res NEEDS DOCUMENTATION
+#'
+#' @return NEEDS DOCUMENTATION.
+#'
 #' @export
 dashboardPlot <- function(all.glm.res){ 
   ds <- all.glm.res
@@ -296,6 +435,22 @@ dashboardPlot <- function(all.glm.res){
   shiny::shinyApp(ui, server)
 }
 
+#' ONE LINER DESCRIPTION
+#'
+#' \code{excessExtract} DOES SOMETHING
+#'
+#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
+#' function: methods can be defined for it directly or via the
+#' \code{\link{Summary}} group generic. For this to work properly, the
+#' arguments \code{...} should be unnamed, and dispatch is on the first
+#' argument.
+#'
+#' @param ds NEEDS DOCUMENTATION
+#' @param syndrome NEEDS DOCUMENTATION
+#' @param extract.quantity NEEDS DOCUMENTATION
+#'
+#' @return NEEDS DOCUMENTATION.
+#'
 #' @export
 excessExtract <- function(ds, syndrome, extract.quantity) {
     out.ds <- sapply(ds[[syndrome]], function(x) sapply(x, "[[", extract.quantity), 

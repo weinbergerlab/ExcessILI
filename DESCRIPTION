@@ -23,3 +23,5 @@ Imports:
     tidyr,
     reshape2,
     MASS
+RoxygenNote: 7.1.0
+Encoding: UTF-8
