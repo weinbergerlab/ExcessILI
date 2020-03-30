@@ -1,31 +1,32 @@
 #' Format line list data into time series
 #'
-#' \code{ts_format} DOES SOMETHING
+#' \code{ts_format} Formats line list data of cases into time series  
+#' This function takes a line list of case data and formats it into weekly 
+#' or daily time series, which can be used to fit a seasonal baseline
 #'
-#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-#' function: methods can be defined for it directly or via the
-#' \code{\link{Summary}} group generic. For this to work properly, the
-#' arguments \code{...} should be unnamed, and dispatch is on the first
-#' argument.
-#'
-#' @param line.list Input data to be reformatted. NEEDS DETAILED DESCRIPTION
-#'
+#' @param line.list A dataframe containing one line for each case (e.g., ED visit, hospitalization). 
+#' At a minimum, each row should have the date of the visit (YYYY-MM-DD), the state code (e.g. "NY"), and a 0/1 variable for each syndrome of 
+#' interest (e.g. influenza-like illness, fever, cough). All visits
+#' should be included in the dataframe, even if the case did not have any of the syndromes of interest. For instance,
+#' for emergency department data, every ED visit should have a line represented in the dataframe
+#' 
 #' @param datevar A string. What variable contains the date?
 #'
-#' @param statevar A string. What variable contains the state?
+#' @param statevar A string. What variable contains the 2-digit state code (e.g., "NY")?
 #'
-#' @param sub.statevar A string. NEEDS DOCUMENTATION
+#' @param sub.statevar A string. What variable contains the local geography identifier (e.g., county, borough)
 #'
 #' @param agevar A string. What variable contains the age group? Use 'none'
 #'   if there is no age grouping in the data
 #'
 #' @param syndromes A character vector. Which variables contain counts of
-#'   syndromic data?
+#'   syndromic data? (e.g., c('ili', 'respiratory'))
 #'
 #' @param resolution One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
 #'
-#' @param remove.final A logical scalar. NEEDS DOCUMENTATION.
+#' @param remove.final A logical scalar. Remove the final date in the dataset? This is someties 
+#' helpful if the data from the last date.
 #'
 #' @return NEEDS DOCUMENTATION.
 #'
