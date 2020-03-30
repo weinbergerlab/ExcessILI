@@ -98,7 +98,7 @@ excess_cases1 <-
               rsv.import       = F,
               flu.import    = F,
               extrapolation.date = "2020-03-01",
-              time.res='week')
+              time.res='day')
 ```
 
 ## Plot the results in an interactive dashboard
@@ -113,12 +113,54 @@ unexplained.cases <-
   excessExtract(ds = excess_cases1,
                 syndrome = "ili",
                 extract.quantity = "unexplained.cases")
+unexplained.cases[unexplained.cases<=0]<-0
+
+obs <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ili",
+                extract.quantity = "y")
+```
+
+
+```{r}
+
 ```
 
 ```{r}
 matplot(unexplained.cases[,,5], type='l', bty='l')
+
+
 ```
 
+
+```{r}
+plot(unexplained.cases[,'Citywide',3])
+```
+
+## Smooth spline of excess
+```{r}
+
+
+dates<-unique(combo1$ddate)
+select.date<-as.Date('2020-02-15')
+date.select.index<-which(dates>=select.date)
+dates.selected<-dates[date.select.index]
+
+cumsum.excess<-cumsum(unexplained.cases[date.select.index,'Citywide',5])
+  smooth.mod<-smooth.spline(log(cumsum.excess+0.5), cv=T)
+  fitted<-predict(smooth.mod)$y
+  derivs.all<-predict(smooth.mod, deriv=1)$y
+  derivs2.all<-predict(smooth.mod, deriv=2)$y
+
+  plot(dates.selected,obs[date.select.index,'Citywide',3]+0.5, ylim=c(0,max(obs) ))
+  points(dates.selected,exp(fitted)-0.5, type='l', col='blue')
+  
+  plot(dates.selected,derivs.all)
+  abline(h=0)
+  
+    plot(dates.selected,derivs2.all)
+  abline(h=0)
+```
 
 
 

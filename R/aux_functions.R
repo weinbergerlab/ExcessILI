@@ -64,8 +64,8 @@ nrevss_flu_import <- function() {
     clin3$total_specimens <- as.numeric(clin3$total_specimens)
     clin3$flu_pct_adj<-(clin3$total_a+clin3$total_b+0.5)/(clin3$total_specimens+0.5)
     clin3$fluN<-(clin3$total_a+clin3$total_b+0.5)
-    #clin3$flu.var <- clin3$fluN
-    clin3$flu.var <- clin3$flu_pct_adj
+    clin3$flu.var <- clin3$fluN
+    #clin3$flu.var <- clin3$flu_pct_adj
     
     return(clin3)
 }
