@@ -2,25 +2,12 @@
 % Please edit documentation in R/functions.R
 \name{excessCases}
 \alias{excessCases}
-\title{ONE LINER DESCRIPTION}
+\title{Fits a baseline to the data}
 \usage{
-excessCases(
-  ds,
-  sub.statevar = "none",
-  statevar = "state",
-  agevar = "none",
-  datevar,
-  use.syndromes,
-  denom.var,
-  flu.import = T,
-  rsv.import = T,
-  adj.flu = F,
-  adj.rsv = F,
-  flu.var = "flu.var",
-  rsv.var = "rsv.var",
-  time.res = "day",
-  extrapolation.date
-)
+excessCases(ds, sub.statevar = "none", statevar = "state",
+  agevar = "none", datevar, use.syndromes, denom.var, flu.import = T,
+  rsv.import = T, adj.flu = F, adj.rsv = F, flu.var = "flu.var",
+  rsv.var = "rsv.var", time.res = "day", extrapolation.date)
 }
 \arguments{
 \item{sub.statevar}{A string. NEEDS DOCUMENTATION}
@@ -57,7 +44,10 @@ binned by?}
 NEEDS DOCUMENTATION.
 }
 \description{
-\code{excessCases} DOES SOMETHING
+\code{excessCases} This function takes a time series of cases (daily or weekly) and fits a harmonic baseline
+There is also an option to import influenza data from the CDC's NREVSS database and match it by state,
+or import Google search queries for RSV for the respective state. Dummy variables adjust for variations in average
+incidence between years, and interactions between RSV or flu allow these effects to vary over time.
 }
 \details{
 EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic

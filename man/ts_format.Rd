@@ -4,49 +4,43 @@
 \alias{ts_format}
 \title{Format line list data into time series}
 \usage{
-ts_format(
-  line.list,
-  datevar,
-  statevar,
-  sub.statevar,
-  agevar,
-  syndromes,
-  resolution = "day",
-  remove.final = F
-)
+ts_format(line.list, datevar, statevar, sub.statevar, agevar, syndromes,
+  resolution = "day", remove.final = F)
 }
 \arguments{
-\item{line.list}{Input data to be reformatted. NEEDS DETAILED DESCRIPTION}
+\item{line.list}{A dataframe containing one line for each case (e.g., ED visit, hospitalization). 
+At a minimum, each row should have the date of the visit (YYYY-MM-DD), the state code (e.g. "NY"), and a 0/1 variable for each syndrome of 
+interest (e.g. influenza-like illness, fever, cough). All visits
+should be included in the dataframe, even if the case did not have any of the syndromes of interest. For instance,
+for emergency department data, every ED visit should have a line represented in the dataframe}
 
 \item{datevar}{A string. What variable contains the date?}
 
-\item{statevar}{A string. What variable contains the state?}
+\item{statevar}{A string. What variable contains the 2-digit state code (e.g., "NY")?}
 
-\item{sub.statevar}{A string. NEEDS DOCUMENTATION}
+\item{sub.statevar}{A string. What variable contains the local geography identifier (e.g., county, borough)}
 
 \item{agevar}{A string. What variable contains the age group? Use 'none'
 if there is no age grouping in the data}
 
 \item{syndromes}{A character vector. Which variables contain counts of
-syndromic data?}
+syndromic data? (e.g., c('ili', 'respiratory'))}
 
 \item{resolution}{One of \code{c("day", "week", "month")}. What is the data
 binned by?}
 
-\item{remove.final}{A logical scalar. NEEDS DOCUMENTATION.}
+\item{remove.final}{A logical scalar. Remove the final date in the dataset? This is someties 
+helpful if the data from the last date.}
 }
 \value{
-NEEDS DOCUMENTATION.
+A dataframe in the "long" format, with a row for each date (week or day), and location (e.g. state, county),
+and age category. There is a column for date, age category, location, and the number of counts for each of 
+the selected syndromes. There is also a column that tallies all visits regardless of cause
 }
 \description{
-\code{ts_format} DOES SOMETHING
-}
-\details{
-EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-function: methods can be defined for it directly or via the
-\code{\link{Summary}} group generic. For this to work properly, the
-arguments \code{...} should be unnamed, and dispatch is on the first
-argument.
+\code{ts_format} Formats line list data of cases into time series  
+This function takes a line list of case data and formats it into weekly 
+or daily time series, which can be used to fit a seasonal baseline
 }
 \examples{
  n.obs <- 10000
