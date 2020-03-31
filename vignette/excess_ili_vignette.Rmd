@@ -34,7 +34,7 @@ The goal for this package is to facilitate the formatting of line list data from
 n.obs<-10000
 set.seed(123)
 sim1<-as.data.frame(matrix(NA,nrow=n.obs, ncol=5))
-names(sim1)<-c('state','date','agegrp','ili','resp')
+names(sim1)<-c('state','adate','agegrp','ili','resp')
 sim1$state<- c(rep('CT', times=n.obs*0.3), rep("NY", times=n.obs*0.7))
 sim1$agegrp<-sample(1:5, n.obs, replace=T)
 sim1$adate<-sample(seq.Date(from=as.Date('2019-01-01'),by='day', length.out=500), 1000, replace=T)
@@ -95,8 +95,7 @@ excess_cases1 <-
               statevar      = "state",
               denom.var     = "total.visits",
               use.syndromes = c("ili", "resp"),
-              rsv.import       = F,
-              flu.import    = F,
+              adj.flu       ='auto',
               extrapolation.date = "2020-03-01",
               time.res='week')
 ```

@@ -64,7 +64,7 @@
 #' @export
 ts_format <-
   function(line.list,
-           datevar, statevar, sub.statevar, agevar,
+           datevar, statevar, sub.statevar='none', agevar='none',
            syndromes,
            resolution='day',
            remove.final=F) {
@@ -90,7 +90,7 @@ ts_format <-
   ds1$all.visits <-1
   
   if(!('sub.statevar' %in% names(ds1))){
-    ds1$sub.statevar <- statevar
+    ds1$sub.statevar <- ds1[,statevar]
     sub.statevar <-'sub.statevar'
   }
   
@@ -155,15 +155,12 @@ ts_format <-
 
 #' @param rsv.import A logical scalar. Import weekly search volume for 'RSV' for the states in the input dataframe? This option can only be used if there are 5 or fewer states on the input dataset. This variable is included in the regression model when fitting the seasonal baseline.
 
-#' @param adj.flu A logical scalar. Adjust for influenza when fitting the seasonal baseline? This is automatically set to TRUE
-#' if flu.import is TRUE
+#' @param adj.flu How should influenza be adjusted for when fittig the seasonal baseline? Possible values are 'none' for no adjustment (default); 'auto': automatically downloads NREVSS data from CDC and matches by state and week; 
+#' or specify the name of a variable in the the input dataframe that contains a variable for influenza. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
 
-#' @param adj.rsv A logical scalar. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
-#' rsv.import is TRUE
-
-#' @param flu.var A string. If an influenza variabke is included on the input dataset, provide the variable name here.
-
-#' @param rsv.var A string. If an RSV variable is included on the input dataset, provide the variable name here.
+#' @param adj.rsv How should RSv be adjusted for when fitting the seasonal baseline? A string.  Possible values are 'none' for no adjustment (default); 'auto': automatically downloads 
+#' the weekly volume of search queries for 'RSV' for the last 5 years from Google trends and matches by state. Note that a maximum of 5 states can be included on the input dataset 
+#' when using the 'auto option'; Or specify the name of a variable in the the input dataframe that contains a variable for influenza. 
 
 #' @param time.res One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
@@ -205,14 +202,10 @@ excessCases <-
            datevar,
            use.syndromes,
            denom.var,
-           flu.import=T,
-           rsv.import=T,
-           adj.flu=F,
-           adj.rsv=F,
-           flu.var='flu.var',
-           rsv.var='rsv.var',
+           adj.flu='none',
+           adj.rsv='none',
            time.res='day',
-           extrapolation.date) {
+           extrapolation.date='2020-03-01') {
 
   is.string <- assertthat::is.string
 
@@ -222,31 +215,30 @@ excessCases <-
   assertthat::assert_that(is.string(datevar))
   assertthat::assert_that(is.character(use.syndromes))
   assertthat::assert_that(is.string(denom.var))
-  assertthat::assert_that(is.logical(flu.import))
-  assertthat::assert_that(is.logical(rsv.import))
-  assertthat::assert_that(is.logical(adj.flu))
-  assertthat::assert_that(is.logical(adj.rsv))
-  assertthat::assert_that(is.string(flu.var))
-  assertthat::assert_that(is.string(rsv.var))
+  assertthat::assert_that(is.string(adj.flu))
+  assertthat::assert_that(is.string(adj.rsv))
   assertthat::assert_that(is.string(time.res) &&
                           time.res %in% c('day', 'week', 'month'))
   # Need a better test here
   # assertthat::assert_that(!is.null(extrapolation.date)) 
 
+  flu.var='flu.var'
+  flu.import <- FALSE
+  
+  if( adj.flu == 'auto'){
+    flu.import <- TRUE
+  }
+  rsv.var <- 'rsv.var'
+  rsv.import <- FALSE
+  
+  if( adj.rsv == 'auto'){
+    rsv.import <- TRUE
+  }
+
+  
   if( length(unique(ds[,statevar])) > 5 && identical(rsv.import, T))
     stop('Maximum of 5 states can be used when rsv.import=T')
   
-  # If import the RSV or flu data, automatically adjust for it in model  data
-  if(identical(flu.import, T)){
-    adj.flu <- T
-    flu.var <- 'flu.var'
-  }
-
-  if(identical(rsv.import, T)){
-    adj.rsv <- T
-    rsv.var <-'rsv.var'
-  }
-
   ds<-as.data.frame(ds)
   ds[,datevar]<-as.Date(ds[,datevar])
   mmwr.date<-MMWRweek::MMWRweek(ds[,datevar])
@@ -283,14 +275,22 @@ excessCases <-
                   all.x=T)
   }
 
-  if(adj.flu==F){
+  if(adj.flu=='none'){
     ds1.df$flu.var<-1
   }
 
-  if(adj.rsv==F){
+  if(adj.rsv=='none'){
     ds1.df$rsv.var<-1
   }
-
+  
+  if( !(adj.rsv %in% c('auto','none')) ){
+    ds1.df$rsv.var <- ds1.df[,adj.rsv]
+  } 
+  
+  if( !(adj.flu %in% c('auto','none')) ){
+    ds1.df$flu.var <- ds1.df[,adj.flu]
+  } 
+  
   if(!exists("denom.var")){
     ds1.df$denom <-1
     denom.var <-'denom'
@@ -302,8 +302,8 @@ excessCases <-
       sub.statevar,
       use.syndromes,
       denom.var,
-      'flu.var',
-      'rsv.var')
+      flu.var,
+      rsv.var)
 
   if (any( !(cols_of_interest %in% names(ds1.df)) ))
     stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
@@ -398,13 +398,13 @@ dashboardPlot <- function(all.glm.res){
       
       data_to_pluck <- ds[[input$set.syndrome]]
 
-      ili2.resid    <- sapply(data_to_pluck, plucker("resid1"))
-      ili2.pred     <- sapply(data_to_pluck, plucker("pred"))
-      ili2.pred.lcl <- sapply(data_to_pluck, plucker("lpi"))
-      ili2.pred.ucl <- sapply(data_to_pluck, plucker("upi"))
-      obs.ili       <- sapply(data_to_pluck, plucker("y"))
-      denom         <- sapply(data_to_pluck, plucker("denom"))
-
+      ili2.resid    <- sapply(data_to_pluck, plucker("resid1"), simplify='array')
+      ili2.pred     <- sapply(data_to_pluck, plucker("pred"), simplify='array')
+      ili2.pred.lcl <- sapply(data_to_pluck, plucker("lpi"), simplify='array')
+      ili2.pred.ucl <- sapply(data_to_pluck, plucker("upi"), simplify='array')
+      obs.ili       <- sapply(data_to_pluck, plucker("y"), simplify='array')
+      denom         <- sapply(data_to_pluck, plucker("denom"), simplify='array')
+      
       dimnames(ili2.resid)[[2]]    <- counties.to.test
       dimnames(ili2.pred)[[2]]     <- counties.to.test
       dimnames(ili2.pred.lcl)[[2]] <- counties.to.test
@@ -583,14 +583,14 @@ dashboardPlot <- function(all.glm.res){
 #' from excessCases
 #'
 #' EXTENDED DESCRIPTION This function extracts specific estimates
-#' produced in excessCases and aves them in a multidimensional
+#' produced in excessCases and saves them in a multidimensional
 #' array.
 #'
-#' @param ds An onject created by the function excessCases
+#' @param ds An object created by the function excessCases
 #' @param syndrome Character. For which syndrome should results be extracted? The name for this variable should match a syndrom provided to excessCases
 #' @param extract.quantity Which element of the output (e.g., 'lpi') from the output of excessCases do you want to extract. See the values in the help for excessCases to see the options.
 #'
-#' @return a multideimensional array with dimensions for time, age group, and geography (state, and sub-state)
+#' @return a multidimensional array with dimensions for time, age group, and geography (state, and sub-state)
 #'
 #' @export
 excessExtract <- function(ds, syndrome, extract.quantity) {

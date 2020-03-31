@@ -7,14 +7,14 @@
 excessExtract(ds, syndrome, extract.quantity)
 }
 \arguments{
-\item{ds}{An onject created by the function excessCases}
+\item{ds}{An object created by the function excessCases}
 
 \item{syndrome}{Character. For which syndrome should results be extracted? The name for this variable should match a syndrom provided to excessCases}
 
 \item{extract.quantity}{Which element of the output (e.g., 'lpi') from the output of excessCases do you want to extract. See the values in the help for excessCases to see the options.}
 }
 \value{
-a multideimensional array with dimensions for time, age group, and geography (state, and sub-state)
+a multidimensional array with dimensions for time, age group, and geography (state, and sub-state)
 }
 \description{
 \code{excessExtract} Helper function to format the results
@@ -22,6 +22,6 @@ from excessCases
 }
 \details{
 EXTENDED DESCRIPTION This function extracts specific estimates
-produced in excessCases and aves them in a multidimensional
+produced in excessCases and saves them in a multidimensional
 array.
 }

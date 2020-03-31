@@ -28,8 +28,7 @@ test_that("NYC data is processed correctly", {
                 statevar      = "state",
                 denom.var     = "total.visits",
                 use.syndromes = c("ili", "resp"),
-                adj.flu       = F,
-                flu.import    = F)
+                adj.flu       = 'none')
 
   dashboardPlot(excess_cases1)
 
