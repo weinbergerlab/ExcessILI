@@ -133,27 +133,53 @@ ts_format <-
 #' arguments \code{...} should be unnamed, and dispatch is on the first
 #' argument.
 #'
-#' @param sub.statevar A string. NEEDS DOCUMENTATION
-#' @param statevar A string. What variable contains the state?
+#' @param ds A dataframe, with a format similar to the one produced by the ts_format() function. There should be a row for each date (week or day), and location (e.g. state, county),
+#' and age category. There must be a column for date (YYYY-MM-DD), age category, location, and the number of counts for each of 
+#' the selected syndromes. There should also be a column with a denominator (e.g., total number of ED visits). If there is no denominator, create a vector of 1s.
+#'  
+#' @param sub.statevar A string. Which variable in the input data frame contains the local geography identifier (e.g., county, borough)
+#' 
+#' @param statevar A string. Which variable in the input data frame contains the state (2-digit state; e.g. 'NY')?
 #'
-#' @param agevar A string. What variable contains the age group? Use 'none'
+#' @param agevar A string. Which variable in the input data frame contains the age group? Use 'none'
 #'   if there is no age grouping in the data
 #'
-#' @param datevar A string. What variable contains the date?
+#' @param datevar A string. Which variables in the input data frame contains the date?
 #'
-#' @param use.syndromes NEEDS DOCUMENTATION.
-#' @param denom.var NEEDS DOCUMENTATION.
-#' @param flu.import A logical scalar. NEEDS DOCUMENTATION.
-#' @param rsv.import A logical scalar. NEEDS DOCUMENTATION.
-#' @param adj.flu A logical scalar. NEEDS DOCUMENTATION.
-#' @param adj.rsv A logical scalar. NEEDS DOCUMENTATION.
-#' @param flu.var A string. NEEDS DOCUMENTATION.
-#' @param rsv.var A string. NEEDS DOCUMENTATION.
+#' @param use.syndromes A vector with the variable names for syndromes to be tested (e.g., c('ILI','respiratory') ).
+
+#' @param denom.var Which variable on the input dataframe should be used as the denominator. For instance, all ED visits. If there is no denominator, use a vector of 1s
+
+#' @param flu.import A logical scalar. Import the latest influenza testing data from the CDC NREVSS system? If TRUE, the data will be downloaded and merge with the input 
+#' dataframe by state and week. the flu variable will be included in the regressionwhen fitting the baseline
+
+#' @param rsv.import A logical scalar. Import weekly search volume for 'RSV' for the states in the input dataframe? This option can only be used if there are 5 or fewer states on the input dataset. This variable is included in the regression model when fitting the seasonal baseline.
+
+#' @param adj.flu A logical scalar. Adjust for influenza when fitting the seasonal baseline? This is automatically set to TRUE
+#' if flu.import is TRUE
+
+#' @param adj.rsv A logical scalar. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
+#' rsv.import is TRUE
+
+#' @param flu.var A string. If an influenza variabke is included on the input dataset, provide the variable name here.
+
+#' @param rsv.var A string. If an RSV variable is included on the input dataset, provide the variable name here.
+
 #' @param time.res One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
-#' @param extrapolation.date NEEDS DOCUMENTATION.
+
+#' @param extrapolation.date The model is fit up to this date, and then extrapolated for all future dates.
 #'
-#' @return NEEDS DOCUMENTATION.
+#' @return A list of lists with an entry for each syndrome, and sub-lists by age group and geography 
+#' date: vector of dates used in the model. Use the helper function excessExtract to pull out specific components and organize them into an array
+#' y: array of observed values for the syndromes
+#' resid1 :Observed/model fitted values
+#' upi: upper 95% prediction interval of the fitted value
+#' lpi: lower 95% prediction interval of the fitted value
+#' sqrt.rsv: RSV variale used in the model (if any)
+#' log.flu: flu variable used in the model (if any)
+#' unexplained.cases: observed-expected(fitted)
+#' denom: denominator used in the model
 #'
 #' @examples
 #'  ili.data <- ilinet(region = c("state"))
