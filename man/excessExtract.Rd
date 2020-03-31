@@ -7,22 +7,21 @@
 excessExtract(ds, syndrome, extract.quantity)
 }
 \arguments{
-\item{ds}{NEEDS DOCUMENTATION}
+\item{ds}{An onject created by the function excessCases}
 
-\item{syndrome}{NEEDS DOCUMENTATION}
+\item{syndrome}{Character. For which syndrome should results be extracted? The name for this variable should match a syndrom provided to excessCases}
 
-\item{extract.quantity}{NEEDS DOCUMENTATION}
+\item{extract.quantity}{Which element of the output (e.g., 'lpi') from the output of excessCases do you want to extract. See the values in the help for excessCases to see the options.}
 }
 \value{
-NEEDS DOCUMENTATION.
+a multideimensional array with dimensions for time, age group, and geography (state, and sub-state)
 }
 \description{
-\code{excessExtract} DOES SOMETHING
+\code{excessExtract} Helper function to format the results
+from excessCases
 }
 \details{
-EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-function: methods can be defined for it directly or via the
-\code{\link{Summary}} group generic. For this to work properly, the
-arguments \code{...} should be unnamed, and dispatch is on the first
-argument.
+EXTENDED DESCRIPTION This function extracts specific estimates
+produced in excessCases and aves them in a multidimensional
+array.
 }

@@ -2,23 +2,20 @@
 % Please edit documentation in R/functions.R
 \name{dashboardPlot}
 \alias{dashboardPlot}
-\title{ONE LINER DESCRIPTION}
+\title{Create interactive Shiny app to explore results}
 \usage{
 dashboardPlot(all.glm.res)
 }
 \arguments{
-\item{all.glm.res}{NEEDS DOCUMENTATION}
+\item{all.glm.res}{Provide the object created in the function excessCases}
 }
 \value{
-NEEDS DOCUMENTATION.
+Launches an interactive shiny app
 }
 \description{
-\code{dashboardPlot} DOES SOMETHING
-}
-\details{
-EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-function: methods can be defined for it directly or via the
-\code{\link{Summary}} group generic. For this to work properly, the
-arguments \code{...} should be unnamed, and dispatch is on the first
-argument.
+\code{dashboardPlot} Creates an interactive Shiny plot
+to explore results generated in the function excessCases. 
+Drop down menus allow for viewing different syndromes, age groups,
+and geographies, and for looking at plots of raw counts,
+proportions, or Observed/Expected
 }

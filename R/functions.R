@@ -364,19 +364,18 @@ excessCases <-
   return(all.glm.results)
 }
 
-#' ONE LINER DESCRIPTION
+#' Create interactive Shiny app to explore results
 #'
-#' \code{dashboardPlot} DOES SOMETHING
+#' \code{dashboardPlot} Creates an interactive Shiny plot
+#' to explore results generated in the function excessCases. 
+#' Drop down menus allow for viewing different syndromes, age groups,
+#' and geographies, and for looking at plots of raw counts,
+#' proportions, or Observed/Expected
 #'
-#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-#' function: methods can be defined for it directly or via the
-#' \code{\link{Summary}} group generic. For this to work properly, the
-#' arguments \code{...} should be unnamed, and dispatch is on the first
-#' argument.
+
+#' @param all.glm.res Provide the object created in the function excessCases
 #'
-#' @param all.glm.res NEEDS DOCUMENTATION
-#'
-#' @return NEEDS DOCUMENTATION.
+#' @return Launches an interactive shiny app
 #'
 #' @export
 dashboardPlot <- function(all.glm.res){ 
@@ -580,19 +579,18 @@ dashboardPlot <- function(all.glm.res){
 
 #' ONE LINER DESCRIPTION
 #'
-#' \code{excessExtract} DOES SOMETHING
+#' \code{excessExtract} Helper function to format the results
+#' from excessCases
 #'
-#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-#' function: methods can be defined for it directly or via the
-#' \code{\link{Summary}} group generic. For this to work properly, the
-#' arguments \code{...} should be unnamed, and dispatch is on the first
-#' argument.
+#' EXTENDED DESCRIPTION This function extracts specific estimates
+#' produced in excessCases and aves them in a multidimensional
+#' array.
 #'
-#' @param ds NEEDS DOCUMENTATION
-#' @param syndrome NEEDS DOCUMENTATION
-#' @param extract.quantity NEEDS DOCUMENTATION
+#' @param ds An onject created by the function excessCases
+#' @param syndrome Character. For which syndrome should results be extracted? The name for this variable should match a syndrom provided to excessCases
+#' @param extract.quantity Which element of the output (e.g., 'lpi') from the output of excessCases do you want to extract. See the values in the help for excessCases to see the options.
 #'
-#' @return NEEDS DOCUMENTATION.
+#' @return a multideimensional array with dimensions for time, age group, and geography (state, and sub-state)
 #'
 #' @export
 excessExtract <- function(ds, syndrome, extract.quantity) {
