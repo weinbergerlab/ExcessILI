@@ -28,7 +28,10 @@
 #' @param remove.final A logical scalar. Remove the final date in the dataset? This is someties 
 #' helpful if the data from the last date.
 #'
-#' @return NEEDS DOCUMENTATION.
+#' @return A dataframe in the "long" format, with a row for each date (week or day), and location (e.g. state, county),
+#' and age category. There is a column for date, age category, location, and the number of counts for each of 
+#' the selected syndromes. There is also a column that tallies all visits regardless of cause
+#' 
 #'
 #' @examples
 #'  n.obs <- 10000
