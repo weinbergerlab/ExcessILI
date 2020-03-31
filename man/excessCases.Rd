@@ -84,7 +84,8 @@ A list of lists with an entry for each syndrome, and sub-lists by
   age group and geography:
 
 \code{date}: vector of dates used in the model. Use the helper function
-  excessExtract to pull out specific components and organize them into an
+  \code{\link{excessExtract}} to pull out specific components and organize
+  them into an array
 
 \code{y}: array of observed values for the syndromes
 
@@ -111,6 +112,7 @@ A list of lists with an entry for each syndrome, and sub-lists by
   RSV or flu allow these effects to vary over time.
 }
 \examples{
+ library(cdcfluview)
  ili.data <- ilinet(region = c("state"))
  ili.data$state <- state.abb[match(ili.data$region, state.name)]
 

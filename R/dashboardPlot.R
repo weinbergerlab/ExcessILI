@@ -1,9 +1,9 @@
 #' Create interactive Shiny app to explore results
 #'
 #' \code{dashboardPlot} Creates an interactive Shiny plot to explore results
-#'   generated in the function \code{\link{excessCases}}. Drop down menus allow
-#'   for viewing different syndromes, age groups, and geographies, and for
-#'   looking at plots of raw counts, proportions, or Observed/Expected.
+#'   generated in the function \code{\link{excessCases}}. Drop down menus
+#'   allow for viewing different syndromes, age groups, and geographies, and
+#'   for looking at plots of raw counts, proportions, or Observed/Expected.
 #'
 #' @param all.glm.res Provide the object returned by the function
 #'   \code{\link{excessCases}}

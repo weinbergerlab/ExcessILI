@@ -18,7 +18,7 @@ Returns an object representing the shinyapp. Depending on the
 }
 \description{
 \code{dashboardPlot} Creates an interactive Shiny plot to explore results
-  generated in the function \code{\link{excessCases}}. Drop down menus allow
-  for viewing different syndromes, age groups, and geographies, and for
-  looking at plots of raw counts, proportions, or Observed/Expected.
+  generated in the function \code{\link{excessCases}}. Drop down menus
+  allow for viewing different syndromes, age groups, and geographies, and
+  for looking at plots of raw counts, proportions, or Observed/Expected.
 }

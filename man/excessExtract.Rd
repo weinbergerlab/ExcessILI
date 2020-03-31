@@ -7,20 +7,21 @@
 excessExtract(ds, syndrome, extract.quantity)
 }
 \arguments{
-\item{ds}{An object created by the function excessCases}
+\item{ds}{An object created by the function \code{\link{excessCases}}}
 
 \item{syndrome}{Character. For which syndrome should results be extracted?
-The name for this variable should match a syndrom provided to excessCases}
+The name for this variable should match a syndrome provided to
+\code{\link{excessCases}}}
 
 \item{extract.quantity}{Which element of the output (e.g., 'lpi') from the
 output of excessCases do you want to extract. See the values in the help
-for excessCases to see the options.}
+for \code{\link{excessCases}} to see the options.}
 }
 \value{
 a multidimensional array with dimensions for time, age group, and
   geography (state, and sub-state)
 }
 \description{
-This function extracts specific estimates produced in excessCases and saves
-them in a multidimensional array.
+This function extracts specific estimates produced in
+\code{\link{excessCases}} and saves them in a multidimensional array.
 }

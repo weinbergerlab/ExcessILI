@@ -46,22 +46,21 @@
 #'  simulated_data <-
 #'    as.data.frame(matrix(NA, nrow=n.obs, ncol=5))
 #'
-#'  names(sim1) <- c('state','date','agegrp','ili','resp')
+#'  names(simulated_data) <- c('state','date','agegrp','ili','resp')
 #'
-#'  sim1$state<- c( rep('CT', times=n.obs*0.3),
+#'  simulated_data$state<- c( rep('CT', times=n.obs*0.3),
 #'                  rep("NY", times=n.obs*0.7) )
 #'
-#'  sim1$agegrp <- sample(1:5, n.obs, replace=T)
-#'  sim1$date   <- sample(seq.Date(from=as.Date('2019-01-01'),
-#'                                 by='day',
-#'                                 length.out=500), 
-#'                        1000,
-#'                        replace=T)
+#'  simulated_data$agegrp <- sample(1:5, n.obs, replace=T)
+#'  simulated_data$date   <- 
+#'    sample(seq.Date(from=as.Date('2019-01-01'), by='day', length.out=500),                                      
+#'           1000,                                                 
+#'           replace=T)                                            
 #'
-#'  sim1$ili  <- rbinom(n=n.obs, size=1, prob=0.05)
-#'  sim1$resp <- rbinom(n=n.obs, size=1, prob=0.1)
+#'  simulated_data$ili  <- rbinom(n=n.obs, size=1, prob=0.05)
+#'  simulated_data$resp <- rbinom(n=n.obs, size=1, prob=0.1)
 #'
-#'  ts1 <- ts_format(line.list=sim1,
+#'  ts1 <- ts_format(line.list=simulated_data,
 #'                   datevar='date',
 #'                   agevar='agegrp',
 #'                   statevar='state',

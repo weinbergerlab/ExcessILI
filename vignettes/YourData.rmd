@@ -1,0 +1,145 @@
+---
+title: "Using ExcessILI with arbritrary data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: "Dan Weinberger"
+date: "3/25/2020"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ExcessILI)
+library(cdcfluview)
+```
+
+## Overview
+
+The goal for this package is to facilitate the formatting of line list data
+from syndromic surveillance datasets into time series and then the analysis of
+these data to detect increases above the seasonal baseline. For US data, there
+is an option to automatically adjust the data for state-specific flu activity
+(using data from [NREVSS](https://www.cdc.gov/surveillance/nrevss/index.html)
+and/or state-specific RSV activity (based on Google search volume). The user
+can either start with line list data or formatted time series data
+
+## Preparing line list data for analysis
+
+```{r, simulate, echo=F}
+n.obs<-10000
+set.seed(123)
+
+sim1       <- as.data.frame(matrix(NA,nrow=n.obs, ncol=5))
+names(sim1)<- c('state','adate','agegrp','ili','resp')
+
+sim1$state  <- c(rep('CT', times=n.obs*0.3), rep("NY", times=n.obs*0.7))
+sim1$agegrp <- sample(1:5, n.obs, replace=T)
+sim1$adate  <- sample(seq.Date(from=as.Date('2019-01-01'),
+                               by='day',
+                               length.out=500),
+                      1000,
+                      replace=T)
+sim1$ili    <- rbinom(n=n.obs, size=1, prob=0.05)
+sim1$resp   <- rbinom(n=n.obs, size=1, prob=0.1)
+```
+
+We start with a line list of data of all ED visits in a system (1 line per ED
+visit). We know the admissions data, the age group, and the state. We also have
+flags for whether the individual had influenza like illness (ILI) or a
+respiratory code:
+
+```{r}
+head(sim1)
+```
+
+We can aggregate by day or by week:
+
+```{r}
+ts1<-ts_format(line.list=sim1,
+               datevar='adate',
+               agevar='agegrp',
+               statevar='state', 
+               syndromes=c('ili','resp'),
+               resolution='week')
+```
+
+We now have the data aggregated by state and week.
+
+```{r}
+head(ts1)
+```
+
+We will now analyze syndromic surveillance data from emergency departments in
+New York City
+
+```{r, echo=F}
+combo1 <- readRDS("../Data/NYC_resp_ili_combo.rds")
+
+combo1$denom1 <- combo1$ili  / (combo1$ili.prop  + 0.01)
+combo1$denom2 <- combo1$resp / (combo1$resp.prop + 0.01)
+combo1$total.visits <- round((combo1$denom1 + combo1$denom2)/2) + 1
+combo1$denom1<-NULL
+combo1$denom2<-NULL
+combo1$denom<-NULL
+combo1$ili.prop<-NULL
+combo1$resp.prop<-NULL
+
+combo1$state <- "NY"
+combo1 <- combo1[combo1$borough %in% c("Citywide", "Bronx", "Manhattan") &
+                 combo1$agec %in% c("1", "2", "3", "4", "5"), ]
+
+combo1$agec <- as.character(combo1$agec)
+combo1$agec[combo1$agec == "1"] <- "i. u5y"
+combo1$agec[combo1$agec == "2"] <- "ii. 5-17y"
+combo1$agec[combo1$agec == "3"] <- "iii. 18-64y"
+combo1$agec[combo1$agec == "4"] <- "iv. 65+y"
+combo1$agec[combo1$agec == "5"] <- "v. All ages"
+```
+
+```{r}
+head(combo1)
+```
+
+```{r}
+excess_cases1 <-
+  excessCases(ds = combo1,
+              sub.statevar  = "borough",
+              datevar       = "ddate", 
+              agevar        = "agec",
+              statevar      = "state",
+              denom.var     = "total.visits",
+              use.syndromes = c("ili", "resp"),
+              adj.flu       ='auto',
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+```
+
+## Plot the results in an interactive dashboard
+
+```{r, echo=F}
+# dashboardPlot(excess_cases1)
+```
+## Extract the quantities of interest
+
+```{r}
+unexplained.cases <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ili",
+                extract.quantity = "unexplained.cases")
+```
+
+```{r}
+matplot(unexplained.cases[,,5], type='l', bty='l')
+```
+
+
+
+

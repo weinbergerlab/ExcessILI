@@ -3,16 +3,38 @@ Title: A package and RShiny app to examine excess ILI from syndromic
     surveillance data
 Version: 0.1
 Authors@R: c(
-    person("Daniel", "Weinberger", email = "daniel.weinberger@yale.edu", role = "cre"))
+    person("Daniel", "Weinberger",
+      email = "daniel.weinberger@yale.edu",
+      role  = "cre"),
+    person("Kelsie", "Cassell",
+      email = "kelsie.cassell@yale.edu",
+      role  = "aut"),
+    person("Marcus", "Russi",
+      email = "marcus.russi@yale.edu",
+      role  = "aut"),
+    person("Alyssa", "Amick",
+      email = "alyssa.amick@yale.edu",
+      role  = "ctb"),
+    person("Yu-Han", "Kao",
+      email = "ernest.asare@yale.edu",
+      role  = "ctb"),
+    person("Ernest", "Asare",
+      email = "ernest.asare@yale.edu",
+      role  = "ctb"),
+    person("Forrest", "Crawford",
+      email = "forrest.crawford@yale.edu",
+      role  = "ctb")
+    ) 
 Description: Note, OSX users may need to install the packages
     gdal and udunits. They can be installed using brew.
 Depends: R (>= 3.1.0)
-License: LICENSE NEEDED
+License: MIT + file LICENSE
 LazyData: true
 Suggests:
     testthat (>= 2.1.0),
     knitr,
-    rmarkdown
+    rmarkdown,
+    pkgdown
 Imports: 
     lubridate,
     MMWRweek,

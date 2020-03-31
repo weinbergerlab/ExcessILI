@@ -1,0 +1,8 @@
+pandoc: 2.9.2.1
+pkgdown: 1.5.0
+pkgdown_sha: ~
+articles:
+  ILINet: ILINet.html
+  YourData: YourData.html
+last_built: 2020-03-31T21:24Z
+

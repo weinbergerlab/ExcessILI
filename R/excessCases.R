@@ -71,8 +71,8 @@
 #'   age group and geography:
 #'
 #' \code{date}: vector of dates used in the model. Use the helper function
-#'   \code{excessExtract} to pull out specific components and organize them
-#'   into an array
+#'   \code{\link{excessExtract}} to pull out specific components and organize
+#'   them into an array
 #'
 #' \code{y}: array of observed values for the syndromes
 #'
@@ -91,6 +91,7 @@
 #' \code{denom}: denominator used in the model
 #'
 #' @examples
+#'  library(cdcfluview)
 #'  ili.data <- ilinet(region = c("state"))
 #'  ili.data$state <- state.abb[match(ili.data$region, state.name)]
 #'
