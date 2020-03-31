@@ -4,17 +4,21 @@
 #' This function takes a line list of case data and formats it into weekly 
 #' or daily time series, which can be used to fit a seasonal baseline
 #'
-#' @param line.list A dataframe containing one line for each case (e.g., ED visit, hospitalization). 
-#' At a minimum, each row should have the date of the visit (YYYY-MM-DD), the state code (e.g. "NY"), and a 0/1 variable for each syndrome of 
-#' interest (e.g. influenza-like illness, fever, cough). All visits
-#' should be included in the dataframe, even if the case did not have any of the syndromes of interest. For instance,
-#' for emergency department data, every ED visit should have a line represented in the dataframe
+#' @param line.list A dataframe containing one line for each case (e.g., ED
+#'   visit, hospitalization).  At a minimum, each row should have the date of
+#'   the visit (YYYY-MM-DD), the state code (e.g. "NY"), and a 0/1 variable for
+#'   each syndrome of interest (e.g. influenza-like illness, fever, cough). All
+#'   visits should be included in the dataframe, even if the case did not have
+#'   any of the syndromes of interest. For instance, for emergency department
+#'   data, every ED visit should have a line represented in the dataframe
 #' 
 #' @param datevar A string. What variable contains the date?
 #'
-#' @param statevar A string. What variable contains the 2-digit state code (e.g., "NY")?
+#' @param statevar A string. What variable contains the 2-digit state code
+#' (e.g., "NY")?
 #'
-#' @param sub.statevar A string. What variable contains the local geography identifier (e.g., county, borough)
+#' @param sub.statevar A string. What variable contains the local geography
+#' identifier (e.g., county, borough)
 #'
 #' @param agevar A string. What variable contains the age group? Use 'none'
 #'   if there is no age grouping in the data
@@ -25,12 +29,14 @@
 #' @param resolution One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
 #'
-#' @param remove.final A logical scalar. Remove the final date in the dataset? This is someties 
-#' helpful if the data from the last date.
+#' @param remove.final A logical scalar. Remove the final date in the dataset?
+#'   This is someties helpful if the data from the last date.
 #'
-#' @return A dataframe in the "long" format, with a row for each date (week or day), and location (e.g. state, county),
-#' and age category. There is a column for date, age category, location, and the number of counts for each of 
-#' the selected syndromes. There is also a column that tallies all visits regardless of cause
+#' @return A dataframe in the "long" format, with a row for each date (week or
+#'   day), and location (e.g. state, county), and age category. There is a
+#'   column for date, age category, location, and the number of counts for each
+#'   of the selected syndromes. There is also a column that tallies all visits
+#'   regardless of cause
 #' 
 #'
 #' @examples
@@ -122,61 +128,90 @@ ts_format <-
 
 #' Fits a baseline to the data
 #'
-#' \code{excessCases} This function takes a time series of cases (daily or weekly) and fits a harmonic baseline
-#' There is also an option to import influenza data from the CDC's NREVSS database and match it by state,
-#' or import Google search queries for RSV for the respective state. Dummy variables adjust for variations in average
-#' incidence between years, and interactions between RSV or flu allow these effects to vary over time.
+#' \code{excessCases} takes a time series of cases (daily or weekly) and fits a
+#'   harmonic baseline There is also an option to import influenza data from
+#'   the CDC's NREVSS database and match it by state, or import Google search
+#'   queries for RSV for the respective state. Dummy variables adjust for
+#'   variations in average incidence between years, and interactions between
+#'   RSV or flu allow these effects to vary over time.
 #'
-#' EXTENDED DESCRIPTION, THE FOLLOWING IS AN EXAMPLE: This is a generic
-#' function: methods can be defined for it directly or via the
-#' \code{\link{Summary}} group generic. For this to work properly, the
-#' arguments \code{...} should be unnamed, and dispatch is on the first
-#' argument.
-#'
-#' @param ds A dataframe, with a format similar to the one produced by the ts_format() function. There should be a row for each date (week or day), and location (e.g. state, county),
-#' and age category. There must be a column for date (YYYY-MM-DD), age category, location, and the number of counts for each of 
-#' the selected syndromes. There should also be a column with a denominator (e.g., total number of ED visits). If there is no denominator, create a vector of 1s.
+#' @param ds A dataframe, with a format similar to the one produced by the
+#'   ts_format() function. There should be a row for each date (week or day),
+#'   and location (e.g. state, county), and age category. There must be a
+#'   column for date (YYYY-MM-DD), age category, location, and the number of
+#'   counts for each of the selected syndromes. There should also be a column
+#'   with a denominator (e.g., total number of ED visits). If there is no
+#'   denominator, create a vector of 1s.
 #'  
-#' @param sub.statevar A string. Which variable in the input data frame contains the local geography identifier (e.g., county, borough)
+#' @param sub.statevar A string. Which variable in the input data frame
+#'   contains the local geography identifier (e.g., county, borough)
 #' 
-#' @param statevar A string. Which variable in the input data frame contains the state (2-digit state; e.g. 'NY')?
+#' @param statevar A string. Which variable in the input data frame contains
+#'   the state (2-digit state; e.g. 'NY')?
 #'
-#' @param agevar A string. Which variable in the input data frame contains the age group? Use 'none'
-#'   if there is no age grouping in the data
+#' @param agevar A string. Which variable in the input data frame contains the
+#'   age group? Use 'none' if there is no age grouping in the data
 #'
-#' @param datevar A string. Which variables in the input data frame contains the date?
+#' @param datevar A string. Which variables in the input data frame contains
+#'   the date?
 #'
-#' @param use.syndromes A vector with the variable names for syndromes to be tested (e.g., c('ILI','respiratory') ).
-
-#' @param denom.var Which variable on the input dataframe should be used as the denominator. For instance, all ED visits. If there is no denominator, use a vector of 1s
-
-#' @param flu.import A logical scalar. Import the latest influenza testing data from the CDC NREVSS system? If TRUE, the data will be downloaded and merge with the input 
-#' dataframe by state and week. the flu variable will be included in the regressionwhen fitting the baseline
-
-#' @param rsv.import A logical scalar. Import weekly search volume for 'RSV' for the states in the input dataframe? This option can only be used if there are 5 or fewer states on the input dataset. This variable is included in the regression model when fitting the seasonal baseline.
-
-#' @param adj.flu How should influenza be adjusted for when fittig the seasonal baseline? Possible values are 'none' for no adjustment (default); 'auto': automatically downloads NREVSS data from CDC and matches by state and week; 
-#' or specify the name of a variable in the the input dataframe that contains a variable for influenza. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
-
-#' @param adj.rsv How should RSv be adjusted for when fitting the seasonal baseline? A string.  Possible values are 'none' for no adjustment (default); 'auto': automatically downloads 
-#' the weekly volume of search queries for 'RSV' for the last 5 years from Google trends and matches by state. Note that a maximum of 5 states can be included on the input dataset 
-#' when using the 'auto option'; Or specify the name of a variable in the the input dataframe that contains a variable for influenza. 
-
+#' @param use.syndromes A vector with the variable names for syndromes to be
+#'   tested (e.g., c('ILI','respiratory') ).
+#'
+#' @param denom.var Which variable on the input dataframe should be used as the
+#'   denominator. For instance, all ED visits. If there is no denominator, use
+#'   a vector of 1s
+#'
+#' @param flu.import A logical scalar. Import the latest influenza testing data
+#'   from the CDC NREVSS system? If TRUE, the data will be downloaded and merge
+#'   with the input dataframe by state and week. the flu variable will be
+#'   included in the regressionwhen fitting the baseline
+#'
+#' @param rsv.import A logical scalar. Import weekly search volume for 'RSV'
+#'   for the states in the input dataframe? This option can only be used if
+#'   there are 5 or fewer states on the input dataset. This variable is
+#'   included in the regression model when fitting the seasonal baseline.
+#'
+#' @param adj.flu How should influenza be adjusted for when fittig the seasonal
+#'   baseline? Possible values are 'none' for no adjustment (default); 'auto':
+#'   automatically downloads NREVSS data from CDC and matches by state and
+#'   week; or specify the name of a variable in the the input dataframe that
+#'   contains a variable for influenza. Adjust for RSV when fitting the
+#'   seasonal baseline?  This is automatically set to TRUE when
+#'
+#' @param adj.rsv How should RSv be adjusted for when fitting the seasonal
+#'   baseline? A string.  Possible values are 'none' for no adjustment
+#'   (default); 'auto': automatically downloads the weekly volume of search
+#'   queries for 'RSV' for the last 5 years from Google trends and matches by
+#'   state. Note that a maximum of 5 states can be included on the input
+#'   dataset when using the 'auto option'; Or specify the name of a variable in
+#'   the the input dataframe that contains a variable for influenza. 
+#'
 #' @param time.res One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
-
-#' @param extrapolation.date The model is fit up to this date, and then extrapolated for all future dates.
 #'
-#' @return A list of lists with an entry for each syndrome, and sub-lists by age group and geography 
-#' date: vector of dates used in the model. Use the helper function excessExtract to pull out specific components and organize them into an array
-#' y: array of observed values for the syndromes
-#' resid1 :Observed/model fitted values
-#' upi: upper 95% prediction interval of the fitted value
-#' lpi: lower 95% prediction interval of the fitted value
-#' sqrt.rsv: RSV variale used in the model (if any)
-#' log.flu: flu variable used in the model (if any)
-#' unexplained.cases: observed-expected(fitted)
-#' denom: denominator used in the model
+#' @param extrapolation.date The model is fit up to this date, and then
+#'   extrapolated for all future dates.
+#'
+#' @return A list of lists with an entry for each syndrome, and sub-lists by
+#'   age group and geography 
+#'
+#' \strong{date}: vector of dates used in the model. Use the helper function
+#'   excessExtract to pull out specific components and organize them into an
+#'
+#' \strong{array y}: array of observed values for the syndromes resid1 :Observed/model
+#'
+#' \strong{fitted values upi}: upper 95% prediction interval of the fitted value
+#'
+#' \strong{lpi}: lower 95% prediction interval of the fitted value
+#'
+#' \strong{sqrt.rsv}: RSV variale used in the model (if any)
+#'
+#' \strong{log.flu}: flu variable used in the model (if any)
+#'
+#' \strong{unexplained.cases}: observed-expected(fitted)
+#'
+#' \strong{denom}: denominator used in the model
 #'
 #' @examples
 #'  ili.data <- ilinet(region = c("state"))
@@ -366,13 +401,11 @@ excessCases <-
 
 #' Create interactive Shiny app to explore results
 #'
-#' \code{dashboardPlot} Creates an interactive Shiny plot
-#' to explore results generated in the function excessCases. 
-#' Drop down menus allow for viewing different syndromes, age groups,
-#' and geographies, and for looking at plots of raw counts,
-#' proportions, or Observed/Expected
+#' \code{dashboardPlot} Creates an interactive Shiny plot to explore results
+#' generated in the function excessCases. Drop down menus allow for viewing
+#' different syndromes, age groups, and geographies, and for looking at plots
+#' of raw counts, proportions, or Observed/Expected
 #'
-
 #' @param all.glm.res Provide the object created in the function excessCases
 #'
 #' @return Launches an interactive shiny app
@@ -577,20 +610,22 @@ dashboardPlot <- function(all.glm.res){
   shiny::shinyApp(ui, server)
 }
 
-#' ONE LINER DESCRIPTION
+#' Helper function to format the results from excessCases
 #'
-#' \code{excessExtract} Helper function to format the results
-#' from excessCases
-#'
-#' EXTENDED DESCRIPTION This function extracts specific estimates
-#' produced in excessCases and saves them in a multidimensional
-#' array.
+#' This function extracts specific estimates produced in excessCases and saves
+#' them in a multidimensional array.
 #'
 #' @param ds An object created by the function excessCases
-#' @param syndrome Character. For which syndrome should results be extracted? The name for this variable should match a syndrom provided to excessCases
-#' @param extract.quantity Which element of the output (e.g., 'lpi') from the output of excessCases do you want to extract. See the values in the help for excessCases to see the options.
 #'
-#' @return a multidimensional array with dimensions for time, age group, and geography (state, and sub-state)
+#' @param syndrome Character. For which syndrome should results be extracted?
+#'   The name for this variable should match a syndrom provided to excessCases
+#'
+#' @param extract.quantity Which element of the output (e.g., 'lpi') from the
+#'   output of excessCases do you want to extract. See the values in the help
+#'   for excessCases to see the options.
+#'
+#' @return a multidimensional array with dimensions for time, age group, and
+#'   geography (state, and sub-state)
 #'
 #' @export
 excessExtract <- function(ds, syndrome, extract.quantity) {
