@@ -68,24 +68,27 @@
 #'   extrapolated for all future dates. Defaults to \code{"2020-03-01"}
 #'
 #' @return A list of lists with an entry for each syndrome, and sub-lists by
-#'   age group and geography 
+#'   age group and geography:
 #'
-#' \strong{date}: vector of dates used in the model. Use the helper function
-#'   excessExtract to pull out specific components and organize them into an
+#' \code{date}: vector of dates used in the model. Use the helper function
+#'   \code{excessExtract} to pull out specific components and organize them
+#'   into an array
 #'
-#' \strong{array y}: array of observed values for the syndromes resid1 :Observed/model
+#' \code{y}: array of observed values for the syndromes
 #'
-#' \strong{fitted values upi}: upper 95% prediction interval of the fitted value
+#' \code{resid1}: Observed/model fitted values
 #'
-#' \strong{lpi}: lower 95% prediction interval of the fitted value
+#' \code{upi}: upper 95% prediction interval of the fitted value
 #'
-#' \strong{sqrt.rsv}: RSV variale used in the model (if any)
+#' \code{lpi}: lower 95% prediction interval of the fitted value
 #'
-#' \strong{log.flu}: flu variable used in the model (if any)
+#' \code{sqrt.rsv}: RSV variale used in the model (if any)
 #'
-#' \strong{unexplained.cases}: observed-expected(fitted)
+#' \code{log.flu}: flu variable used in the model (if any)
 #'
-#' \strong{denom}: denominator used in the model
+#' \code{unexplained.cases}: observed-expected(fitted)
+#'
+#' \code{denom}: denominator used in the model
 #'
 #' @examples
 #'  ili.data <- ilinet(region = c("state"))
