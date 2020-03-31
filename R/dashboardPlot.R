@@ -1,13 +1,17 @@
 #' Create interactive Shiny app to explore results
 #'
 #' \code{dashboardPlot} Creates an interactive Shiny plot to explore results
-#' generated in the function excessCases. Drop down menus allow for viewing
-#' different syndromes, age groups, and geographies, and for looking at plots
-#' of raw counts, proportions, or Observed/Expected
+#'   generated in the function \code{\link{excessCases}}. Drop down menus allow
+#'   for viewing different syndromes, age groups, and geographies, and for
+#'   looking at plots of raw counts, proportions, or Observed/Expected.
 #'
-#' @param all.glm.res Provide the object created in the function excessCases
+#' @param all.glm.res Provide the object returned by the function
+#'   \code{\link{excessCases}}
 #'
-#' @return Launches an interactive shiny app
+#' @return Returns an object representing the shinyapp. Depending on the
+#'   environment (RStudio vs. console) the app may then be passed to
+#'   \code{print()}, which will start the server. Refer to
+#'   \code{link[shiny]{shinyApp}} for more details.
 #'
 #' @export
 dashboardPlot <- function(all.glm.res){ 
@@ -26,7 +30,8 @@ dashboardPlot <- function(all.glm.res){
     output$countyPlot = renderPlot({
 
       # Essentially a partialized sapply, one-off for the following few lines
-      plucker <- function(var) function(x) sapply(x, "[[", var, simplify='array')
+      plucker <-
+        function(var) function(x) sapply(x, "[[", var, simplify='array')
       
       data_to_pluck <- ds[[input$set.syndrome]]
 

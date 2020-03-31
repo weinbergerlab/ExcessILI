@@ -1,43 +1,43 @@
 #' Format line list data into time series
 #'
-#' \code{ts_format} Formats line list data of cases into time series  
-#' This function takes a line list of case data and formats it into weekly 
-#' or daily time series, which can be used to fit a seasonal baseline
+#' \code{ts_format} takes a line list of case data and formats it into weekly 
+#'   or daily time series, which can be used to fit a seasonal baseline.
 #'
 #' @param line.list A dataframe containing one line for each case (e.g., ED
 #'   visit, hospitalization).  At a minimum, each row should have the date of
-#'   the visit (YYYY-MM-DD), the state code (e.g. "NY"), and a 0/1 variable for
-#'   each syndrome of interest (e.g. influenza-like illness, fever, cough). All
-#'   visits should be included in the dataframe, even if the case did not have
-#'   any of the syndromes of interest. For instance, for emergency department
-#'   data, every ED visit should have a line represented in the dataframe
+#'   the visit (\code{YYYY-MM-DD}), the state code (e.g. \code{"NY"}), and a
+#'   0/1 variable for each syndrome of interest (e.g. influenza-like illness,
+#'   fever, cough). All visits should be included in the dataframe, even if the
+#'   case did not have any of the syndromes of interest. For instance, for
+#'   emergency department data, every ED visit should have a line represented
+#'   in the dataframe
 #' 
 #' @param datevar A string. What variable contains the date?
 #'
 #' @param statevar A string. What variable contains the 2-digit state code
-#' (e.g., "NY")?
+#'   (e.g., \code{"NY"})?
 #'
 #' @param sub.statevar A string. What variable contains the local geography
-#' identifier (e.g., county, borough)
+#'   identifier? (e.g., county, borough)
 #'
 #' @param agevar A string. What variable contains the age group? Use 'none'
 #'   if there is no age grouping in the data
 #'
 #' @param syndromes A character vector. Which variables contain counts of
-#'   syndromic data? (e.g., c('ili', 'respiratory'))
+#'   syndromic data? (e.g., \code{c('ili', 'respiratory')})
 #'
 #' @param resolution One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
 #'
 #' @param remove.final A logical scalar. Remove the final date in the dataset?
-#'   This is someties helpful if the data from the last date.
+#'   This is someties helpful if the data from the last date is unfinalized
+#'   or otherwise untrustworthy.
 #'
-#' @return A dataframe in the "long" format, with a row for each date (week or
-#'   day), and location (e.g. state, county), and age category. There is a
-#'   column for date, age category, location, and the number of counts for each
-#'   of the selected syndromes. There is also a column that tallies all visits
-#'   regardless of cause
-#' 
+#' @return A dataframe in the "long" format, with a row for each time period
+#'   (as in, week or day), and location (e.g. state, county), and age category.
+#'   There is a column for date, age category, location, and the number of
+#'   counts for each of the selected syndromes. There is also a column that
+#'   tallies all visits, regardless of cause
 #'
 #' @examples
 #'  n.obs <- 10000

@@ -1,38 +1,38 @@
-#' Fits a baseline to the data
+#' Fits a baseline to case data
 #'
 #' \code{excessCases} takes a time series of cases (daily or weekly) and fits a
-#'   harmonic baseline There is also an option to import influenza data from
+#'   harmonic baseline. There is also an option to import influenza data from
 #'   the CDC's NREVSS database and match it by state, or import Google search
 #'   queries for RSV for the respective state. Dummy variables adjust for
 #'   variations in average incidence between years, and interactions between
 #'   RSV or flu allow these effects to vary over time.
 #'
 #' @param ds A dataframe, with a format similar to the one produced by the
-#'   ts_format() function. There should be a row for each date (week or day),
-#'   and location (e.g. state, county), and age category. There must be a
-#'   column for date (YYYY-MM-DD), age category, location, and the number of
-#'   counts for each of the selected syndromes. There should also be a column
-#'   with a denominator (e.g., total number of ED visits). If there is no
-#'   denominator, create a vector of 1s.
+#'   \code{\link{ts_format}} function. There should be a row for each time
+#'   period (week or day), location (e.g. state, county), and age category.
+#'   There must be a column for date (\code{YYYY-MM-DD}), age category,
+#'   location, and the number of counts for each of the selected syndromes.
+#'   There should also be a column with a denominator (e.g., total number of ED
+#'   visits). If there is no denominator, create a variable with vector of 1s
+#'   as a substitute.
 #'  
 #' @param sub.statevar A string. Which variable in the input data frame
 #'   contains the local geography identifier (e.g., county, borough)
 #' 
 #' @param statevar A string. Which variable in the input data frame contains
-#'   the state (2-digit state; e.g. 'NY')?
+#'   the state (2-digit state; e.g. \code{'NY'})?
 #'
 #' @param agevar A string. Which variable in the input data frame contains the
-#'   age group? Use 'none' if there is no age grouping in the data
+#'   age group? Use \code{'none'} if there is no age grouping in the data
 #'
 #' @param datevar A string. Which variables in the input data frame contains
 #'   the date?
 #'
 #' @param use.syndromes A vector with the variable names for syndromes to be
-#'   tested (e.g., c('ILI','respiratory') ).
+#'   tested (e.g., \code{c('ILI','respiratory')} ).
 #'
-#' @param denom.var Which variable on the input dataframe should be used as the
-#'   denominator. For instance, all ED visits. If there is no denominator, use
-#'   a vector of 1s
+#' @param denom.var A string. Which variable on the input dataframe should be
+#'   used as the denominator? For instance, all ED visits.
 #'
 #' @param flu.import A logical scalar. Import the latest influenza testing data
 #'   from the CDC NREVSS system? If TRUE, the data will be downloaded and merge
@@ -44,26 +44,28 @@
 #'   there are 5 or fewer states on the input dataset. This variable is
 #'   included in the regression model when fitting the seasonal baseline.
 #'
-#' @param adj.flu How should influenza be adjusted for when fittig the seasonal
-#'   baseline? Possible values are 'none' for no adjustment (default); 'auto':
-#'   automatically downloads NREVSS data from CDC and matches by state and
-#'   week; or specify the name of a variable in the the input dataframe that
-#'   contains a variable for influenza. Adjust for RSV when fitting the
-#'   seasonal baseline?  This is automatically set to TRUE when
+#' @param adj.flu A logical scalar. How should influenza be adjusted for when
+#'   fitting the seasonal baseline? Possible values are \code{'none'} for no
+#'   adjustment (default); 'auto': automatically downloads NREVSS data from CDC
+#'   and matches by state and week; or specify the name of a variable in the
+#'   the input dataframe that contains a variable for influenza. Adjust for RSV
+#'   when fitting the seasonal baseline?  This is automatically set to
+#'   \code{TRUE} when
 #'
-#' @param adj.rsv How should RSv be adjusted for when fitting the seasonal
-#'   baseline? A string.  Possible values are 'none' for no adjustment
-#'   (default); 'auto': automatically downloads the weekly volume of search
-#'   queries for 'RSV' for the last 5 years from Google trends and matches by
-#'   state. Note that a maximum of 5 states can be included on the input
-#'   dataset when using the 'auto option'; Or specify the name of a variable in
-#'   the the input dataframe that contains a variable for influenza. 
+#' @param adj.rsv A string. How should RSV be adjusted for when fitting the
+#'   seasonal baseline? Possible values are \code{'none'} for no adjustment
+#'   (default); \code{'auto'}: automatically downloads the weekly volume of
+#'   search queries for 'RSV' for the last 5 years from Google trends and
+#'   matches by state. Note that a maximum of 5 states can be included on the
+#'   input dataset when using the 'auto option'; Or specify the name of a
+#'   variable in the the input dataframe that contains a variable for
+#'   influenza. 
 #'
 #' @param time.res One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
 #'
 #' @param extrapolation.date The model is fit up to this date, and then
-#'   extrapolated for all future dates.
+#'   extrapolated for all future dates. Defaults to \code{"2020-03-01"}
 #'
 #' @return A list of lists with an entry for each syndrome, and sub-lists by
 #'   age group and geography 
