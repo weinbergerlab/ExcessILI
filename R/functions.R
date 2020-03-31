@@ -155,15 +155,12 @@ ts_format <-
 
 #' @param rsv.import A logical scalar. Import weekly search volume for 'RSV' for the states in the input dataframe? This option can only be used if there are 5 or fewer states on the input dataset. This variable is included in the regression model when fitting the seasonal baseline.
 
-#' @param adj.flu A logical scalar. Adjust for influenza when fitting the seasonal baseline? This is automatically set to TRUE
-#' if flu.import is TRUE
+#' @param adj.flu How should influenza be adjusted for when fittig the seasonal baseline? Possible values are 'none' for no adjustment (default); 'auto': automatically downloads NREVSS data from CDC and matches by state and week; 
+#' or specify the name of a variable in the the input dataframe that contains a variable for influenza. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
 
-#' @param adj.rsv A logical scalar. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
-#' rsv.import is TRUE
-
-#' @param flu.var A string. If an influenza variabke is included on the input dataset, provide the variable name here.
-
-#' @param rsv.var A string. If an RSV variable is included on the input dataset, provide the variable name here.
+#' @param adj.rsv How should RSv be adjusted for when fitting the seasonal baseline? A string.  Possible values are 'none' for no adjustment (default); 'auto': automatically downloads 
+#' the weekly volume of search queries for 'RSV' for the last 5 years from Google trends and matches by state. Note that a maximum of 5 states can be included on the input dataset 
+#' when using the 'auto option'; Or specify the name of a variable in the the input dataframe that contains a variable for influenza. 
 
 #' @param time.res One of \code{c("day", "week", "month")}. What is the data
 #'   binned by?
@@ -205,14 +202,10 @@ excessCases <-
            datevar,
            use.syndromes,
            denom.var,
-           flu.import=T,
-           rsv.import=T,
-           adj.flu=F,
-           adj.rsv=F,
-           flu.var='flu.var',
-           rsv.var='rsv.var',
+           adj.flu='none',
+           adj.rsv='none',
            time.res='day',
-           extrapolation.date) {
+           extrapolation.date='2020-03-01') {
 
   is.string <- assertthat::is.string
 
@@ -222,31 +215,30 @@ excessCases <-
   assertthat::assert_that(is.string(datevar))
   assertthat::assert_that(is.character(use.syndromes))
   assertthat::assert_that(is.string(denom.var))
-  assertthat::assert_that(is.logical(flu.import))
-  assertthat::assert_that(is.logical(rsv.import))
-  assertthat::assert_that(is.logical(adj.flu))
-  assertthat::assert_that(is.logical(adj.rsv))
-  assertthat::assert_that(is.string(flu.var))
-  assertthat::assert_that(is.string(rsv.var))
+  assertthat::assert_that(is.string(adj.flu))
+  assertthat::assert_that(is.string(adj.rsv))
   assertthat::assert_that(is.string(time.res) &&
                           time.res %in% c('day', 'week', 'month'))
   # Need a better test here
   # assertthat::assert_that(!is.null(extrapolation.date)) 
 
+  flu.var='flu.var'
+  flu.import <- FALSE
+  
+  if( adj.flu == 'auto'){
+    flu.import <- TRUE
+  }
+  rsv.var <- 'rsv.var'
+  rsv.import <- FALSE
+  
+  if( adj.rsv == 'auto'){
+    rsv.import <- TRUE
+  }
+
+  
   if( length(unique(ds[,statevar])) > 5 && identical(rsv.import, T))
     stop('Maximum of 5 states can be used when rsv.import=T')
   
-  # If import the RSV or flu data, automatically adjust for it in model  data
-  if(identical(flu.import, T)){
-    adj.flu <- T
-    flu.var <- 'flu.var'
-  }
-
-  if(identical(rsv.import, T)){
-    adj.rsv <- T
-    rsv.var <-'rsv.var'
-  }
-
   ds<-as.data.frame(ds)
   ds[,datevar]<-as.Date(ds[,datevar])
   mmwr.date<-MMWRweek::MMWRweek(ds[,datevar])
@@ -283,14 +275,22 @@ excessCases <-
                   all.x=T)
   }
 
-  if(adj.flu==F){
+  if(adj.flu=='auto'){
     ds1.df$flu.var<-1
   }
 
-  if(adj.rsv==F){
+  if(adj.rsv=='auto'){
     ds1.df$rsv.var<-1
   }
-
+  
+  if( !(adj.rsv %in% c('auto','none')) ){
+    ds1.df$rsv.var <- ds1.df[,adj.rsv]
+  } 
+  
+  if( !(adj.flu %in% c('auto','none')) ){
+    ds1.df$flu.var <- ds1.df[,adj.flu]
+  } 
+  
   if(!exists("denom.var")){
     ds1.df$denom <-1
     denom.var <-'denom'
