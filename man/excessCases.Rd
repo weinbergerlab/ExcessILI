@@ -5,9 +5,9 @@
 \title{Fits a baseline to the data}
 \usage{
 excessCases(ds, sub.statevar = "none", statevar = "state",
-  agevar = "none", datevar, use.syndromes, denom.var, flu.import = T,
-  rsv.import = T, adj.flu = F, adj.rsv = F, flu.var = "flu.var",
-  rsv.var = "rsv.var", time.res = "day", extrapolation.date)
+  agevar = "none", datevar, use.syndromes, denom.var, adj.flu = "none",
+  adj.rsv = "none", time.res = "day",
+  extrapolation.date = "2020-03-01")
 }
 \arguments{
 \item{ds}{A dataframe, with a format similar to the one produced by the ts_format() function. There should be a row for each date (week or day), and location (e.g. state, county),
@@ -27,25 +27,22 @@ if there is no age grouping in the data}
 
 \item{denom.var}{Which variable on the input dataframe should be used as the denominator. For instance, all ED visits. If there is no denominator, use a vector of 1s}
 
-\item{flu.import}{A logical scalar. Import the latest influenza testing data from the CDC NREVSS system? If TRUE, the data will be downloaded and merge with the input 
-dataframe by state and week. the flu variable will be included in the regressionwhen fitting the baseline}
+\item{adj.flu}{How should influenza be adjusted for when fittig the seasonal baseline? Possible values are 'none' for no adjustment (default); 'auto': automatically downloads NREVSS data from CDC and matches by state and week; 
+or specify the name of a variable in the the input dataframe that contains a variable for influenza. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when}
 
-\item{rsv.import}{A logical scalar. Import weekly search volume for 'RSV' for the states in the input dataframe? This option can only be used if there are 5 or fewer states on the input dataset. This variable is included in the regression model when fitting the seasonal baseline.}
-
-\item{adj.flu}{A logical scalar. Adjust for influenza when fitting the seasonal baseline? This is automatically set to TRUE
-if flu.import is TRUE}
-
-\item{adj.rsv}{A logical scalar. Adjust for RSV when fitting the seasonal baseline? This is automatically set to TRUE when
-rsv.import is TRUE}
-
-\item{flu.var}{A string. If an influenza variabke is included on the input dataset, provide the variable name here.}
-
-\item{rsv.var}{A string. If an RSV variable is included on the input dataset, provide the variable name here.}
+\item{adj.rsv}{How should RSv be adjusted for when fitting the seasonal baseline? A string.  Possible values are 'none' for no adjustment (default); 'auto': automatically downloads 
+the weekly volume of search queries for 'RSV' for the last 5 years from Google trends and matches by state. Note that a maximum of 5 states can be included on the input dataset 
+when using the 'auto option'; Or specify the name of a variable in the the input dataframe that contains a variable for influenza.}
 
 \item{time.res}{One of \code{c("day", "week", "month")}. What is the data
 binned by?}
 
 \item{extrapolation.date}{The model is fit up to this date, and then extrapolated for all future dates.}
+
+\item{flu.import}{A logical scalar. Import the latest influenza testing data from the CDC NREVSS system? If TRUE, the data will be downloaded and merge with the input 
+dataframe by state and week. the flu variable will be included in the regressionwhen fitting the baseline}
+
+\item{rsv.import}{A logical scalar. Import weekly search volume for 'RSV' for the states in the input dataframe? This option can only be used if there are 5 or fewer states on the input dataset. This variable is included in the regression model when fitting the seasonal baseline.}
 }
 \value{
 A list of lists with an entry for each syndrome, and sub-lists by age group and geography 

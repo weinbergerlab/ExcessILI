@@ -64,7 +64,7 @@
 #' @export
 ts_format <-
   function(line.list,
-           datevar, statevar, sub.statevar, agevar,
+           datevar, statevar, sub.statevar='none', agevar='none',
            syndromes,
            resolution='day',
            remove.final=F) {
@@ -90,7 +90,7 @@ ts_format <-
   ds1$all.visits <-1
   
   if(!('sub.statevar' %in% names(ds1))){
-    ds1$sub.statevar <- statevar
+    ds1$sub.statevar <- ds1[,statevar]
     sub.statevar <-'sub.statevar'
   }
   
@@ -275,11 +275,11 @@ excessCases <-
                   all.x=T)
   }
 
-  if(adj.flu=='auto'){
+  if(adj.flu=='none'){
     ds1.df$flu.var<-1
   }
 
-  if(adj.rsv=='auto'){
+  if(adj.rsv=='none'){
     ds1.df$rsv.var<-1
   }
   
@@ -302,8 +302,8 @@ excessCases <-
       sub.statevar,
       use.syndromes,
       denom.var,
-      'flu.var',
-      'rsv.var')
+      flu.var,
+      rsv.var)
 
   if (any( !(cols_of_interest %in% names(ds1.df)) ))
     stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
@@ -398,13 +398,13 @@ dashboardPlot <- function(all.glm.res){
       
       data_to_pluck <- ds[[input$set.syndrome]]
 
-      ili2.resid    <- sapply(data_to_pluck, plucker("resid1"))
-      ili2.pred     <- sapply(data_to_pluck, plucker("pred"))
-      ili2.pred.lcl <- sapply(data_to_pluck, plucker("lpi"))
-      ili2.pred.ucl <- sapply(data_to_pluck, plucker("upi"))
-      obs.ili       <- sapply(data_to_pluck, plucker("y"))
-      denom         <- sapply(data_to_pluck, plucker("denom"))
-
+      ili2.resid    <- sapply(data_to_pluck, plucker("resid1"), simplify='array')
+      ili2.pred     <- sapply(data_to_pluck, plucker("pred"), simplify='array')
+      ili2.pred.lcl <- sapply(data_to_pluck, plucker("lpi"), simplify='array')
+      ili2.pred.ucl <- sapply(data_to_pluck, plucker("upi"), simplify='array')
+      obs.ili       <- sapply(data_to_pluck, plucker("y"), simplify='array')
+      denom         <- sapply(data_to_pluck, plucker("denom"), simplify='array')
+      
       dimnames(ili2.resid)[[2]]    <- counties.to.test
       dimnames(ili2.pred)[[2]]     <- counties.to.test
       dimnames(ili2.pred.lcl)[[2]] <- counties.to.test
@@ -583,14 +583,14 @@ dashboardPlot <- function(all.glm.res){
 #' from excessCases
 #'
 #' EXTENDED DESCRIPTION This function extracts specific estimates
-#' produced in excessCases and aves them in a multidimensional
+#' produced in excessCases and saves them in a multidimensional
 #' array.
 #'
-#' @param ds An onject created by the function excessCases
+#' @param ds An object created by the function excessCases
 #' @param syndrome Character. For which syndrome should results be extracted? The name for this variable should match a syndrom provided to excessCases
 #' @param extract.quantity Which element of the output (e.g., 'lpi') from the output of excessCases do you want to extract. See the values in the help for excessCases to see the options.
 #'
-#' @return a multideimensional array with dimensions for time, age group, and geography (state, and sub-state)
+#' @return a multidimensional array with dimensions for time, age group, and geography (state, and sub-state)
 #'
 #' @export
 excessExtract <- function(ds, syndrome, extract.quantity) {
