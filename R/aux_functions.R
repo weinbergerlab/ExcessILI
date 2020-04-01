@@ -155,7 +155,12 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   }
   
   # Same for all ages and boroughs
-  log.flu = log(clean.array.citywide[, , age.test, "flu.var"])  
+  flu <- clean.array.citywide[, , age.test, "flu.var"]
+  cont.correct <- 0
+  if(min(flu, na.rm=T)==0 ){
+    cont.correct <- min(flu[flu!=0], na.rm=T)/2 
+  }
+  log.flu = log(flu + cont.correct)  
   
   # Fill in missing observations for flu at end of TS with most recent
   # observed values
