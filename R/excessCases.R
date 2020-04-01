@@ -258,6 +258,8 @@ excessCases <-
         ds        = ds2,
         age.test  = y,
         syndrome  = x,
+        adj.flu   = adj.flu,
+        adj.rsv   = adj.rsv,
         denom.var = denom.var,
         time.res  = time.res,
         extrapolation.date = extrapolation.date
