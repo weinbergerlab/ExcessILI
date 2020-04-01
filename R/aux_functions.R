@@ -180,7 +180,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   sin3 <- sin(2*pi * t2 * 3/period)
   cos3 <- cos(2*pi * t2 * 3/period)
   
-  log.offset <- log(clean.array.citywide[, , age.test, denom.var])
+  log.offset <- log(clean.array.citywide[, , age.test, denom.var]+ 0.5)
   
   ds.glm <-
     cbind.data.frame(
