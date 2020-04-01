@@ -94,7 +94,7 @@ ts_format <-
   
   ds1$all.visits <-1
   
-  if(!('sub.statevar' %in% names(ds1))){
+  if(!(sub.statevar %in% names(ds1))){
     ds1$sub.statevar <- ds1[,statevar]
     sub.statevar <-'sub.statevar'
   }
