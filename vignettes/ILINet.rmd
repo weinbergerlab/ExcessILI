@@ -9,7 +9,7 @@ author: "Dan Weinberger"
 date: "3/25/2020"
 ---
 
-```{r, include = FALSE}
+```{r, include = F}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -59,9 +59,8 @@ ili.data <- ili.data[ili.data$state %in% state.select,]
 
 ## Run the main analysis function, adjusting for flu using NREVSS data
 
-```{r}
-excess_cases1 <-
-  excessCases(ds = ili.data,
+```{r, echo=T}
+excess_cases1 <-  excessCases(ds = ili.data,
               datevar       = "week_start", 
               statevar      = "state",
               denom.var     = "total_patients",

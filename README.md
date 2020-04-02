@@ -25,6 +25,8 @@ devtools::install_github("weinbergerlab/ExcessILI", dependencies = TRUE, build_v
 
 # Usage
 
-Try some examples in the vignettes `vignette("ESSENCE")` and 
-`vignette("ILINet")`.
+- To see how to go from line list data to an interactive app, see
+  `vignette("ESSENCE")`
 
+- For an example of how to use the analysis functions with the CDC's ILINet
+  data, see `vignette("ILINet")`.
