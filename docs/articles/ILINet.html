@@ -100,9 +100,10 @@
 <a href="#download-the-data" class="anchor"></a>Download the data</h2>
 <div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/cdcfluview/man/ilinet.html">ilinet</a></span>(<span class="kw">region</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"state"</span>))</pre></body></html></div>
 <div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">ili.data</span>$<span class="no">state</span> <span class="kw">&lt;-</span> <span class="no">state.abb</span>[<span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span>(<span class="no">ili.data</span>$<span class="no">region</span>, <span class="no">state.name</span>)]
-<span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="no">ili.data</span>[, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"state"</span>, <span class="st">"week_start"</span>, <span class="st">"ilitotal"</span>, <span class="st">"total_patients"</span>)]
-<span class="no">ili.data</span><span class="kw">&lt;-</span><span class="no">ili.data</span>[!<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">ili.data</span>$<span class="no">total_patients</span>),]
-<span class="no">ili.data.spl</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span>(<span class="no">ili.data</span>, <span class="no">ili.data</span>$<span class="no">state</span>)
+<span class="no">ili.data</span>       <span class="kw">&lt;-</span> <span class="no">ili.data</span>[, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"state"</span>, <span class="st">"week_start"</span>, <span class="st">"ilitotal"</span>, <span class="st">"total_patients"</span>)]
+<span class="no">ili.data</span>       <span class="kw">&lt;-</span> <span class="no">ili.data</span>[!<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">ili.data</span>$<span class="no">total_patients</span>),]
+<span class="no">ili.data.spl</span>   <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span>(<span class="no">ili.data</span>, <span class="no">ili.data</span>$<span class="no">state</span>)
+
 <span class="no">min</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="no">ili.data.spl</span>, <span class="kw">function</span>(<span class="no">x</span>)  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span>(<span class="no">x</span>$<span class="no">total_patients</span>))
 <span class="no">min</span>
 <span class="co">#&gt;    AK    AL    AR    AZ    CA    CO    CT    DE    GA    HI    IA    ID    IL </span>
@@ -172,7 +173,8 @@
                 <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
                 <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"y"</span>)
 
-<span class="no">pred</span><span class="kw">&lt;-</span>  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+<span class="no">pred</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
                 <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
                 <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"pred"</span>)
 
@@ -230,7 +232,7 @@
 
 
       <footer><div class="copyright">
-  <p>Developed by Daniel Weinberger, Marcus Russi.</p>
+  <p>Developed by Daniel Weinberger, Kelsie Cassell, Marcus Russi.</p>
 </div>
 
 <div class="pkgdown">
