@@ -1,0 +1,13 @@
+name: ilinet_vignette
+title: ilinet_vignette
+username:
+account: weinbergerlab
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 2008465
+bundleId: 2933103
+url: https://weinbergerlab.shinyapps.io/ilinet_vignette/
+when: 1585332101.71079
+asMultiple: TRUE
+asStatic: FALSE
+ignoredFiles: ../Data/NYC_resp_ili_combo.rds|excess_ili_vignette.Rmd|extracted.output.ilinet.rds

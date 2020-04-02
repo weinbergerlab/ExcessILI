@@ -28,10 +28,15 @@ and/or state-specific RSV activity (based on Google search volume). In this exam
 
 ## Getting started
 This package is not available on CRAN so needs to be installed directly from Github. Make sure you have the 'devtools' package installed.
-```{r}
+```{r, eval=F}
 # Install development version from GitHub
 library(devtools)
 devtools::install_github("weinbergerlab/ExcessILI")
+```
+
+```{r}
+library(ExcessILI)
+library(cdcfluview)
 ```
 
 **We also recommend installing the cdcfluview package to take full advantage of the ExcessILI package. If you are using the Enterpise version of RStudio on the BioSense platform, cdcfluview might not install correctly.**

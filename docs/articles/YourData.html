@@ -54,6 +54,9 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/ESSENCE.html">Going from line list data to an interactive app</a>
+    </li>
+    <li>
       <a href="../articles/ILINet.html">Using ExcessILI with ILINet</a>
     </li>
     <li>
@@ -72,7 +75,7 @@
 
       
 
-      </header><script src="YourData_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using ExcessILI with arbritrary data</h1>
@@ -87,8 +90,9 @@
 
     
     
-<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ExcessILI</span>)
-<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">cdcfluview</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb1"><html><body><pre class="r">library(ExcessILI)
+library(cdcfluview)
+#&gt; Warning: package 'cdcfluview' was built under R version 3.6.3</pre></body></html></div>
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
@@ -98,52 +102,37 @@
 <h2 class="hasAnchor">
 <a href="#preparing-line-list-data-for-analysis" class="anchor"></a>Preparing line list data for analysis</h2>
 <p>We start with a line list of data of all ED visits in a system (1 line per ED visit). We know the admissions data, the age group, and the state. We also have flags for whether the individual had influenza like illness (ILI) or a respiratory code:</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">sim1</span>)
-<span class="co">#&gt;   state      adate agegrp ili resp</span>
-<span class="co">#&gt; 1    CT 2019-01-03      3   0    0</span>
-<span class="co">#&gt; 2    CT 2019-01-14      3   0    0</span>
-<span class="co">#&gt; 3    CT 2020-04-29      2   0    0</span>
-<span class="co">#&gt; 4    CT 2019-06-30      2   0    0</span>
-<span class="co">#&gt; 5    CT 2019-09-27      3   0    0</span>
-<span class="co">#&gt; 6    CT 2019-12-23      5   0    0</span></pre></body></html></div>
+<div class="sourceCode" id="cb2"><html><body><pre class="r">head(sim1)
+#&gt;   state      adate agegrp ili resp
+#&gt; 1    CT 2019-01-03      3   0    0
+#&gt; 2    CT 2019-01-14      3   0    0
+#&gt; 3    CT 2020-04-29      2   0    0
+#&gt; 4    CT 2019-06-30      2   0    0
+#&gt; 5    CT 2019-09-27      3   0    0
+#&gt; 6    CT 2019-12-23      5   0    0</pre></body></html></div>
 <p>We can aggregate by day or by week:</p>
-<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">ts1</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/ts_format.html">ts_format</a></span>(<span class="kw">line.list</span><span class="kw">=</span><span class="no">sim1</span>,
-               <span class="kw">datevar</span><span class="kw">=</span><span class="st">'adate'</span>,
-               <span class="kw">agevar</span><span class="kw">=</span><span class="st">'agegrp'</span>,
-               <span class="kw">statevar</span><span class="kw">=</span><span class="st">'state'</span>,
-               <span class="kw">syndromes</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'ili'</span>,<span class="st">'resp'</span>),
-               <span class="kw">resolution</span><span class="kw">=</span><span class="st">'week'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb3"><html><body><pre class="r">ts1</pre></body></html></div>
 <p>We now have the data aggregated by state and week.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">ts1</span>)
-<span class="co">#&gt;   agegrp      adate state sub.statevar ili resp all.visits</span>
-<span class="co">#&gt; 1      1 2018-12-30    CT           CT   0    1          8</span>
-<span class="co">#&gt; 2      1 2018-12-30    NY           NY   1    5         19</span>
-<span class="co">#&gt; 3      1 2019-01-06    CT           CT   2    0          9</span>
-<span class="co">#&gt; 4      1 2019-01-06    NY           NY   1    2         23</span>
-<span class="co">#&gt; 5      1 2019-01-13    CT           CT   0    2         10</span>
-<span class="co">#&gt; 6      1 2019-01-13    NY           NY   2    1         24</span></pre></body></html></div>
+<div class="sourceCode" id="cb4"><html><body><pre class="r">head(ts1)
+#&gt;   agegrp      adate state sub.statevar ili resp all.visits
+#&gt; 1      1 2018-12-30    CT           CT   0    1          8
+#&gt; 2      1 2018-12-30    NY           NY   1    5         19
+#&gt; 3      1 2019-01-06    CT           CT   2    0          9
+#&gt; 4      1 2019-01-06    NY           NY   1    2         23
+#&gt; 5      1 2019-01-13    CT           CT   0    2         10
+#&gt; 6      1 2019-01-13    NY           NY   2    1         24</pre></body></html></div>
 <p>We will now analyze syndromic surveillance data from emergency departments in New York City</p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">combo1</span>)
-<span class="co">#&gt; # A tibble: 6 x 7</span>
-<span class="co">#&gt;   ddate      borough  agec          ili  resp total.visits state</span>
-<span class="co">#&gt;   &lt;date&gt;     &lt;fct&gt;    &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;        &lt;dbl&gt; &lt;chr&gt;</span>
-<span class="co">#&gt; 1 2016-01-01 Bronx    i. u5y         46   121          127 NY   </span>
-<span class="co">#&gt; 2 2016-01-01 Bronx    iii. 18-64y    11   112          922 NY   </span>
-<span class="co">#&gt; 3 2016-01-01 Bronx    ii. 5-17y      15    35          142 NY   </span>
-<span class="co">#&gt; 4 2016-01-01 Bronx    iv. 65+y        1    39          116 NY   </span>
-<span class="co">#&gt; 5 2016-01-01 Bronx    v. All ages    73   307         1598 NY   </span>
-<span class="co">#&gt; 6 2016-01-01 Citywide i. u5y        223   485          391 NY</span></pre></body></html></div>
-<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">excess_cases1</span> <span class="kw">&lt;-</span>
-  <span class="fu"><a href="../reference/excessCases.html">excessCases</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">combo1</span>,
-              <span class="kw">sub.statevar</span>  <span class="kw">=</span> <span class="st">"borough"</span>,
-              <span class="kw">datevar</span>       <span class="kw">=</span> <span class="st">"ddate"</span>,
-              <span class="kw">agevar</span>        <span class="kw">=</span> <span class="st">"agec"</span>,
-              <span class="kw">statevar</span>      <span class="kw">=</span> <span class="st">"state"</span>,
-              <span class="kw">denom.var</span>     <span class="kw">=</span> <span class="st">"total.visits"</span>,
-              <span class="kw">use.syndromes</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ili"</span>, <span class="st">"resp"</span>),
-              <span class="kw">adj.flu</span>       <span class="kw">=</span><span class="st">'auto'</span>,
-              <span class="kw">extrapolation.date</span> <span class="kw">=</span> <span class="st">"2020-03-01"</span>,
-              <span class="kw">time.res</span><span class="kw">=</span><span class="st">'week'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb5"><html><body><pre class="r">head(combo1)
+#&gt; # A tibble: 6 x 7
+#&gt;   ddate      borough  agec          ili  resp total.visits state
+#&gt;   <date><fct><chr><dbl><dbl><dbl><chr>
+#&gt; 1 2016-01-01 Bronx    i. u5y         46   121          127 NY   
+#&gt; 2 2016-01-01 Bronx    iii. 18-64y    11   112          922 NY   
+#&gt; 3 2016-01-01 Bronx    ii. 5-17y      15    35          142 NY   
+#&gt; 4 2016-01-01 Bronx    iv. 65+y        1    39          116 NY   
+#&gt; 5 2016-01-01 Bronx    v. All ages    73   307         1598 NY   
+#&gt; 6 2016-01-01 Citywide i. u5y        223   485          391 NY</chr></dbl></dbl></dbl></chr></fct></date></pre></body></html></div>
+<div class="sourceCode" id="cb6"><html><body><pre class="r">excess_cases1 </pre></body></html></div>
 </div>
 <div id="plot-the-results-in-an-interactive-dashboard" class="section level2">
 <h2 class="hasAnchor">
@@ -152,10 +141,7 @@
 <div id="extract-the-quantities-of-interest" class="section level2">
 <h2 class="hasAnchor">
 <a href="#extract-the-quantities-of-interest" class="anchor"></a>Extract the quantities of interest</h2>
-<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">unexplained.cases</span> <span class="kw">&lt;-</span>
-  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
-                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ili"</span>,
-                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"unexplained.cases"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r">unexplained.cases </pre></body></html></div>
 <div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/matplot.html">matplot</a></span>(<span class="no">unexplained.cases</span>[,,<span class="fl">5</span>], <span class="kw">type</span><span class="kw">=</span><span class="st">'l'</span>, <span class="kw">bty</span><span class="kw">=</span><span class="st">'l'</span>)</pre></body></html></div>
 <p><img src="YourData_files/figure-html/unnamed-chunk-10-1.png" width="700"></p>
 </div>
@@ -176,7 +162,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
 </div>
 
       </footer>
