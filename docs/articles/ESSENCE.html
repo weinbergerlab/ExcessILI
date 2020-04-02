@@ -170,12 +170,15 @@ library(cdcfluview)
 <p>We need to specify the names of the relevant variables in the dataset ds1. We will fit the regression through the end of Feb 2020 and then extrapolate forward based on the seasonal baseline and observed flu activity. We adjust for flu using the ‘auto’ option, which will download the latest NREVSS testing data</p>
 <div class="sourceCode" id="cb9"><html><body><pre class="r">excess_cases1 </pre></body></html></div>
 </div>
-<div id="interactive-dashboard" class="section level2">
+<div id="generate-an-interactive-dashboard" class="section level2">
 <h2 class="hasAnchor">
-<a href="#interactive-dashboard" class="anchor"></a>Interactive dashboard</h2>
+<a href="#generate-an-interactive-dashboard" class="anchor"></a>Generate an interactive dashboard</h2>
 <p>You can take the results of the excessCases function and generate an interactive dashboard by running the following line. This is especially useful if you have a lot of regions, age groups, and syndromes to explore. You can also view the time series of raw cases, the proportion, or the observed/expected.</p>
 <div class="sourceCode" id="cb10"><html><body><pre class="r">#dashboardPlot(excess_cases1)</pre></body></html></div>
-<p>You also might want to generate static version of these plots</p>
+</div>
+<div id="generate-static-versions-of-the-plots" class="section level2">
+<h2 class="hasAnchor">
+<a href="#generate-static-versions-of-the-plots" class="anchor"></a>Generate static versions of the plots</h2>
 <div id="extract-the-quantities-of-interest" class="section level3">
 <h3 class="hasAnchor">
 <a href="#extract-the-quantities-of-interest" class="anchor"></a>Extract the quantities of interest</h3>

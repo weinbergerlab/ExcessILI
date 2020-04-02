@@ -146,12 +146,13 @@ excess_cases1 <-
 	              extrapolation.date = "2020-03-01",
 	              time.res='day')
 ```
-## Interactive dashboard
+## Generate an interactive dashboard
 You can take the results of the excessCases function and generate an interactive dashboard by running the following line. This is especially useful if you have a lot of regions, age groups, and syndromes to explore. You can also view the time series of raw cases, the proportion, or the observed/expected.
 ```{r, eval=F}
 #dashboardPlot(excess_cases1)
 ```
-You also might want to generate static version of these plots
+
+## Generate static versions of the plots
 
 ### Extract the quantities of interest
 
