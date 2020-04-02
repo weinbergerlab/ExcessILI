@@ -54,13 +54,10 @@
   </a>
   <ul class="dropdown-menu" role="menu">
 <li>
+      <a href="../articles/ESSENCE.html">Going from line list data to an interactive app</a>
+    </li>
+    <li>
       <a href="../articles/ILINet.html">Using ExcessILI with ILINet</a>
-    </li>
-    <li>
-      <a href="../articles/SampleWorkflowESSENCE.html">Going from line list data to an interactive app</a>
-    </li>
-    <li>
-      <a href="../articles/YourData.html">Using ExcessILI with arbritrary data</a>
     </li>
   </ul>
 </li>
@@ -75,7 +72,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="ILINet_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using ExcessILI with ILINet</h1>
@@ -90,9 +87,8 @@
 
     
     
-<div class="sourceCode" id="cb1"><html><body><pre class="r">library(ExcessILI)
-library(cdcfluview)
-#&gt; Warning: package 'cdcfluview' was built under R version 3.6.3</pre></body></html></div>
+<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ExcessILI</span>)
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">cdcfluview</span>)</pre></body></html></div>
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
@@ -102,25 +98,37 @@ library(cdcfluview)
 <div id="download-the-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#download-the-data" class="anchor"></a>Download the data</h2>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="fu">ilinet</span>(<span class="kw">region</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"state"</span>))</pre></body></html></div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r">ili.data$state     AK    AL    AR    AZ    CA    CO    CT    DE    GA    HI    IA    ID 
-#&gt;    43  2097   244  7949 14858     0    15     0  3151   665   149    34 
-#&gt;    IL    IN    KS    KY    LA    MA    MD    ME    MI    MN    MO    MS 
-#&gt; 24448  1783   866  1034  1169  6273   472  2095  4301   842   680  5045 
-#&gt;    MT    NC    ND    NE    NH    NJ    NM    NV    NY    OH    OK    OR 
-#&gt;   439  2177   106   595  1018  1286   958  2629  1638  5406     0   676 
-#&gt;    PA    RI    SC    SD    TN    TX    UT    VA    VT    WA    WI    WV 
-#&gt;  5436  1845   841     0  3427 11851     0 15389   359   344   594  3141 
-#&gt;    WY 
-#&gt;  1141
+<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/cdcfluview/man/ilinet.html">ilinet</a></span>(<span class="kw">region</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"state"</span>))</pre></body></html></div>
+<div class="sourceCode" id="cb3"><html><body><pre class="r"><span class="no">ili.data</span>$<span class="no">state</span> <span class="kw">&lt;-</span> <span class="no">state.abb</span>[<span class="fu"><a href="https://rdrr.io/r/base/match.html">match</a></span>(<span class="no">ili.data</span>$<span class="no">region</span>, <span class="no">state.name</span>)]
+<span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="no">ili.data</span>[, <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"state"</span>, <span class="st">"week_start"</span>, <span class="st">"ilitotal"</span>, <span class="st">"total_patients"</span>)]
+<span class="no">ili.data</span><span class="kw">&lt;-</span><span class="no">ili.data</span>[!<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">ili.data</span>$<span class="no">total_patients</span>),]
+<span class="no">ili.data.spl</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/split.html">split</a></span>(<span class="no">ili.data</span>, <span class="no">ili.data</span>$<span class="no">state</span>)
+<span class="no">min</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/lapply.html">sapply</a></span>(<span class="no">ili.data.spl</span>, <span class="kw">function</span>(<span class="no">x</span>)  <span class="fu"><a href="https://rdrr.io/r/base/Extremes.html">min</a></span>(<span class="no">x</span>$<span class="no">total_patients</span>))
+<span class="no">min</span>
+<span class="co">#&gt;    AK    AL    AR    AZ    CA    CO    CT    DE    GA    HI    IA    ID    IL </span>
+<span class="co">#&gt;    43  2097   244  7949 14858     0    15     0  3151   665   149    34 24448 </span>
+<span class="co">#&gt;    IN    KS    KY    LA    MA    MD    ME    MI    MN    MO    MS    MT    NC </span>
+<span class="co">#&gt;  1783   866  1034  1169  6273   472  2095  4301   842   680  5045   439  2177 </span>
+<span class="co">#&gt;    ND    NE    NH    NJ    NM    NV    NY    OH    OK    OR    PA    RI    SC </span>
+<span class="co">#&gt;   106   595  1018  1286   958  2629  1638  5406     0   676  5436  1845   841 </span>
+<span class="co">#&gt;    SD    TN    TX    UT    VA    VT    WA    WI    WV    WY </span>
+<span class="co">#&gt;     0  3427 11851     0 15389   359   344   594  3141  1141</span>
 
-state.select0) ]
-ili.data </pre></body></html></div>
+<span class="no">state.select</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">min</span>)[<span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="no">min</span><span class="kw">&gt;</span><span class="fl">0</span>) ]
+<span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="no">ili.data</span>[<span class="no">ili.data</span>$<span class="no">state</span> <span class="kw">%in%</span> <span class="no">state.select</span>,]</pre></body></html></div>
 </div>
 <div id="run-the-main-analysis-function-adjusting-for-flu-using-nrevss-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#run-the-main-analysis-function-adjusting-for-flu-using-nrevss-data" class="anchor"></a>Run the main analysis function, adjusting for flu using NREVSS data</h2>
-<div class="sourceCode" id="cb4"><html><body><pre class="r">excess_cases1 </pre></body></html></div>
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="no">excess_cases1</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessCases.html">excessCases</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">ili.data</span>,
+              <span class="kw">datevar</span>       <span class="kw">=</span> <span class="st">"week_start"</span>,
+              <span class="kw">statevar</span>      <span class="kw">=</span> <span class="st">"state"</span>,
+              <span class="kw">denom.var</span>     <span class="kw">=</span> <span class="st">"total_patients"</span>,
+              <span class="kw">adj.flu</span>       <span class="kw">=</span> <span class="st">"auto"</span>,
+              <span class="kw">use.syndromes</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ilitotal"</span>),
+              <span class="kw">extrapolation.date</span> <span class="kw">=</span> <span class="st">"2020-03-01"</span>,
+              <span class="kw">time.res</span><span class="kw">=</span><span class="st">'week'</span>)</pre></body></html></div>
 </div>
 <div id="plot-the-results-in-an-interactive-dashboard" class="section level2">
 <h2 class="hasAnchor">
@@ -130,12 +138,83 @@ ili.data </pre></body></html></div>
 <div id="extract-the-quantities-of-interest" class="section level2">
 <h2 class="hasAnchor">
 <a href="#extract-the-quantities-of-interest" class="anchor"></a>Extract the quantities of interest</h2>
-<div class="sourceCode" id="cb6"><html><body><pre class="r">dates </pre></body></html></div>
-<div class="sourceCode" id="cb7"><html><body><pre class="r">rr </pre></body></html></div>
-<p><img src="ILINet_files/figure-html/unnamed-chunk-7-1.png" width="480"></p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r">par(mfrow=c(4,4), mar=c(2,2,1,1))
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="no">dates</span> <span class="kw">&lt;-</span>
+  <span class="no">excess_cases1</span><span class="kw">[[</span><span class="fl">1</span>]]<span class="kw">[[</span><span class="fl">1</span>]]<span class="kw">[[</span><span class="fl">1</span>]]$<span class="no">date</span>
 
-dates </pre></body></html></div>
+<span class="no">unexplained.cases</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"unexplained.cases"</span>)
+
+<span class="no">unexplained.log.rr</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"resid1"</span>)
+
+<span class="no">denom</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"denom"</span>)
+
+
+<span class="no">upi</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"upi"</span>)
+
+<span class="no">lpi</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"lpi"</span>)
+
+<span class="no">obs</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"y"</span>)
+
+<span class="no">pred</span><span class="kw">&lt;-</span>  <span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                <span class="kw">syndrome</span> <span class="kw">=</span> <span class="st">"ilitotal"</span>,
+                <span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="st">"pred"</span>)
+
+<span class="no">result.object</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span>(<span class="st">'dates'</span><span class="kw">=</span><span class="no">dates</span>,
+       <span class="st">'obs'</span><span class="kw">=</span><span class="no">obs</span>[,,<span class="fl">1</span>],
+       <span class="st">'pred'</span><span class="kw">=</span><span class="no">pred</span>[,,<span class="fl">1</span>],
+       <span class="st">'unexplained.cases'</span><span class="kw">=</span><span class="no">unexplained.cases</span>[,,<span class="fl">1</span>],
+       <span class="st">'unexplained.log.rr'</span><span class="kw">=</span><span class="no">unexplained.log.rr</span>[,,<span class="fl">1</span>])
+
+<span class="co"># saveRDS(result.object,'extracted.output.ilinet.rds')</span></pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">rr</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/sort.html">sort</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/Log.html">exp</a></span>(<span class="no">unexplained.log.rr</span>[<span class="fl">232</span>,,<span class="fl">1</span>]), <span class="kw">decreasing</span><span class="kw">=</span><span class="no">T</span>)
+
+<span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span>(<span class="kw">mfrow</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">1</span>,<span class="fl">1</span>))
+<span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="no">rr</span>),<span class="kw">x</span><span class="kw">=</span><span class="no">rr</span>, <span class="kw">yaxt</span><span class="kw">=</span><span class="st">'n'</span>, <span class="kw">col</span><span class="kw">=</span><span class="st">'white'</span>)
+<span class="fu"><a href="https://rdrr.io/r/graphics/abline.html">abline</a></span>(<span class="kw">v</span><span class="kw">=</span><span class="fl">1</span>, <span class="kw">lty</span><span class="kw">=</span><span class="fl">2</span>)
+<span class="fu"><a href="https://rdrr.io/r/graphics/text.html">text</a></span>(<span class="kw">y</span><span class="kw">=</span><span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="no">rr</span>),<span class="kw">x</span><span class="kw">=</span><span class="no">rr</span>, <span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">rr</span>), <span class="kw">yaxt</span><span class="kw">=</span><span class="st">'n'</span>, <span class="kw">cex</span><span class="kw">=</span><span class="fl">0.5</span>)</pre></body></html></div>
+<p><img src="ILINet_files/figure-html/unnamed-chunk-7-1.png" width="480"></p>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span>(<span class="kw">mfrow</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">4</span>,<span class="fl">4</span>), <span class="kw">mar</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">2</span>,<span class="fl">2</span>,<span class="fl">1</span>,<span class="fl">1</span>))
+
+<span class="no">dates</span> <span class="kw">&lt;-</span> <span class="no">result.object</span>$<span class="no">dates</span>
+<span class="no">states</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html">dimnames</a></span>(<span class="no">pred</span>)<span class="kw">[[</span><span class="fl">2</span>]]
+<span class="kw">for</span>(<span class="no">i</span> <span class="kw">in</span> <span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">pred</span>)[<span class="fl">2</span>]){
+  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">dates</span>[<span class="fl">180</span>:<span class="fl">233</span>],
+       <span class="no">pred</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>]/<span class="no">denom</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>],
+       <span class="kw">type</span><span class="kw">=</span><span class="st">'l'</span>,
+       <span class="kw">col</span><span class="kw">=</span><span class="st">'red'</span>,
+       <span class="kw">bty</span><span class="kw">=</span><span class="st">'l'</span>,
+       <span class="kw">main</span><span class="kw">=</span><span class="no">states</span>[<span class="no">i</span>])
+
+  <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span>(<span class="no">dates</span>[<span class="fl">180</span>:<span class="fl">233</span>],
+         <span class="no">obs</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>]/<span class="no">denom</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>],
+         <span class="kw">type</span><span class="kw">=</span><span class="st">'l'</span>,
+         <span class="kw">col</span><span class="kw">=</span><span class="st">'black'</span>)
+
+  <span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html">polygon</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">dates</span>[<span class="fl">180</span>:<span class="fl">233</span>],
+            <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span>(<span class="no">dates</span>[<span class="fl">180</span>:<span class="fl">233</span>])),
+          <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">lpi</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>]/<span class="no">denom</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>],
+            <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span>(<span class="no">upi</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>]/<span class="no">denom</span>[<span class="fl">180</span>:<span class="fl">233</span>,<span class="no">i</span>,<span class="fl">1</span>])),
+          <span class="kw">col</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/rgb.html">rgb</a></span>(<span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="kw">alpha</span> <span class="kw">=</span> <span class="fl">0.1</span>),
+          <span class="kw">border</span> <span class="kw">=</span> <span class="fl">NA</span>)
+}</pre></body></html></div>
 <p><img src="ILINet_files/figure-html/unnamed-chunk-8-1.png" width="960"><img src="ILINet_files/figure-html/unnamed-chunk-8-2.png" width="960"><img src="ILINet_files/figure-html/unnamed-chunk-8-3.png" width="960"></p>
 </div>
   </div>
@@ -155,7 +234,7 @@ dates </pre></body></html></div>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>

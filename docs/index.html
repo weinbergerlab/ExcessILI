@@ -81,23 +81,25 @@
 <div id="excessili" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#excessili" class="anchor"></a>ExcessILI</h1></div>
-<p>The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets into time series and then the analysis of these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data or formatted time series data. An rshiny app is provided to examine data products.</p>
+<p>ExcessILI facilitates formatting line list data from syndromic surveillance datasets into time series, and enables analysis of these data to detect increases in reporting above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data, or formatted time series data. An <a href="https://shiny.rstudio.com/">rshiny</a> app is provided to examine data products.</p>
 </div>
 <div id="installation" class="section level1">
 <h1 class="hasAnchor">
 <a href="#installation" class="anchor"></a>Installation</h1>
-<div class="sourceCode" id="cb1"><pre class="r"># Currently, ExcessILI is not availble on CRAN
-# install.packages("ExcessILI")
+<div class="sourceCode" id="cb1"><pre class="r"><span class="co"># Currently, ExcessILI is not availble on CRAN</span>
+<span class="co"># install.packages("ExcessILI")</span>
 
-# Install development version from GitHub
-devtools::install_github("weinbergerlab/ExcessILI")</pre></div>
-<p>ExcessILI’s dependencies require the packages <code>gdal</code> and <code>udunits</code>, which cannot be installed using R’s package manager. If ExcessILI installation fails for this reason, you’ll need to install these by hand. For installation of these two packages on OS X, we recommend using a package manager such as <a href="https://brew.sh">brew</a>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" title="1"><span class="ex">brew</span> install gdal udunits</a></code></pre></div>
+<span class="co"># Install development version from GitHub. This requires that the 'devtools'</span>
+<span class="co"># package be installed.</span>
+<span class="kw">if</span> (!<span class="fu"><a href="https://rdrr.io/r/base/library.html">require</a></span>(<span class="st">"devtools"</span>)) {
+  <span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html">install.packages</a></span>(<span class="st">"devtools"</span>)
+}
+<span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"weinbergerlab/ExcessILI"</span>, <span class="kw">dependencies</span> <span class="kw">=</span> <span class="fl">TRUE</span>, <span class="kw">build_vignettes</span> <span class="kw">=</span> <span class="fl">FALSE</span>)</pre></div>
 </div>
 <div id="usage" class="section level1">
 <h1 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h1>
-<p>Try some examples in the vignettes <code>vignette("YourData")</code> and <code><a href="articles/ILINet.html">vignette("ILINet")</a></code></p>
+<p>Try some examples in the vignettes <code><a href="articles/ESSENCE.html">vignette("ESSENCE")</a></code> and <code><a href="articles/ILINet.html">vignette("ILINet")</a></code>.</p>
 </div>
 
   </div>
@@ -130,7 +132,7 @@ devtools::install_github("weinbergerlab/ExcessILI")</pre></div>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>
