@@ -2,7 +2,7 @@
 title: "Going from line list data to an interactive app"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteIndexEntry{Using ESSENCE data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 author: "Dan Weinberger"
@@ -145,7 +145,7 @@ excess_cases1 <-
 ## Interactive dashboard
 You can take the results of the excessCases function and generate an interactive dashboard by running the following line. This is especially useful if you have a lot of regions, age groups, and syndromes to explore. You can also view the time series of raw cases, the proportion, or the observed/expected.
 ```{r, eval=F}
-dashboardPlot(excess_cases1)
+#dashboardPlot(excess_cases1)
 ```
 You also might want to generate static version of these plots
 
