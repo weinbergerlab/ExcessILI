@@ -152,6 +152,7 @@ You can take the results of the excessCases function and generate an interactive
 #dashboardPlot(excess_cases1)
 ```
 
+<iframe src = "https://weinbergerlab.shinyapps.io/NYC_syndromic/" width="900" height="750" class="shiny-app">
 ## Generate static versions of the plots
 
 ### Extract the quantities of interest
