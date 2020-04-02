@@ -31,6 +31,7 @@ brew install gdal udunits
 
 # Usage
 
-Try some examples in the vignettes `vignette("YourData")` and 
+- To see how to go from line list data to an interactive app, see this [vigenette](https://weinbergerlab.github.io/ExcessILI/articles/ESSENCE.html)
+- For an example of how to use the analysis functions with the CDC's ILINet data, see [here](https://weinbergerlab.github.io/ExcessILI/articles/ILINet.html)
 `vignette("ILINet")`
 
