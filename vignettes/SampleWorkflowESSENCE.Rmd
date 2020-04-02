@@ -1,0 +1,238 @@
+---
+title: "Going from line list data to an interactive app"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: "Dan Weinberger"
+date: "3/25/2020"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(devtools)
+```
+
+## Overview
+
+The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets (such as those stored in ESSENCE) into daily or weekly time series, and then analyzing these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity
+(using data from [NREVSS](https://www.cdc.gov/surveillance/nrevss/index.html)
+and/or state-specific RSV activity (based on Google search volume). In this example, we will demonstrate how to prepare the data obtained from ESSENCE to be used with this package and then how to run the analyses. Thanks to Sara Chronister from Maricopa County, AZ for contributing to this workflow.
+
+## Getting started
+This package is not available on CRAN so needs to be installed directly from Github. Make sure you have the 'devtools' package installed.
+```{r}
+# Install development version from GitHub
+library(devtools)
+devtools::install_github("weinbergerlab/ExcessILI")
+```
+
+**We also recommend installing the cdcfluview package to take full advantage of the ExcessILI package. If you are using the Enterpise version of RStudio on the BioSense platform, cdcfluview might not install correctly.**
+
+ExcessILI’s dependencies require the packages gdal and udunits, which cannot be installed using R’s package manager. If ExcessILI installation fails for this reason, you’ll need to install these by hand. For installation of these two packages on OS X, we recommend using a package manager such as brew.
+
+```{r, eval=F}
+brew install gdal udunits
+```
+
+## Prepare the data
+
+We ultimately want to have a dataset that looks like this, where we have a line for each case, a column for the state (2 digit state), a column for smaller geographic levels if any (e.g., counties, hospitals), a column for the age group, the day of admissions (in a YYY-MM-DD date format), and flags for whether the admission was related to a syndrome of interest, such as "ILI" or "respiratory". You should have a row in your data for every admission, *regardless of the cause.* 
+
+```{r, simulate, echo=F}
+n.obs<-100000
+set.seed(123)
+
+sim1       <- as.data.frame(matrix(NA,nrow=n.obs, ncol=5))
+names(sim1)<- c('state','adate','agegrp','ili','resp')
+
+sim1$state   <- 'NY'
+sim1$borough  <- c(rep('Manhattan', times=n.obs*0.3), rep("Bronx", times=n.obs*0.7))
+sim1$agegrp <- sample(c('i. u5y', 'ii. 5-17y', 'v. 65+y'), n.obs, replace=T)
+sim1$adate  <- sample(seq.Date(from=as.Date('2019-01-01'),
+                               by='day',
+                               length.out=500),
+                      100000,
+                      replace=T)
+sim1$ili    <- rbinom(n=n.obs, size=1, prob=0.05)
+sim1$resp   <- rbinom(n=n.obs, size=1, prob=0.1)
+ds1<-sim1
+```
+
+```{r}
+head(ds1)
+```
+
+## Format line list into a time series
+We can aggregate by day or week using the function "ts_format()"
+```{r}
+ts1<-ts_format(line.list=ds1,
+               datevar='adate',
+               agevar='agegrp',
+               statevar='state', 
+               sub.statevar = 'borough',
+               syndromes=c('ili','resp'),
+               resolution='day')
+```
+
+```{r}
+head(ts1[,c('agegrp','adate','state','borough', 'ili', 'resp', 'all.visits')])
+```
+
+As an example of how to prepare line list data to be used in the ts_format function, starting from ESSENCE data, here is code from Sara Chronister
+```{r, eval=F}
+ds1 <- all_visits %>%
+         # extract date only from C_Visit_Date_Time
+  mutate(Visit_Date = as.Date(C_Visit_Date_Time),
+         # fill in missing HasBeenI with 0
+         ifelse(is.na(HasBeenI),0,HasBeenI),
+         # concatenate all _flat variables into one classification variable
+         classification = paste(Category_flat,SubCategory_flat,CCDDCategory_flat,sep=";"),
+         # flag for COVID-like illness
+         COVIDlike = ifelse(str_detect(CCDDCategory_flat,"Fever and Cough-Sob-DiffBr neg Influenza DD v1"),1,0),
+         # flag for influenza-like illness
+         ili = ifelse(str_detect(CCDDCategory_flat,"ILI CCDD v1"),1,0),
+         # flag for cough
+         cough = ifelse(str_detect(SubCategory_flat,"Cough"),1,0),
+         # flag for respiratory
+         resp = ifelse(str_detect(Category_flat,"Resp"),1,0),
+         # age groups
+         Age = as.numeric(Age),
+         agegrp = case_when(Age>=0 & Age<20~"00-19Y",
+                            Age>=20 & Age<45~"20-44Y",
+                            Age>=45 & Age<65~"45-64Y",
+                            Age>=65 & Age<150~"65+Y"),
+         agegrp = ifelse(is.na(agegrp),"UNK",agegrp),
+         # state variable (for use when multiple counties are pulled in)
+         state = 'AZ',
+         county = str_remove(HospitalRegion,"AZ_"),
+         ALL = "ALL") %>%
+  filter(agegrp!="UNK")
+```
+
+## Run the analysis
+Now that we have the formatted time series, we are ready to run the analysis. You can either just fit a seasonal baseline with harmonic waves (default), or you can  adjust for influenza activity. If you were able to install the cdcfluview package and have data from the US, you can automatically adjust for influenza activity using data on influenza positive tests from NREVSS. If not, you can merge in your own influenza data with the time series formatted in the steps above, and specify the name of the flu variable.
+
+```{r, echo=F}
+ds1<- readRDS('../Data/NYC_resp_ili_combo.rds')
+ds1$state<-'NY'
+
+ds1 <- ds1[ds1$borough %in% c('Bronx', 'Brooklyn','Manhattan','Queens','Staten Island', 'Citywide'),]
+ds1$denom <- 1
+```
+
+We need to specify the names of the relevant variables in the dataset ds1. We will fit the regression through the end of Feb 2020 and then extrapolate forward based on the seasonal baseline and observed flu activity. We adjust for flu using the 'auto' option, which will download the latest NREVSS testing data
+```{r}
+excess_cases1 <-
+	  excessCases(ds = ds1,
+	              datevar       = "ddate", 
+	              agevar        = "agec",
+	              statevar      = "state",
+	              sub.statevar  = "borough",
+	              denom.var     = "denom",
+	              use.syndromes = c("ili", "resp"),
+	              adj.flu       = 'auto', #adjust using NREVSS data
+	              extrapolation.date = "2020-03-01",
+	              time.res='day')
+```
+## Interactive dashboard
+You can take the results of the excessCases function and generate an interactive dashboard by running the following line. This is especially useful if you have a lot of regions, age groups, and syndromes to explore. You can also view the time series of raw cases, the proportion, or the observed/expected.
+```{r, eval=F}
+dashboardPlot(excess_cases1)
+```
+You also might want to generate static version of these plots
+
+### Extract the quantities of interest
+
+Which syndrome do you want to plot, and over what time range?
+```{r}
+syndrome.select <- 'ili' #which syndrome do you want to plot?
+n.days<-365  #How many days to plot?
+```
+ 
+Extract the data needed to plot from the results
+```{r}
+
+dates <-
+  excess_cases1[[1]][[1]][[1]]$date
+  
+unexplained.cases <-
+  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "unexplained.cases")
+
+unexplained.log.rr <-
+  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "resid1")
+
+denom <-
+  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "denom")
+
+
+upi <-
+  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "upi")
+
+lpi <-
+  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "lpi")
+
+obs <-
+  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "y")
+
+pred<-  excessExtract(ds = excess_cases1,
+                syndrome = syndrome.select,
+                extract.quantity = "pred")
+
+```
+
+Generate the plots
+```{r, fig.width=10, fig.height=7}
+
+select.indices <- (length(dates)-n.days):length(dates)
+dates<-dates[select.indices]
+states <- dimnames(pred)[[2]]
+ages <- dimnames(pred)[[3]]
+
+for(i in 1:dim(pred)[2]){
+  par(mfrow=c(2,3))
+
+  for(j in 1:dim(pred)[3]){
+    y.range1<-range(c( pred[select.indices,i,j],obs[select.indices,i,j], upi[select.indices,i,j],0))
+  plot(dates,
+       pred[select.indices,i,j],
+       type='l',
+       col='red',
+       ylim=y.range1,
+       bty='l',
+       ylab='N cases',
+       main=paste(states[i],ages[j]))
+
+  points(dates,
+         obs[select.indices,i,j],
+         type='l',
+         col='black')
+
+  polygon(c(dates,
+            rev(dates)),
+          c(lpi[select.indices,i,j],
+            rev(upi[select.indices,i,j])),
+          col = rgb(1, 0, 0, alpha = 0.1),
+          border = NA)
+  }
+}
+```
