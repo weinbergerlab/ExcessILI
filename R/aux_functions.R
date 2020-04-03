@@ -128,6 +128,7 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 
 
 ## Evaluate results after controlling for flu and RSV
+#' @importFrom magrittr %>%
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                      extrapolation.date, adj.flu, adj.rsv, covs=character())
 {
@@ -251,8 +252,6 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
 
   covars_str <- paste(covars[!is.na(covars)], collapse=" + ")
   
-  print(covars_str)
-
   # Rsv effect varies by epiyr
   form1 <- as.formula(paste0("y.age.fit ~ ", covars_str))
   form2 <- as.formula(paste0("y.age ~ ",     covars_str))
