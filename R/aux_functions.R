@@ -27,13 +27,18 @@ rsv.google.import <- function(geo.select) {
 # Pull NREVSS testing data (% positive)
 nrevss_flu_import <- function() {
   
-  nrevvs.state <- who_nrevss(region = c("state"))
+  if (!requireNamespace("cdcfluview", quietly = TRUE)) {
+    stop("Package \"cdcfluview\" needed for this function to work. Please install it.",
+      call. = FALSE)
+  }
+
+  nrevvs.state <- cdcfluview::who_nrevss(region = c("state"))
   
   clin <- nrevvs.state[["clinical_labs"]]
   
-  data(hhs_regions)
+  data(cdcfluview::hhs_regions)
   
-  cw.file <- hhs_regions
+  cw.file <- cdcfluview::hhs_regions
   
   clin2 <- merge(clin, cw.file,
                  by.x = "region",
@@ -49,7 +54,7 @@ nrevss_flu_import <- function() {
   
   names(clin2)[1:2] <- c("state", "hhs_region")
   
-  nrevvs_hhs <- who_nrevss(region = c("hhs"))
+  nrevvs_hhs <- cdcfluview::who_nrevss(region = c("hhs"))
   
   clin.hhs <- nrevvs_hhs[["clinical_labs"]]
   clin.hhs.subsetvars <-

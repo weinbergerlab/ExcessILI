@@ -37,7 +37,7 @@ the state (2-digit state; e.g. \code{'NY'})?}
 \item{agevar}{A string. Which variable in the input data frame contains the
 age group? Use \code{'none'} if there is no age grouping in the data}
 
-\item{datevar}{A string. Which variables in the input data frame contains
+\item{datevar}{A string. Which variable in the input data frame contains
 the date?}
 
 \item{use.syndromes}{A vector with the variable names for syndromes to be
@@ -50,9 +50,8 @@ used as the denominator? For instance, all ED visits.}
 fitting the seasonal baseline? Possible values are \code{'none'} for no
 adjustment (default); 'auto': automatically downloads NREVSS data from CDC
 and matches by state and week; or specify the name of a variable in the
-the input dataframe that contains a variable for influenza. Adjust for RSV
-when fitting the seasonal baseline?  This is automatically set to
-\code{TRUE} when}
+the input dataframe that contains a variable for influenza. \strong{The
+package \code{cdcfluview} is required to use \code{'auto'}.}}
 
 \item{adj.rsv}{A string. How should RSV be adjusted for when fitting the
 seasonal baseline? Possible values are \code{'none'} for no adjustment

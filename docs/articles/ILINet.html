@@ -109,11 +109,11 @@
 <span class="co">#&gt;    AK    AL    AR    AZ    CA    CO    CT    DE    GA    HI    IA    ID    IL </span>
 <span class="co">#&gt;    43  2097   244  7949 14858     0    15     0  3151   665   149    34 24448 </span>
 <span class="co">#&gt;    IN    KS    KY    LA    MA    MD    ME    MI    MN    MO    MS    MT    NC </span>
-<span class="co">#&gt;  1783   866  1034  1169  6273   472  2095  4301   842   680  5045   439  2177 </span>
+<span class="co">#&gt;  1585   866  1034  1169  6273   472  2095  1975   842   284  5045   439  2177 </span>
 <span class="co">#&gt;    ND    NE    NH    NJ    NM    NV    NY    OH    OK    OR    PA    RI    SC </span>
-<span class="co">#&gt;   106   595  1018  1286   958  2629  1638  5406     0   676  5436  1845   841 </span>
+<span class="co">#&gt;   106   595   592  1286   958  2629  1638  4365     0   676  5436  1453   841 </span>
 <span class="co">#&gt;    SD    TN    TX    UT    VA    VT    WA    WI    WV    WY </span>
-<span class="co">#&gt;     0  3427 11851     0 15389   359   344   594  3141  1141</span>
+<span class="co">#&gt;     0  3427 11851     0 15389   359   344   594  3141   277</span>
 
 <span class="no">state.select</span><span class="kw">&lt;-</span><span class="fu"><a href="https://rdrr.io/r/base/names.html">names</a></span>(<span class="no">min</span>)[<span class="fu"><a href="https://rdrr.io/r/base/which.html">which</a></span>(<span class="no">min</span><span class="kw">&gt;</span><span class="fl">0</span>) ]
 <span class="no">ili.data</span> <span class="kw">&lt;-</span> <span class="no">ili.data</span>[<span class="no">ili.data</span>$<span class="no">state</span> <span class="kw">%in%</span> <span class="no">state.select</span>,]</pre></body></html></div>
@@ -129,7 +129,9 @@
               <span class="kw">adj.flu</span>       <span class="kw">=</span> <span class="st">"auto"</span>,
               <span class="kw">use.syndromes</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ilitotal"</span>),
               <span class="kw">extrapolation.date</span> <span class="kw">=</span> <span class="st">"2020-03-01"</span>,
-              <span class="kw">time.res</span><span class="kw">=</span><span class="st">'week'</span>)</pre></body></html></div>
+              <span class="kw">time.res</span><span class="kw">=</span><span class="st">'week'</span>)
+<span class="co">#&gt; Warning in data(cdcfluview::hhs_regions): data set 'cdcfluview::hhs_regions' not</span>
+<span class="co">#&gt; found</span></pre></body></html></div>
 </div>
 <div id="plot-the-results-in-an-interactive-dashboard" class="section level2">
 <h2 class="hasAnchor">
