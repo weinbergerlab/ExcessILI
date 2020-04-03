@@ -221,19 +221,20 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                           paste(covars.term1a, covars.term1b, sep=" + "))
 
   # If the data has day-resolution, use it as one of the mock variables
-  covars.term2  <- ifelse(time.res == 'day', 'day.of.week', NULL)
+  covars.term2  <- ifelse(time.res == 'day', 'day.of.week', NA)
 
   # Sinusoidals
   covars.term3  <- paste("sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep=" + ")
 
   # Add in user-specified covariates, if available
-  covars.term4  <- ifelse(length(covs > 0) paste(covs, collapse = " + "), NULL)
+  covars.term4  <- ifelse(length(covs > 0), paste(covs, collapse = " + "), NA)
 
   # Concatenate everything together as a string
-  covars <- paste(c(covars.term1, covars.term2, covars.term3, covars.term4),
-                  collapse=" + ")
+  covars <- c(covars.term1, covars.term2, covars.term3, covars.term4)
+
+  covars_str <- paste(covars[!is.na(covars)], collapse=" + ")
   
-  print(covars)
+  print(covars_str)
 
   # if (adj.flu=='none' && adj.rsv=='none') {
   #   if (time.res == "day") {
@@ -262,8 +263,8 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   # }
 
   # Rsv effect varies by epiyr
-  form1 <- as.formula(paste0("y.age.fit ~ ", covars))
-  form2 <- as.formula(paste0("y.age ~ ",     covars))
+  form1 <- as.formula(paste0("y.age.fit ~ ", covars_str))
+  form2 <- as.formula(paste0("y.age ~ ",     covars_str))
  
   if (sum(ds.glm$y.age, na.rm=T) >= 100) {
     mod1 <- glm(form1,
