@@ -28,6 +28,10 @@
 #' @param datevar A string. Which variable in the input data frame contains
 #'   the date?
 #'
+#' @param covs A character vector. Which, if any, variables in \code{ds} should
+#'   be treated as covariates in fitting the baseline model? Default is to not
+#'   consider any variables in \code{ds} to be covariates.
+#'
 #' @param use.syndromes A vector with the variable names for syndromes to be
 #'   tested (e.g., \code{c('ILI','respiratory')} ).
 #'
@@ -112,6 +116,7 @@ excessCases <-
            statevar='state',
            agevar='none',
            datevar,
+           covs=character(),
            use.syndromes,
            denom.var,
            adj.flu='none',
@@ -125,6 +130,9 @@ excessCases <-
   assertthat::assert_that(is.string(sub.statevar))
   assertthat::assert_that(is.string(statevar))
   assertthat::assert_that(is.string(datevar))
+  assertthat::assert_that(is.character(covs))
+  if (length(covs) > 0)
+    assertthat::assert_that(all(covs %in% names(ds)))
   assertthat::assert_that(is.character(use.syndromes))
   assertthat::assert_that(is.string(denom.var))
   assertthat::assert_that(is.string(adj.flu))
