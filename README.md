@@ -20,7 +20,7 @@ either start with line list data, or formatted time series data. An
 if (!require("devtools")) {
   install.packages("devtools")
 }
-devtools::install_github("weinbergerlab/ExcessILI", dependencies = TRUE, build_vignettes = FALSE)
+devtools::install_github("weinbergerlab/ExcessILI")
 ```
 
 # Usage
@@ -30,3 +30,9 @@ devtools::install_github("weinbergerlab/ExcessILI", dependencies = TRUE, build_v
 
 - For an example of how to use the analysis functions with CDC ILINet
   data, see `vignette("ILINet")`.
+
+# Resources
+
+- [Ask a question](mailto:daniel.weinberger@yale.edu?subject=ExcessILI)
+- [Open an issue](https://github.com/weinbergerlab/ExcessILI/issues) (GitHub
+  issues for bug reports, feature requests)
