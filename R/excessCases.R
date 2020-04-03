@@ -25,7 +25,7 @@
 #' @param agevar A string. Which variable in the input data frame contains the
 #'   age group? Use \code{'none'} if there is no age grouping in the data
 #'
-#' @param datevar A string. Which variables in the input data frame contains
+#' @param datevar A string. Which variable in the input data frame contains
 #'   the date?
 #'
 #' @param use.syndromes A vector with the variable names for syndromes to be
