@@ -211,7 +211,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   ds.glm$epiyr.index.f <- factor(ds.glm$epiyr.index.f)
   # ds.glm<-ds.glm[complete.cases(ds.glm),]
   
-  if (adj.flu=='none' & adj.rsv=='none') {
+  if (adj.flu=='none' && adj.rsv=='none') {
     if (time.res == "day") {
       covars <- paste("epiyr.index.f", 
                       "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
@@ -219,7 +219,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
       covars <- paste("epiyr.index.f",
                       "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
     }
-  } else if (adj.flu=='none' & adj.rsv!='none') {
+  } else if (adj.flu=='none' && adj.rsv!='none') {
     if (time.res == "day") {
       covars <- paste("epiyr.index.f*sqrt.rsv", 
                "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
@@ -227,7 +227,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
       covars <- paste("epiyr.index.f*sqrt.rsv", 
                       "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
     }
-  } else if (adj.flu!='none' & adj.rsv=='none') {
+  } else if (adj.flu!='none' && adj.rsv=='none') {
     if (time.res == "day") {
       covars <- paste("epiyr.index.f*log.flu", 
                       "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
@@ -235,7 +235,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
       covars <- paste("epiyr.index.f*log.flu", 
                       "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
     }
-  } else if (adj.flu!='none' & adj.rsv!='none') {
+  } else if (adj.flu!='none' && adj.rsv!='none') {
       if (time.res == "day") {
         covars <- paste("epiyr.index.f*log.flu","epiyr.index.f*sqrt.rsv", 
                         "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
