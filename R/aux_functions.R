@@ -129,7 +129,7 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 
 ## Evaluate results after controlling for flu and RSV
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
-                     extrapolation.date, adj.flu, adj.rsv)
+                     extrapolation.date, adj.flu, adj.rsv, covs=character())
 {
   date.string       <- as.Date(dimnames(ds)[[1]])
   month             <- lubridate::month(date.string)
@@ -210,49 +210,60 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   ds.glm <- ds.glm[!is.na(ds.glm$sqrt.rsv) & !is.na(ds.glm$log.flu), ]
   ds.glm$epiyr.index.f <- factor(ds.glm$epiyr.index.f)
   # ds.glm<-ds.glm[complete.cases(ds.glm),]
-  
-  if (adj.flu=='none' && adj.rsv=='none') {
-    if (time.res == "day") {
-      covars <- paste("epiyr.index.f", 
-                      "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    } else {
-      covars <- paste("epiyr.index.f",
-                      "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }
-  } else if (adj.flu=='none' && adj.rsv!='none') {
-    if (time.res == "day") {
-      covars <- paste("epiyr.index.f*sqrt.rsv", 
-               "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    } else {
-      covars <- paste("epiyr.index.f*sqrt.rsv", 
-                      "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }
-  } else if (adj.flu!='none' && adj.rsv=='none') {
-    if (time.res == "day") {
-      covars <- paste("epiyr.index.f*log.flu", 
-                      "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    } else {
-      covars <- paste("epiyr.index.f*log.flu", 
-                      "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }
-  } else if (adj.flu!='none' && adj.rsv!='none') {
-      if (time.res == "day") {
-        covars <- paste("epiyr.index.f*log.flu","epiyr.index.f*sqrt.rsv", 
-                        "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-      } else {
-        covars <- paste("epiyr.index.f*log.flu", "epiyr.index.f*sqrt.rsv",
-                        "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-      }
-  }
 
-  form1 <- as.formula(
-    paste0(paste("y.age.fit ~",covars))
-  )
+  # Term 1a,1b adjust for flu and RSV. If both of them aren't specified, 
+  # then only one 'epiyr.index.f' is to be specified.
+  covars.term1a <- ifelse(adj.flu == 'none', 'epiyr.index.f', 'epiyr.index.f*log.flu')
+  covars.term1b <- ifelse(adj.rsv == 'none', 'epiyr.index.f', 'epiyr.index.f*sqrt.rsv')
+
+  covars.term1  <- ifelse(identical(covars.term1a, covars.term1b),
+                          covars.term1a, 
+                          paste(covars.term1a, covars.term1b, sep=" + "))
+
+  # If the data has day-resolution, use it as one of the mock variables
+  covars.term2  <- ifelse(time.res == 'day', 'day.of.week', NULL)
+
+  # Sinusoidals
+  covars.term3  <- paste("sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep=" + ")
+
+  # Add in user-specified covariates, if available
+  covars.term4  <- ifelse(length(covs > 0) paste(covs, collapse = " + "), NULL)
+
+  # Concatenate everything together as a string
+  covars <- paste(c(covars.term1, covars.term2, covars.term3, covars.term4),
+                  collapse=" + ")
   
+  print(covars)
+
+  # if (adj.flu=='none' && adj.rsv=='none') {
+  #   if (time.res == "day") {
+  #     covars <- paste("epiyr.index.f", "day.of.week", sines, sep="+")
+  #   } else {
+  #     covars <- paste("epiyr.index.f", sines, sep="+")
+  #   }
+  # } else if (adj.flu=='none' && adj.rsv!='none') {
+  #   if (time.res == "day") {
+  #     covars <- paste("epiyr.index.f*sqrt.rsv", "day.of.week", sines, sep="+")
+  #   } else {
+  #     covars <- paste("epiyr.index.f*sqrt.rsv", sines, sep="+")
+  #   }
+  # } else if (adj.flu!='none' && adj.rsv=='none') {
+  #   if (time.res == "day") {
+  #     covars <- paste("epiyr.index.f*log.flu", "day.of.week", sines, sep="+")
+  #   } else {
+  #     covars <- paste("epiyr.index.f*log.flu", sines, sep="+")
+  #   }
+  # } else if (adj.flu!='none' && adj.rsv!='none') {
+  #     if (time.res == "day") {
+  #       covars <- paste("epiyr.index.f*log.flu","epiyr.index.f*sqrt.rsv", "day.of.week", sines, sep="+")
+  #     } else {
+  #       covars <- paste("epiyr.index.f*log.flu", "epiyr.index.f*sqrt.rsv", sines, sep="+")
+  #     }
+  # }
+
   # Rsv effect varies by epiyr
-  form2 <- as.formula(
-    paste0(paste("y.age ~",covars))
-  )
+  form1 <- as.formula(paste0("y.age.fit ~ ", covars))
+  form2 <- as.formula(paste0("y.age ~ ",     covars))
  
   if (sum(ds.glm$y.age, na.rm=T) >= 100) {
     mod1 <- glm(form1,
@@ -306,7 +317,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            unexplained.cases = unexplained.cases, 
            denom             = exp(ds.glm$log.offset),
            sparse.group      = F)
-  }else{
+  } else {
     out.list <-
       list(date              = ds.glm$date,
            y                 = ds.glm$y.age,

@@ -7,7 +7,7 @@
 #'   variations in average incidence between years, and interactions between
 #'   RSV or flu allow these effects to vary over time.
 #'
-#' @param ds A dataframe, with a format similar to the one produced by the
+#' @param ds A data.frame, with a format similar to the one produced by the
 #'   \code{\link{ts_format}} function. There should be a row for each time
 #'   period (week or day), location (e.g. state, county), and age category.
 #'   There must be a column for date (\code{YYYY-MM-DD}), age category,
@@ -124,21 +124,23 @@ excessCases <-
            time.res='day',
            extrapolation.date='2020-03-01') {
 
+  att       <- assertthat::assert_that
   is.string <- assertthat::is.string
 
-  assertthat::assert_that(is.data.frame(ds))
-  assertthat::assert_that(is.string(sub.statevar))
-  assertthat::assert_that(is.string(statevar))
-  assertthat::assert_that(is.string(datevar))
-  assertthat::assert_that(is.character(covs))
+  att(is.data.frame(ds))
+  att(is.string(sub.statevar))
+  att(is.string(statevar))
+  att(is.string(datevar))
+  att(is.character(covs))
+
   if (length(covs) > 0)
-    assertthat::assert_that(all(covs %in% names(ds)))
-  assertthat::assert_that(is.character(use.syndromes))
-  assertthat::assert_that(is.string(denom.var))
-  assertthat::assert_that(is.string(adj.flu))
-  assertthat::assert_that(is.string(adj.rsv))
-  assertthat::assert_that(is.string(time.res) &&
-                          time.res %in% c('day', 'week', 'month'))
+    att(all(covs %in% names(ds)))
+
+  att(is.character(use.syndromes))
+  att(is.string(denom.var))
+  att(is.string(adj.flu))
+  att(is.string(adj.rsv))
+  att(is.string(time.res) && time.res %in% c('day', 'week', 'month'))
   # Need a better test here
   # assertthat::assert_that(!is.null(extrapolation.date)) 
 
@@ -219,11 +221,12 @@ excessCases <-
   cols_of_interest <-
     c(agevar, datevar,
       'MMWRyear', 'MMWRweek',
+      covs,
       sub.statevar,
       use.syndromes,
       denom.var,
-      flu.var,
-      rsv.var)
+      'flu.var',
+      'rsv.var')
 
   if (any( !(cols_of_interest %in% names(ds1.df)) ))
     stop(paste0("Some of 'cols_of_interest' were not in 'ds1.df'.\n\n",
@@ -235,25 +238,18 @@ excessCases <-
                         intersect(names(ds1.df), cols_of_interest)),
                       collapse=", ")))
 
-  combo2.sub <-
-    ds1.df[, c(agevar, datevar,
-               'MMWRyear', 'MMWRweek',
-               sub.statevar,
-               use.syndromes,
-               denom.var,
-               'flu.var',
-               'rsv.var')]
+  combo2.sub <- ds1.df[, cols_of_interest]
   
-  if(time.res=='week'){
+  if(time.res == 'week'){
     combo2.sub[,datevar] <-
       lubridate::floor_date(combo2.sub[,datevar], unit='week')
   }
   
   ds2 <-
-    reshape_ds(ds2=combo2.sub,
-               sub.statevar=sub.statevar,
-               agevar=agevar,
-               datevar=datevar)
+    reshape_ds(ds2          = combo2.sub,
+               sub.statevar = sub.statevar,
+               agevar       = agevar,
+               datevar      = datevar)
  
   ages <- dimnames(ds2)[[3]]
   geos <- dimnames(ds2)[[2]]
@@ -267,6 +263,7 @@ excessCases <-
         syndrome  = x,
         adj.flu   = adj.flu,
         adj.rsv   = adj.rsv,
+        covs      = covs,
         denom.var = denom.var,
         time.res  = time.res,
         extrapolation.date = extrapolation.date
