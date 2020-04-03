@@ -23,6 +23,10 @@
 #' @param agevar A string. What variable contains the age group? Use 'none'
 #'   if there is no age grouping in the data
 #'
+#' @param covs A character vector. Which, if any, variables in \code{ds} should
+#'   be treated as covariates in fitting the baseline model? Default is to not
+#'   consider any variables in \code{ds} to be covariates.
+#'
 #' @param syndromes A character vector. Which variables contain counts of
 #'   syndromic data? (e.g., \code{c('ili', 'respiratory')})
 #'
@@ -70,21 +74,29 @@
 ts_format <-
   function(line.list,
            datevar, statevar, sub.statevar='none', agevar='none',
+           covs=character(),
            syndromes,
            resolution='day',
            remove.final=F) {
 
+  att       <- assertthat::assert_that
   is.string <- assertthat::is.string
 
-  assertthat::assert_that(is.data.frame(line.list))
-  assertthat::assert_that(is.string(datevar))
-  assertthat::assert_that(is.string(statevar))
-  assertthat::assert_that(is.string(sub.statevar))
-  assertthat::assert_that(is.string(agevar))
-  assertthat::assert_that(is.character(syndromes))
-  assertthat::assert_that(is.string(resolution))
-  assertthat::assert_that(any(resolution %in% c('day', 'week', 'month')))
-  assertthat::assert_that(is.logical(remove.final))
+  att(is.data.frame(line.list))
+  att(is.string(datevar))
+  att(is.string(statevar))
+  att(is.string(sub.statevar))
+  att(is.string(agevar))
+  att(is.character(covs))
+
+  # Be sure that the covariates are actually present as named in 'line.list'
+  if (length(covs) > 0)
+    att(all(covs %in% names(line.list)))
+
+  att(is.character(syndromes))
+  att(is.string(resolution))
+  att(any(resolution %in% c('day', 'week', 'month')))
+  att(is.logical(remove.final))
   
   ds1 <- line.list
   
@@ -92,35 +104,29 @@ ts_format <-
   ds1[, datevar] <- as.Date(ds1[,datevar])
   ds1[, datevar] <- lubridate::floor_date(ds1[, datevar], unit=resolution)
   
-  ds1$all.visits <-1
+  ds1$all.visits <- 1
   
   if(!(sub.statevar %in% names(ds1))){
     ds1$sub.statevar <- ds1[,statevar]
     sub.statevar <-'sub.statevar'
   }
   
-  ds1.m <- reshape2::melt(
-    ds1[,   c(datevar, statevar, sub.statevar, agevar,syndromes,'all.visits')],
-    id.vars=c(datevar, statevar, sub.statevar, agevar)
-  )
+  id_vars       <- c(agevar, datevar, statevar, sub.statevar)
+  included_vars <- c(id_vars, syndromes, 'all.visits', covs)
 
-  last.date <- max(ds1.m[,datevar])
+  ds1.molten <- reshape2::melt(ds1[, included_vars], id.vars = id_vars)
+
+  last.date <- max(ds1.molten[,datevar])
   
-  if(remove.final){
-    # remove last day from the dataset,assuming it is incomplete
-    ds1.m <- ds1.m[ ds1.m[,datevar] < last.date,] 
-  }
+  # remove last day from the dataset,assuming it is incomplete
+  if (remove.final)
+    ds1.molten <- filter(ds1.molten, datevar < last.date)
   
-  form1 <-
-    as.formula(
-      paste0(
-        paste(agevar, datevar, statevar, sub.statevar, sep='+'),
-        '~',
-        'variable'
-      )
-    )
+  as.formula(
+    paste0( paste(id_vars, collapse=" + "), ' ~ ', 'variable' )
+  ) -> form1
 
-  ds1.c <- reshape2::dcast(ds1.m, form1, fun.aggregate = sum)
+  ds1.casted <- reshape2::dcast(ds1.molten, form1, fun.aggregate = sum)
 
-  return(ds1.c)
+  return(ds1.casted)
 }
