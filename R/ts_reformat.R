@@ -89,6 +89,7 @@ ts_format <-
   att(is.string(agevar))
   att(is.character(covs))
 
+  # Be sure that the covariates are actually present as named in 'line.list'
   if (length(covs) > 0)
     att(all(covs %in% names(line.list)))
 
