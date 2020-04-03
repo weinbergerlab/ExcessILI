@@ -211,49 +211,48 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   ds.glm$epiyr.index.f <- factor(ds.glm$epiyr.index.f)
   # ds.glm<-ds.glm[complete.cases(ds.glm),]
   
-  if(adj.flu=='none' & adj.rsv=='none'){
+  if (adj.flu=='none' & adj.rsv=='none') {
     if (time.res == "day") {
       covars <- paste("epiyr.index.f", 
                       "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }else{
+    } else {
       covars <- paste("epiyr.index.f",
                       "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
     }
-  }else if(adj.flu=='none' & adj.rsv!='none'){
+  } else if (adj.flu=='none' & adj.rsv!='none') {
     if (time.res == "day") {
       covars <- paste("epiyr.index.f*sqrt.rsv", 
                "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }else{
+    } else {
       covars <- paste("epiyr.index.f*sqrt.rsv", 
                       "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
     }
-  }else if(adj.flu!='none' & adj.rsv=='none'){
+  } else if (adj.flu!='none' & adj.rsv=='none') {
     if (time.res == "day") {
       covars <- paste("epiyr.index.f*log.flu", 
                       "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }else{
+    } else {
       covars <- paste("epiyr.index.f*log.flu", 
                       "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
     }
-  }else if(adj.flu!='none' & adj.rsv!='none'){
+  } else if (adj.flu!='none' & adj.rsv!='none') {
       if (time.res == "day") {
         covars <- paste("epiyr.index.f*log.flu","epiyr.index.f*sqrt.rsv", 
                         "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-      }else{
+      } else {
         covars <- paste("epiyr.index.f*log.flu", "epiyr.index.f*sqrt.rsv",
                         "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
       }
   }
 
-    form1 <- as.formula(
-      paste0(paste("y.age.fit ~",covars))
-    )
-    
-    # Rsv effect varies by epiyr
-    form2 <- as.formula(
-      paste0(paste("y.age ~",covars))
-    )
-    
+  form1 <- as.formula(
+    paste0(paste("y.age.fit ~",covars))
+  )
+  
+  # Rsv effect varies by epiyr
+  form2 <- as.formula(
+    paste0(paste("y.age ~",covars))
+  )
  
   if (sum(ds.glm$y.age, na.rm=T) >= 100) {
     mod1 <- glm(form1,
