@@ -10,6 +10,7 @@ ts_format(
   statevar,
   sub.statevar = "none",
   agevar = "none",
+  covs = character(),
   syndromes,
   resolution = "day",
   remove.final = F
@@ -35,6 +36,10 @@ identifier? (e.g., county, borough)}
 
 \item{agevar}{A string. What variable contains the age group? Use 'none'
 if there is no age grouping in the data}
+
+\item{covs}{A character vector. Which, if any, variables in \code{ds} should
+be treated as covariates in fitting the baseline model? Default is to not
+consider any variables in \code{ds} to be covariates.}
 
 \item{syndromes}{A character vector. Which variables contain counts of
 syndromic data? (e.g., \code{c('ili', 'respiratory')})}
