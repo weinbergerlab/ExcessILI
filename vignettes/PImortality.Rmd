@@ -31,10 +31,12 @@ library(MMWRweek)
 
 ## Overview
 
-In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjustign for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward
-based on the time of year.
-
-
+In this example, we will analyze increases of pneumonia and influenza (P&I)
+above the seasonal baseline, adjusting for year-to-year variations in
+incidence. We use the weekly data published by the
+[CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data, with a simple
+seasonal baseline, and year-to-year variations. The model is fit through
+end-of-February 2020 and then extrapolated forward based on the time of year.
 
 ```{r}
 ## Download the mortality data
@@ -48,25 +50,30 @@ pi.data <- pi_mortality(coverage_area='state')
 
 pi.data$state <- state.abb[match(pi.data$region_name, state.name)]
 pi.data$state[pi.data$region_name == 'New York City'] <- 'NYC'
-spl1<-split(pi.data, pi.data$state)
-min.state <- lapply(spl1, function(x){ x$miss.x<-min(x$total_pni)
-return(x)
-                })
+
+spl1 <- split(pi.data, pi.data$state)
+min.state <-
+  lapply(spl1,
+         function(x){
+           x$miss.x <- min(x$total_pni)
+           return(x)
+         })
+
 pi.data.clean <- do.call('rbind.data.frame',min.state)
 pi.data.clean <- pi.data.clean[!is.na(pi.data.clean$miss.x),]
 ```
 
 ```{r, include=F}
-#Run analysis
+# Run analysis
 excess_deaths1.adjusted <-
-  excessCases(ds = pi.data.clean,
-              datevar       = "wk_start",
-              statevar      = "state",
-              denom.var     = "all_deaths",
-              adj.flu       = "none",
-              use.syndromes = c("total_pni"),
+  excessCases(ds                 = pi.data.clean,
+              datevar            = "wk_start",
+              statevar           = "state",
+              denom.var          = "all_deaths",
+              adj.flu            = "none",
+              use.syndromes      = c("total_pni"),
               extrapolation.date = "2020-03-01",
-              time.res='week')
+              time.res           = 'week')
 ```
 
 
@@ -78,15 +85,15 @@ excess_deaths1.adjusted <-
 ```{r}
 ### Extract the quantities of interest
 
-#Which syndrome do you want to plot, and over what time range?
+# Which syndrome do you want to plot, and over what time range?
 
-syndrome.select <- 'total_pni' #which syndrome do you want to plot?
-n.days<-52  #How many days to plot?
+syndrome.select <- 'total_pni' # Which syndrome do you want to plot?
+n.daysl <- 52  # How many days to plot?
 ds <- excess_deaths1.adjusted
 ```
  
 ```{r}
-#Extract the data needed to plot from the results
+# Extract the data needed to plot from the results
 
 dates1 <-
   ds[[1]][[1]][[1]]$date
@@ -144,11 +151,14 @@ ages <- dimnames(pred)[[3]]
 
 ```{r, fig.width=8, fig.height=7}
 
-  par(mfrow=c(4,4))
+par(mfrow=c(4,4))
 
 for(i in 1:dim(pred)[2]){
   for(j in 1:dim(pred)[3]){
-    y.range1<-range(c( pred[select.indices,i,j]/denom[select.indices,i,j],obs[select.indices,i,j]/denom[select.indices,i,j], upi[select.indices,i,j]/denom[select.indices,i,j],0))
+    y.range1 <- range(c(pred[select.indices,i,j] / denom[select.indices,i,j],
+                        obs[select.indices,i,j]  / denom[select.indices,i,j],
+                        upi[select.indices,i,j]  / denom[select.indices,i,j],
+                        0))
   plot(dates,
        pred[select.indices,i,j]/denom[select.indices,i,j],
        type='l',
@@ -163,11 +173,10 @@ for(i in 1:dim(pred)[2]){
          type='l',
          col='black')
 
-  polygon(c(dates,
-            rev(dates)),
-          c(lpi[select.indices,i,j]/denom[select.indices,i,j],
+  polygon(c(dates, rev(dates)),
+          c(    lpi[select.indices,i,j]/denom[select.indices,i,j],
             rev(upi[select.indices,i,j]/denom[select.indices,i,j])),
-          col = rgb(1, 0, 0, alpha = 0.1),
+          col    = rgb(1, 0, 0, alpha = 0.1),
           border = NA)
   }
 }
@@ -177,22 +186,26 @@ for(i in 1:dim(pred)[2]){
 ```{r, eval=F, echo=F}
 n.cols=100
 set.seed(123)
-rr2 <- as.data.frame(rr[,,1])
-rr2$date <-dates1
-nice.cols <-  colorRampPalette(brewer.pal(11, "Set3"))(ncol(rr2))
-nice.cols<-sample(nice.cols)
 
-meltdf <- melt(rr2, id.vars = 'date')
-meltdf$rr<-exp(meltdf$value)
-p1<-ggplot(meltdf,aes(x=date,y=rr,
-                      color=variable,
-                      group=variable)) +
- geom_line() +  
+rr2       <- as.data.frame(rr[,,1])
+rr2$date  <- dates1
+nice.cols <- colorRampPalette(brewer.pal(11, "Set3"))(ncol(rr2))
+nice.cols <- sample(nice.cols)
+
+meltdf    <- melt(rr2, id.vars = 'date')
+meltdf$rr <- exp(meltdf$value)
+
+p1 <- ggplot(meltdf, aes(x=date,y=rr,
+                         color=variable,
+                         group=variable)) +
+  geom_line() +  
   theme_bw() + 
   ggtitle("Excess P&I mortality") +
-   labs(y="Observed/Expected")+
-  theme(panel.border = element_blank()) + scale_color_manual(values = nice.cols)+
+  labs(y="Observed/Expected")+
+  theme(panel.border = element_blank()) +
+  scale_color_manual(values = nice.cols) +
   scale_x_date(date_labels = "%b-%Y")
+
 ggplotly(p1)
 ```
 
