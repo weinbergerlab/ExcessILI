@@ -12,6 +12,9 @@ date: "3/25/2020"
 ```{r, include = F}
 knitr::opts_chunk$set(
   collapse = TRUE,
+    echo=F,
+    warning=FALSE, 
+    message=FALSE,
   comment = "#>"
 )
 ```
@@ -39,14 +42,15 @@ based on the time of year and the amount of influenza activity. Influenza
 activity is captured by using the proportion of tests that were positive from
 the NREVSS system (log transformed in model) 
 
-## Download the data
 
 ```{r, eval=T}
+## Download the data
+
 ili.data <- ilinet(region = c("state"))
 ```
 
 
-```{r}
+```{r, include=F}
 ili.data$state <- state.abb[match(ili.data$region, state.name)]
 ili.data       <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
 ili.data       <- ili.data[!is.na(ili.data$total_patients),]
@@ -59,9 +63,9 @@ state.select<-names(min)[which(min>0) ]
 ili.data <- ili.data[ili.data$state %in% state.select,]
 ```
 
-## Run the main analysis function, adjusting for flu using NREVSS data
 
-```{r, echo=T}
+```{r, echo=F, include=F}
+## Run the main analysis function, adjusting for flu using NREVSS data
 excess_cases1 <-
   excessCases(ds = ili.data,
               datevar       = "week_start", 
@@ -73,14 +77,16 @@ excess_cases1 <-
               time.res='week')
 ```
 
+
+```{r, echo=F}
 ## Plot the results in an interactive dashboard
 
-```{r, echo=T}
 # dashboardPlot(excess_cases1)
 ```
 
-## Extract the quantities of interest
 ```{r}
+## Extract the quantities of interest
+
 dates1 <-
   excess_cases1[[1]][[1]][[1]]$date
 
@@ -135,6 +141,7 @@ rr <-  excessExtract(ds = excess_cases1,
 # saveRDS(result.object,'extracted.output.ilinet.rds')
 ```
 
+## Observed weekly proportion of visits due to ILI vs seasonal baseline (+/-95%PI)
 
 ```{r, fig.width=10, fig.height=10}
 par(mfrow=c(4,4), mar=c(2,2,1,1))
@@ -178,6 +185,8 @@ mmwr.epiwk[date.mmwrdates$mmwr_week>=27]<-date.mmwrdates$mmwr_week[date.mmwrdate
 mmwr.epiwk <- mmwr.epiwk +26
 check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
 ```
+
+## Observed deaths/expected deaths by state
 
 ```{r, fig.width=8, fig.height=7}
 

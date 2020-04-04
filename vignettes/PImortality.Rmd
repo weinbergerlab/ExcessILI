@@ -12,6 +12,9 @@ date: "4/3/2020"
 ```{r, include = F}
 knitr::opts_chunk$set(
   collapse = TRUE,
+  echo=F,
+  warning=FALSE, 
+  message=FALSE,
   comment = "#>"
 )
 ```
@@ -28,20 +31,8 @@ library(MMWRweek)
 
 ## Overview
 
-The goal for this package is to facilitate the formatting of line list data
-from syndromic surveillance datasets into time series and then the analysis of
-these data to detect increases above the seasonal baseline. For US data, there
-is an option to automatically adjust the data for state-specific flu activity
-(using data from [NREVSS](https://www.cdc.gov/surveillance/nrevss/index.html)
-and/or state-specific RSV activity (based on Google search volume). The user
-can either start with line list data or formatted time series data
-
-In this example, we will analyze [ILINet](https://wwwn.cdc.gov/ILINet/) data
-with a simple seasonal baseline, adjusting for flu and year-to-year variations.
-The model is fit through end-of-February 2020 and then extrapolated forward
-based on the time of year and the amount of influenza activity. Influenza
-activity is captured by using the proportion of tests that were positive from
-the NREVSS system (log transformed in model) 
+In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjustign for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward
+based on the time of year.
 
 
 
@@ -52,7 +43,7 @@ pi.data <- pi_mortality(coverage_area='state')
 
 ```
 
-```{r}
+```{r, include=F}
 #Format and fill mssings with 0s
 
 pi.data$state <- state.abb[match(pi.data$region_name, state.name)]
@@ -65,7 +56,7 @@ pi.data.clean <- do.call('rbind.data.frame',min.state)
 pi.data.clean <- pi.data.clean[!is.na(pi.data.clean$miss.x),]
 ```
 
-```{r}
+```{r, include=F}
 #Run analysis
 excess_deaths1.adjusted <-
   excessCases(ds = pi.data.clean,
@@ -82,9 +73,6 @@ excess_deaths1.adjusted <-
 ```{r, echo=F}
  #dashboardPlot(excess_deaths1.adjusted)
 ```
-
-
-## Plot observed weekly death rate vs baseline
 
 
 ```{r}
@@ -143,7 +131,7 @@ rr <-  excessExtract(ds = ds,
                 extract.quantity = "resid1")
 ```
 
-Generate the plots
+## Observed weekly death rate vs seasonal baseline (+/-95%PI)
 
 ```{r}
 n.days <- 52
@@ -184,7 +172,8 @@ for(i in 1:dim(pred)[2]){
   }
 }
 ```
-## Observed/expected
+
+## Observed deaths/expected deaths by state
 ```{r, eval=F, echo=F}
 n.cols=100
 set.seed(123)

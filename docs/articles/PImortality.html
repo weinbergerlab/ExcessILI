@@ -90,113 +90,19 @@
 
     
     
-<div class="sourceCode" id="cb1"><html><body><pre class="r">library(ExcessILI)
-library(cdcfluview)
-#&gt; Warning: package 'cdcfluview' was built under R version 3.6.3
-library(reshape2)
-library(ggplot2)
-#&gt; Warning: package 'ggplot2' was built under R version 3.6.3
-library(RColorBrewer)
-library(plotly)
-#&gt; 
-#&gt; Attaching package: 'plotly'
-#&gt; The following object is masked from 'package:ggplot2':
-#&gt; 
-#&gt;     last_plot
-#&gt; The following object is masked from 'package:stats':
-#&gt; 
-#&gt;     filter
-#&gt; The following object is masked from 'package:graphics':
-#&gt; 
-#&gt;     layout
-library(MMWRweek)
-#&gt; Warning: package 'MMWRweek' was built under R version 3.6.3</pre></body></html></div>
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets into time series and then the analysis of these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data or formatted time series data</p>
-<p>In this example, we will analyze <a href="https://wwwn.cdc.gov/ILINet/">ILINet</a> data with a simple seasonal baseline, adjusting for flu and year-to-year variations. The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year and the amount of influenza activity. Influenza activity is captured by using the proportion of tests that were positive from the NREVSS system (log transformed in model)</p>
-<div class="sourceCode" id="cb2"><html><body><pre class="r">## Download the mortality data
-
-pi.data </pre></body></html></div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r">#Format and fill mssings with 0s
-
-pi.data$state </pre></body></html></div>
-<div class="sourceCode" id="cb4"><html><body><pre class="r">#Run analysis
-excess_deaths1.adjusted  [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"</pre></body></html></div>
+<p>In this example, we will analyze increases of pneumonia and influenza (P&amp;I) above the seasonal baseline, adjustign for year-to-year variations in incidence. We use the weekly data published by the <a href="https://gis.cdc.gov/grasp/fluview/mortality.html">CDC</a> data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.</p>
 </div>
-<div id="plot-observed-weekly-death-rate-vs-baseline" class="section level2">
+<div id="observed-weekly-death-rate-vs-seasonal-baseline--95pi" class="section level2">
 <h2 class="hasAnchor">
-<a href="#plot-observed-weekly-death-rate-vs-baseline" class="anchor"></a>Plot observed weekly death rate vs baseline</h2>
-<div class="sourceCode" id="cb5"><html><body><pre class="r">### Extract the quantities of interest
-
-#Which syndrome do you want to plot, and over what time range?
-
-syndrome.select </pre></body></html></div>
-<div class="sourceCode" id="cb6"><html><body><pre class="r">#Extract the data needed to plot from the results
-
-dates1 </pre></body></html></div>
-<p>Generate the plots</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r">n.days </pre></body></html></div>
-<div class="sourceCode" id="cb8"><html><body><pre class="r">
-  par(mfrow=c(4,4))
-
-for(i in 1:dim(pred)[2]){
-  for(j in 1:dim(pred)[3]){
-    y.range1</pre></body></html></div>
-<p><img src="PImortality_files/figure-html/unnamed-chunk-9-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-9-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-9-3.png" width="768"> ## Observed/expected</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r">
-  par(mfrow=c(4,4))
-
-for(i in 1:dim(pred)[2]){
-    y.range1</pre></body></html></div>
+<a href="#observed-weekly-death-rate-vs-seasonal-baseline--95pi" class="anchor"></a>Observed weekly death rate vs seasonal baseline (+/-95%PI)</h2>
+<p><img src="PImortality_files/figure-html/unnamed-chunk-9-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-9-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-9-3.png" width="768"></p>
+</div>
+<div id="observed-deathsexpected-deaths-by-state" class="section level2">
+<h2 class="hasAnchor">
+<a href="#observed-deathsexpected-deaths-by-state" class="anchor"></a>Observed deaths/expected deaths by state</h2>
 <p><img src="PImortality_files/figure-html/unnamed-chunk-12-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-12-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-12-3.png" width="768"></p>
 </div>
   </div>
