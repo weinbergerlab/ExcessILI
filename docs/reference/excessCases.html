@@ -105,6 +105,9 @@
     <li>
       <a href="../articles/ILINet.html">Using ExcessILI with ILINet</a>
     </li>
+    <li>
+      <a href="../articles/PImortality.html">Using ExcessILI with US P&amp;I mortality data</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -182,7 +185,7 @@ age group? Use <code>'none'</code> if there is no age grouping in the data</p></
     </tr>
     <tr>
       <th>datevar</th>
-      <td><p>A string. Which variables in the input data frame contains
+      <td><p>A string. Which variable in the input data frame contains
 the date?</p></td>
     </tr>
     <tr>
@@ -201,9 +204,8 @@ used as the denominator? For instance, all ED visits.</p></td>
 fitting the seasonal baseline? Possible values are <code>'none'</code> for no
 adjustment (default); 'auto': automatically downloads NREVSS data from CDC
 and matches by state and week; or specify the name of a variable in the
-the input dataframe that contains a variable for influenza. Adjust for RSV
-when fitting the seasonal baseline?  This is automatically set to
-<code>TRUE</code> when</p></td>
+the input dataframe that contains a variable for influenza. <strong>The
+package <code>cdcfluview</code> is required to use <code>'auto'</code>.</strong></p></td>
     </tr>
     <tr>
       <th>adj.rsv</th>
@@ -272,7 +274,11 @@ included in the regression model when fitting the seasonal baseline.</p></td>
                <span class='kw'>statevar</span> <span class='kw'>=</span> <span class='st'>"state"</span>,
                <span class='kw'>denom.var</span> <span class='kw'>=</span> <span class='st'>"total_patients"</span>,
                <span class='kw'>use.syndromes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ilitotal"</span>),
-               <span class='kw'>time.res</span> <span class='kw'>=</span> <span class='st'>"week"</span>)</div></pre>
+               <span class='kw'>time.res</span> <span class='kw'>=</span> <span class='st'>"week"</span>)</div><div class='output co'>#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

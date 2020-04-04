@@ -48,9 +48,10 @@ ili.data <- ilinet(region = c("state"))
 
 ```{r}
 ili.data$state <- state.abb[match(ili.data$region, state.name)]
-ili.data <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
-ili.data<-ili.data[!is.na(ili.data$total_patients),]
-ili.data.spl<-split(ili.data, ili.data$state)
+ili.data       <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
+ili.data       <- ili.data[!is.na(ili.data$total_patients),]
+ili.data.spl   <- split(ili.data, ili.data$state)
+
 min<-sapply(ili.data.spl, function(x)  min(x$total_patients))
 min
 
@@ -61,7 +62,8 @@ ili.data <- ili.data[ili.data$state %in% state.select,]
 ## Run the main analysis function, adjusting for flu using NREVSS data
 
 ```{r, echo=T}
-excess_cases1 <-  excessCases(ds = ili.data,
+excess_cases1 <-
+  excessCases(ds = ili.data,
               datevar       = "week_start", 
               statevar      = "state",
               denom.var     = "total_patients",
@@ -116,7 +118,8 @@ obs <-
                 syndrome = "ilitotal",
                 extract.quantity = "y")
 
-pred<-  excessExtract(ds = excess_cases1,
+pred <-
+  excessExtract(ds = excess_cases1,
                 syndrome = "ilitotal",
                 extract.quantity = "pred")
 
@@ -163,6 +166,7 @@ for(i in 1:dim(pred)[2]){
           border = NA)
 }
 ```
+<<<<<<< HEAD
 
 ```{r}
 date.mmwrdates <- mmwr_week(dates1)
@@ -199,3 +203,5 @@ for(i in 1:dim(pred)[2]){
 
 
 
+=======
+>>>>>>> c222b78de2033a86bd629740a6eac5059880466d

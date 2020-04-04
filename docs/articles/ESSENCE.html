@@ -59,6 +59,9 @@
     <li>
       <a href="../articles/ILINet.html">Using ExcessILI with ILINet</a>
     </li>
+    <li>
+      <a href="../articles/PImortality.html">Using ExcessILI with US P&amp;I mortality data</a>
+    </li>
   </ul>
 </li>
       </ul>
@@ -90,29 +93,28 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets (such as those stored in ESSENCE) into daily or weekly time series, and then analyzing these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume). In this example, we will demonstrate how to prepare the data obtained from ESSENCE to be used with this package and then how to run the analyses. Thanks to Sara Chronister from Maricopa County, AZ for contributing to this workflow.</p>
+<p>The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets (such as those stored in <a href="https://www.cdc.gov/nssp/index.html">ESSENCE</a> into daily or weekly time series, and then analyzing these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume).</p>
+<p>In this example, we will demonstrate how to prepare the data obtained from ESSENCE to be used with this package and then how to run the analyses. Thanks to Sara Chronister from Maricopa County, AZ for contributing to this workflow.</p>
 </div>
 <div id="getting-started" class="section level2">
 <h2 class="hasAnchor">
 <a href="#getting-started" class="anchor"></a>Getting started</h2>
-<p>This package is not available on CRAN so needs to be installed directly from Github. Make sure you have the ‘devtools’ package installed.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r">library(devtools)
-#&gt; Loading required package: usethis</pre></body></html></div>
-<div class="sourceCode" id="cb2"><html><body><pre class="r"># Install development version from GitHub
+<p>This package is not available on CRAN, so it needs to be installed directly from Github. Make sure you have the ‘devtools’ package installed.</p>
+<div class="sourceCode" id="cb1"><html><body><pre class="r"># Install development version from GitHub
 library(devtools)
 devtools::install_github("weinbergerlab/ExcessILI")</pre></body></html></div>
-<div class="sourceCode" id="cb3"><html><body><pre class="r">library(ExcessILI)
+<div class="sourceCode" id="cb2"><html><body><pre class="r">library(ExcessILI)
 library(cdcfluview)
 #&gt; Warning: package 'cdcfluview' was built under R version 3.6.3</pre></body></html></div>
-<p><strong>We also recommend installing the cdcfluview package to take full advantage of the ExcessILI package. If you are using the Enterpise version of RStudio on the BioSense platform, cdcfluview might not install correctly.</strong></p>
-<p>ExcessILI’s dependencies require the packages gdal and udunits, which cannot be installed using R’s package manager. If ExcessILI installation fails for this reason, you’ll need to install these by hand. For installation of these two packages on OS X, we recommend using a package manager such as brew.</p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r">brew install gdal udunits</pre></body></html></div>
+<p><strong>We recommend installing the cdcfluview package to take full advantage of the ExcessILI package. If you are using the Enterpise version of RStudio on the BioSense platform, cdcfluview might not install correctly.</strong></p>
+<p><code>cdcfluview</code>’s dependencies require the packages <code>gdal</code> and <code>udunits</code>, which cannot be installed using R’s package manager. If <code>cdcfluview</code> installation fails for this reason, you’ll need to install these by hand. For installation of these two packages on OS X, we recommend using a package manager such as <a href="https://brew.sh">brew</a>.</p>
+<div class="sourceCode" id="cb3"><html><body><pre class="r">brew install gdal udunits</pre></body></html></div>
 </div>
 <div id="prepare-the-data" class="section level2">
 <h2 class="hasAnchor">
 <a href="#prepare-the-data" class="anchor"></a>Prepare the data</h2>
 <p>We ultimately want to have a dataset that looks like this, where we have a line for each case, a column for the state (2 digit state), a column for smaller geographic levels if any (e.g., counties, hospitals), a column for the age group, the day of admissions (in a YYY-MM-DD date format), and flags for whether the admission was related to a syndrome of interest, such as “ILI” or “respiratory”. You should have a row in your data for every admission, <em>regardless of the cause.</em></p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r">head(ds1)
+<div class="sourceCode" id="cb4"><html><body><pre class="r">head(ds1)
 #&gt;   state      adate    agegrp ili resp   borough
 #&gt; 1    NY 2020-05-12   v. 65+y   0    0 Manhattan
 #&gt; 2    NY 2020-03-04   v. 65+y   1    0 Manhattan
@@ -124,9 +126,9 @@ library(cdcfluview)
 <div id="format-line-list-into-a-time-series" class="section level2">
 <h2 class="hasAnchor">
 <a href="#format-line-list-into-a-time-series" class="anchor"></a>Format line list into a time series</h2>
-<p>We can aggregate by day or week using the function “ts_format()”</p>
-<div class="sourceCode" id="cb6"><html><body><pre class="r">ts1</pre></body></html></div>
-<div class="sourceCode" id="cb7"><html><body><pre class="r">head(ts1[,c('agegrp','adate','state','borough', 'ili', 'resp', 'all.visits')])
+<p>We can aggregate by day or week using the function <code><a href="../reference/ts_format.html">ts_format()</a></code></p>
+<div class="sourceCode" id="cb5"><html><body><pre class="r">ts1</pre></body></html></div>
+<div class="sourceCode" id="cb6"><html><body><pre class="r">head(ts1[,c('agegrp','adate','state','borough', 'ili', 'resp', 'all.visits')])
 #&gt;   agegrp      adate state   borough ili resp all.visits
 #&gt; 1 i. u5y 2019-01-01    NY     Bronx   0    4         41
 #&gt; 2 i. u5y 2019-01-01    NY Manhattan   0    2         17
@@ -134,8 +136,8 @@ library(cdcfluview)
 #&gt; 4 i. u5y 2019-01-02    NY Manhattan   2    1         20
 #&gt; 5 i. u5y 2019-01-03    NY     Bronx   0    2         48
 #&gt; 6 i. u5y 2019-01-03    NY Manhattan   2    1         17</pre></body></html></div>
-<p>As an example of how to prepare line list data to be used in the ts_format function, starting from ESSENCE data, here is code from Sara Chronister</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r">ds1 %
+<p>As an example of how to prepare line list data to be used in the ts_format function, starting from ESSENCE data, here is code from Sara Chronister:</p>
+<div class="sourceCode" id="cb7"><html><body><pre class="r">ds1 %
          # extract date only from C_Visit_Date_Time
   mutate(Visit_Date = as.Date(C_Visit_Date_Time),
          # fill in missing HasBeenI with 0
@@ -168,14 +170,75 @@ library(cdcfluview)
 <a href="#run-the-analysis" class="anchor"></a>Run the analysis</h2>
 <p>Now that we have the formatted time series, we are ready to run the analysis. You can either just fit a seasonal baseline with harmonic waves (default), or you can adjust for influenza activity. If you were able to install the cdcfluview package and have data from the US, you can automatically adjust for influenza activity using data on influenza positive tests from NREVSS. If not, you can merge in your own influenza data with the time series formatted in the steps above, and specify the name of the flu variable.</p>
 <p>We need to specify the names of the relevant variables in the dataset ds1. We will fit the regression through the end of Feb 2020 and then extrapolate forward based on the seasonal baseline and observed flu activity. We adjust for flu using the ‘auto’ option, which will download the latest NREVSS testing data</p>
-<div class="sourceCode" id="cb9"><html><body><pre class="r">excess_cases1 </pre></body></html></div>
+<div class="sourceCode" id="cb8"><html><body><pre class="r">excess_cases1  Warning in data(cdcfluview::hhs_regions): data set
+#&gt; 'cdcfluview::hhs_regions' not found
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
+#&gt; [1] "epiyr.index.f*log.flu + epiyr.index.f + day.of.week + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"</pre></body></html></div>
 </div>
 <div id="generate-an-interactive-dashboard" class="section level2">
 <h2 class="hasAnchor">
 <a href="#generate-an-interactive-dashboard" class="anchor"></a>Generate an interactive dashboard</h2>
 <p>You can take the results of the excessCases function and generate an interactive dashboard by running the following line. This is especially useful if you have a lot of regions, age groups, and syndromes to explore. You can also view the time series of raw cases, the proportion, or the observed/expected.</p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r">#dashboardPlot(excess_cases1)</pre></body></html></div>
-<iframe src="https://weinbergerlab.shinyapps.io/NYC_syndromic/" width="900" height="750" class="shiny-app">
+<div class="sourceCode" id="cb9"><html><body><pre class="r"><span class="fu"><a href="../reference/dashboardPlot.html">dashboardPlot</a></span>(<span class="no">excess_cases1</span>)</pre></body></html></div>
+<iframe src="https://weinbergerlab.shinyapps.io/NYC_syndromic/" width="100%" height="600px" class="shiny-app">
 </iframe>
 </div>
 <div id="generate-static-versions-of-the-plots" class="section level2">
@@ -185,15 +248,23 @@ library(cdcfluview)
 <h3 class="hasAnchor">
 <a href="#extract-the-quantities-of-interest" class="anchor"></a>Extract the quantities of interest</h3>
 <p>Which syndrome do you want to plot, and over what time range?</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="no">syndrome.select</span> <span class="kw">&lt;-</span> <span class="st">'ili'</span> <span class="co">#which syndrome do you want to plot?</span>
-<span class="no">n.days</span><span class="kw">&lt;-</span><span class="fl">365</span>  <span class="co">#How many days to plot?</span></pre></body></html></div>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">syndrome.select</span> <span class="kw">&lt;-</span> <span class="st">'ili'</span> <span class="co">#which syndrome do you want to plot?</span>
+<span class="no">n.days</span> <span class="kw">&lt;-</span> <span class="fl">365</span>  <span class="co">#How many days to plot?</span></pre></body></html></div>
 <p>Extract the data needed to plot from the results</p>
-<div class="sourceCode" id="cb12"><html><body><pre class="r">
-dates </pre></body></html></div>
+<div class="sourceCode" id="cb11"><html><body><pre class="r">library(magrittr)
+library(purrr)
+#&gt; 
+#&gt; Attaching package: 'purrr'
+#&gt; The following object is masked from 'package:magrittr':
+#&gt; 
+#&gt;     set_names
+
+dates %
+           setNames(resultsNames)</pre></body></html></div>
 <p>Generate the plots</p>
-<div class="sourceCode" id="cb13"><html><body><pre class="r">
+<div class="sourceCode" id="cb12"><html><body><pre class="r">
 select.indices </pre></body></html></div>
-<p><img src="ESSENCE_files/figure-html/unnamed-chunk-15-1.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-15-2.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-15-3.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-15-4.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-15-5.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-15-6.png" width="960"></p>
+<p><img src="ESSENCE_files/figure-html/unnamed-chunk-14-1.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-2.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-3.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-4.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-5.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-6.png" width="960"></p>
 </div>
 </div>
   </div>

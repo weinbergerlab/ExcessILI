@@ -84,7 +84,7 @@
 <div id="excessili" class="section level1">
 <div class="page-header"><h1 class="hasAnchor">
 <a href="#excessili" class="anchor"></a>ExcessILI</h1></div>
-<p>The goal for this package is to facilitate the formatting of line list data from syndromic surveillance datasets into time series and then the analysis of these data to detect increases above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data or formatted time series data. An rshiny app is provided to examine data products.</p>
+<p>ExcessILI facilitates formatting line list data from syndromic surveillance datasets into time series, and enables analysis of these data to detect increases in reporting above the seasonal baseline. For US data, there is an option to automatically adjust the data for state-specific flu activity (using data from <a href="https://www.cdc.gov/surveillance/nrevss/index.html">NREVSS</a> and/or state-specific RSV activity (based on Google search volume). The user can either start with line list data, or formatted time series data. An <a href="https://shiny.rstudio.com/">rshiny</a> app is provided to examine data products.</p>
 </div>
 <div id="installation" class="section level1">
 <h1 class="hasAnchor">
@@ -92,19 +92,28 @@
 <div class="sourceCode" id="cb1"><pre class="r"># Currently, ExcessILI is not availble on CRAN
 # install.packages("ExcessILI")
 
-# Install development version from GitHub
+# Install development version from GitHub. This requires that the 'devtools'
+# package be installed.
+if (!require("devtools")) {
+  install.packages("devtools")
+}
 devtools::install_github("weinbergerlab/ExcessILI")</pre></div>
-<p>ExcessILI’s dependencies require the packages <code>gdal</code> and <code>udunits</code>, which cannot be installed using R’s package manager. If ExcessILI installation fails for this reason, you’ll need to install these by hand. For installation of these two packages on OS X, we recommend using a package manager such as <a href="https://brew.sh">brew</a>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb2-1" title="1"><span class="ex">brew</span> install gdal udunits</a></code></pre></div>
 </div>
 <div id="usage" class="section level1">
 <h1 class="hasAnchor">
 <a href="#usage" class="anchor"></a>Usage</h1>
 <ul>
-<li>To see how to go from line list data to an interactive app, see this <a href="https://weinbergerlab.github.io/ExcessILI/articles/ESSENCE.html">vignette</a>
-</li>
-<li>For an example of how to use the analysis functions with the CDC’s ILINet data, see <a href="https://weinbergerlab.github.io/ExcessILI/articles/ILINet.html">here</a>
-</li>
+<li><p>To see how to go from line list data to an interactive app, see <code><a href="articles/ESSENCE.html">vignette("ESSENCE")</a></code></p></li>
+<li><p>For an example of how to use the analysis functions with CDC ILINet data, see <code><a href="articles/ILINet.html">vignette("ILINet")</a></code>.</p></li>
+</ul>
+</div>
+<div id="resources" class="section level1">
+<h1 class="hasAnchor">
+<a href="#resources" class="anchor"></a>Resources</h1>
+<ul>
+<li><a href="mailto:daniel.weinberger@yale.edu?subject=ExcessILI">Ask a question</a></li>
+<li>
+<a href="https://github.com/weinbergerlab/ExcessILI/issues">Open an issue</a> (GitHub issues for bug reports, feature requests)</li>
 </ul>
 </div>
 
