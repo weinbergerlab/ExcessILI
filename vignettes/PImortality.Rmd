@@ -231,4 +231,74 @@ for(i in 1:dim(pred)[2]){
     }
 ```
 
+## Compare Excess P*I mortality vs Excess ILI
+```{r, include=F}
+ili.data <- ilinet(region = c("state"))
+ili.data$state <- state.abb[match(ili.data$region, state.name)]
+ili.data       <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
+ili.data       <- ili.data[!is.na(ili.data$total_patients),]
+ili.data.spl   <- split(ili.data, ili.data$state)
+
+min<-sapply(ili.data.spl, function(x)  min(x$total_patients))
+
+state.select<-names(min)[which(min>0) ]
+ili.data <- ili.data[ili.data$state %in% state.select,]
+## Run the main analysis function, adjusting for flu using NREVSS data
+excess_cases1 <-
+  excessCases(ds = ili.data,
+              datevar       = "week_start", 
+              statevar      = "state",
+              denom.var     = "total_patients",
+              adj.flu       = "auto",
+              use.syndromes = c("ilitotal"),
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+
+dates.ili <-
+  excess_cases1[[1]][[1]][[1]]$date
+  
+rr.ili <-  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "resid1")
+rr2.ili <- rr.ili[,,1]
+
+date.mmwrdates.ili <- mmwr_week(dates.ili)
+mmwr.epiyr.ili<- date.mmwrdates.ili$mmwr_year
+mmwr.epiyr.ili[date.mmwrdates.ili$mmwr_week<=26] <- mmwr.epiyr.ili[date.mmwrdates.ili$mmwr_week<=26] - 1
+
+mmwr.epiwk.ili <- date.mmwrdates.ili$mmwr_week
+mmwr.epiwk.ili[date.mmwrdates.ili$mmwr_week>=27]<-date.mmwrdates.ili$mmwr_week[date.mmwrdates.ili$mmwr_week>=27] - 52
+mmwr.epiwk.ili <- mmwr.epiwk.ili +26
+```
+
+```{r, fig.width=8, fig.height=7}
+common.states <- intersect(colnames(rr2), colnames(rr2.ili))
+rr2.comp <- rr2[,common.states]
+rr2.ili.comp <- rr2.ili[,common.states] 
+  par(mfrow=c(4,4))
+
+for(i in 1:length(common.states)){
+    y.range1<-c(0,2)
+    ds2<-cbind.data.frame('epiwk'=mmwr.epiwk,'epiyr'=mmwr.epiyr, rr=rr2.comp[,i])
+    ds2.c<-dcast(ds2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+    cols1<-c(rep('grey',(ncol(ds2.c)-2) ),'red')
+    plot(ds2.c$epiwk         ,
+       exp(ds2.c[,'2019']),
+       type='l',
+       col='red',
+       ylim=y.range1,
+       bty='l',
+       lty=1,
+       ylab='Observed/Expected',
+       main=paste(states[i], ' Deaths(red),','ILI(blue)' ))
+
+  es2<-cbind.data.frame('epiwk'=mmwr.epiwk.ili,'epiyr'=mmwr.epiyr.ili, rr=rr2.ili.comp[,i])
+    es2.c<-dcast(es2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+     points(es2.c$epiwk         ,
+       exp(es2.c[,'2019']), type='l', col='blue')
+    abline(h=1, col='black')
+}
+
+```
+
 
