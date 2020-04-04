@@ -1,0 +1,304 @@
+---
+title: "Using ExcessILI with US P&I mortality data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: "Dan Weinberger"
+date: "4/3/2020"
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  echo=F,
+  warning=FALSE, 
+  message=FALSE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ExcessILI)
+library(cdcfluview)
+library(reshape2)
+library(ggplot2)
+library(RColorBrewer)
+library(plotly)
+library(MMWRweek)
+```
+
+## Overview
+
+In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjustign for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward
+based on the time of year.
+
+
+
+```{r}
+## Download the mortality data
+
+pi.data <- pi_mortality(coverage_area='state')
+
+```
+
+```{r, include=F}
+#Format and fill mssings with 0s
+
+pi.data$state <- state.abb[match(pi.data$region_name, state.name)]
+pi.data$state[pi.data$region_name == 'New York City'] <- 'NYC'
+spl1<-split(pi.data, pi.data$state)
+min.state <- lapply(spl1, function(x){ x$miss.x<-min(x$total_pni)
+return(x)
+                })
+pi.data.clean <- do.call('rbind.data.frame',min.state)
+pi.data.clean <- pi.data.clean[!is.na(pi.data.clean$miss.x),]
+```
+
+```{r, include=F}
+#Run analysis
+excess_deaths1.adjusted <-
+  excessCases(ds = pi.data.clean,
+              datevar       = "wk_start",
+              statevar      = "state",
+              denom.var     = "all_deaths",
+              adj.flu       = "none",
+              use.syndromes = c("total_pni"),
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+```
+
+
+```{r, echo=F}
+ #dashboardPlot(excess_deaths1.adjusted)
+```
+
+
+```{r}
+### Extract the quantities of interest
+
+#Which syndrome do you want to plot, and over what time range?
+
+syndrome.select <- 'total_pni' #which syndrome do you want to plot?
+n.days<-52  #How many days to plot?
+ds <- excess_deaths1.adjusted
+```
+ 
+```{r}
+#Extract the data needed to plot from the results
+
+dates1 <-
+  ds[[1]][[1]][[1]]$date
+  
+unexplained.cases <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "unexplained.cases")
+
+unexplained.log.rr <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "resid1")
+
+denom <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "denom")
+
+
+upi <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "upi")
+
+lpi <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "lpi")
+
+obs <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "y")
+
+pred<-  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "pred")
+
+rr <-  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "resid1")
+```
+
+## Observed weekly death rate vs seasonal baseline (+/-95%PI)
+
+```{r}
+n.days <- 52
+select.indices <- (length(dates1)-n.days):length(dates1)
+dates<-dates1[select.indices]
+states <- dimnames(pred)[[2]]
+ages <- dimnames(pred)[[3]]
+```
+
+
+```{r, fig.width=8, fig.height=7}
+
+  par(mfrow=c(4,4))
+
+for(i in 1:dim(pred)[2]){
+  for(j in 1:dim(pred)[3]){
+    y.range1<-range(c( pred[select.indices,i,j]/denom[select.indices,i,j],obs[select.indices,i,j]/denom[select.indices,i,j], upi[select.indices,i,j]/denom[select.indices,i,j],0))
+  plot(dates,
+       pred[select.indices,i,j]/denom[select.indices,i,j],
+       type='l',
+       col='red',
+       ylim=y.range1,
+       bty='l',
+       ylab='Proportion',
+       main=paste(states[i],ages[j]))
+
+  points(dates,
+         obs[select.indices,i,j]/denom[select.indices,i,j],
+         type='l',
+         col='black')
+
+  polygon(c(dates,
+            rev(dates)),
+          c(lpi[select.indices,i,j]/denom[select.indices,i,j],
+            rev(upi[select.indices,i,j]/denom[select.indices,i,j])),
+          col = rgb(1, 0, 0, alpha = 0.1),
+          border = NA)
+  }
+}
+```
+
+## Observed deaths/expected deaths by state
+```{r, eval=F, echo=F}
+n.cols=100
+set.seed(123)
+rr2 <- as.data.frame(rr[,,1])
+rr2$date <-dates1
+nice.cols <-  colorRampPalette(brewer.pal(11, "Set3"))(ncol(rr2))
+nice.cols<-sample(nice.cols)
+
+meltdf <- melt(rr2, id.vars = 'date')
+meltdf$rr<-exp(meltdf$value)
+p1<-ggplot(meltdf,aes(x=date,y=rr,
+                      color=variable,
+                      group=variable)) +
+ geom_line() +  
+  theme_bw() + 
+  ggtitle("Excess P&I mortality") +
+   labs(y="Observed/Expected")+
+  theme(panel.border = element_blank()) + scale_color_manual(values = nice.cols)+
+  scale_x_date(date_labels = "%b-%Y")
+ggplotly(p1)
+```
+
+
+```{r, echo=F}
+rr2<-rr[,,1]
+date.mmwrdates <- mmwr_week(dates1)
+mmwr.epiyr<- date.mmwrdates$mmwr_year
+mmwr.epiyr[date.mmwrdates$mmwr_week<=26] <- mmwr.epiyr[date.mmwrdates$mmwr_week<=26] - 1
+
+mmwr.epiwk <- date.mmwrdates$mmwr_week
+mmwr.epiwk[date.mmwrdates$mmwr_week>=27]<-date.mmwrdates$mmwr_week[date.mmwrdates$mmwr_week>=27] - 52
+mmwr.epiwk <- mmwr.epiwk +26
+check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
+```
+
+```{r, fig.width=8, fig.height=7}
+
+  par(mfrow=c(4,4))
+
+for(i in 1:dim(pred)[2]){
+    y.range1<-c(0,2)
+    ds2<-cbind.data.frame('epiwk'=mmwr.epiwk,'epiyr'=mmwr.epiyr, rr=rr2[,i])
+    ds2.c<-dcast(ds2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+    cols1<-c(rep('grey',(ncol(ds2.c)-2) ),'red')
+    matplot(ds2.c$epiwk         ,
+       exp(ds2.c[,-1]),
+       type='l',
+       col=cols1,
+       ylim=y.range1,
+       bty='l',
+       lty=1,
+       ylab='Observed/Expected',
+       main=paste(states[i]))
+    abline(h=1, col='black')
+    }
+```
+
+## Compare Excess P*I mortality vs Excess ILI
+```{r, include=F}
+ili.data <- ilinet(region = c("state"))
+ili.data$state <- state.abb[match(ili.data$region, state.name)]
+ili.data       <- ili.data[, c("state", "week_start", "ilitotal", "total_patients")]
+ili.data       <- ili.data[!is.na(ili.data$total_patients),]
+ili.data.spl   <- split(ili.data, ili.data$state)
+
+min<-sapply(ili.data.spl, function(x)  min(x$total_patients))
+
+state.select<-names(min)[which(min>0) ]
+ili.data <- ili.data[ili.data$state %in% state.select,]
+## Run the main analysis function, adjusting for flu using NREVSS data
+excess_cases1 <-
+  excessCases(ds = ili.data,
+              datevar       = "week_start", 
+              statevar      = "state",
+              denom.var     = "total_patients",
+              adj.flu       = "auto",
+              use.syndromes = c("ilitotal"),
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+
+dates.ili <-
+  excess_cases1[[1]][[1]][[1]]$date
+  
+rr.ili <-  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "resid1")
+rr2.ili <- rr.ili[,,1]
+
+date.mmwrdates.ili <- mmwr_week(dates.ili)
+mmwr.epiyr.ili<- date.mmwrdates.ili$mmwr_year
+mmwr.epiyr.ili[date.mmwrdates.ili$mmwr_week<=26] <- mmwr.epiyr.ili[date.mmwrdates.ili$mmwr_week<=26] - 1
+
+mmwr.epiwk.ili <- date.mmwrdates.ili$mmwr_week
+mmwr.epiwk.ili[date.mmwrdates.ili$mmwr_week>=27]<-date.mmwrdates.ili$mmwr_week[date.mmwrdates.ili$mmwr_week>=27] - 52
+mmwr.epiwk.ili <- mmwr.epiwk.ili +26
+```
+
+```{r, fig.width=8, fig.height=7}
+common.states <- intersect(colnames(rr2), colnames(rr2.ili))
+rr2.comp <- rr2[,common.states]
+rr2.ili.comp <- rr2.ili[,common.states] 
+  par(mfrow=c(4,4))
+
+for(i in 1:length(common.states)){
+    y.range1<-c(0,2)
+    ds2<-cbind.data.frame('epiwk'=mmwr.epiwk,'epiyr'=mmwr.epiyr, rr=rr2.comp[,i])
+    ds2.c<-dcast(ds2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+    cols1<-c(rep('grey',(ncol(ds2.c)-2) ),'red')
+    plot(ds2.c$epiwk         ,
+       exp(ds2.c[,'2019']),
+       type='l',
+       col='red',
+       ylim=y.range1,
+       bty='l',
+       lty=1,
+       ylab='Observed/Expected',
+       main=paste(common.states[i], ' Deaths(red),','ILI(blue)' ))
+
+  es2<-cbind.data.frame('epiwk'=mmwr.epiwk.ili,'epiyr'=mmwr.epiyr.ili, rr=rr2.ili.comp[,i])
+    es2.c<-dcast(es2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+     points(es2.c$epiwk         ,
+       exp(es2.c[,'2019']), type='l', col='blue')
+    abline(h=1, col='black')
+}
+
+```
+
+
