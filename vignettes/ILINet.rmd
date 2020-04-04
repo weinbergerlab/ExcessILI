@@ -141,14 +141,22 @@ rr <-  excessExtract(ds = excess_cases1,
 # saveRDS(result.object,'extracted.output.ilinet.rds')
 ```
 
+```{r}
+n.days <- 52
+select.indices <- (length(dates1)-n.days):length(dates1)
+dates<-dates1[select.indices]
+states <- dimnames(pred)[[2]]
+ages <- dimnames(pred)[[3]]
+```
 ## Observed weekly proportion of visits due to ILI vs seasonal baseline (+/-95%PI)
 
-```{r, fig.width=10, fig.height=10}
-par(mfrow=c(4,4), mar=c(2,2,1,1))
+```{r, fig.width=8, fig.height=7}
+
+  par(mfrow=c(4,4))
 
 dates <- result.object$dates
 states <- dimnames(pred)[[2]]
-week.select.index<-180:length(dates)
+week.select.index<-select.indices
 for(i in 1:dim(pred)[2]){
   yrange1<-range(c(pred[week.select.index,i,1]/denom[week.select.index,i,1],obs[week.select.index,i,1]/denom[week.select.index,i,1],lpi[week.select.index,i,1]/denom[week.select.index,i,1],upi[week.select.index,i,1]/denom[week.select.index,i,1] ))
 
@@ -158,6 +166,8 @@ for(i in 1:dim(pred)[2]){
        col='red',
        bty='l',
        ylim=yrange1,
+       ylab='Proportion ILI',
+       xlab='Date',
        main=states[i])
 
   points(dates[week.select.index],
