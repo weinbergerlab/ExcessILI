@@ -173,7 +173,6 @@ for(i in 1:dim(pred)[2]){
           border = NA)
 }
 ```
-<<<<<<< HEAD
 
 ```{r}
 date.mmwrdates <- mmwr_week(dates1)
@@ -211,6 +210,3 @@ for(i in 1:dim(pred)[2]){
 ```
 
 
-
-=======
->>>>>>> c222b78de2033a86bd629740a6eac5059880466d
