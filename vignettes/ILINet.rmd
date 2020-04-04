@@ -195,7 +195,7 @@ mmwr.epiwk <- mmwr.epiwk +26
 check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
 ```
 
-## Observed deaths/expected deaths by state
+## Observed ILI%/expected ILI% by state
 
 ```{r, fig.width=8, fig.height=7}
 
