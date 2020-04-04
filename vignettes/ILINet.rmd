@@ -19,6 +19,7 @@ knitr::opts_chunk$set(
 ```{r setup}
 library(ExcessILI)
 library(cdcfluview)
+library(reshape2)
 ```
 
 ## Overview
@@ -78,6 +79,9 @@ excess_cases1 <-  excessCases(ds = ili.data,
 
 ## Extract the quantities of interest
 ```{r}
+dates1 <-
+  excess_cases1[[1]][[1]][[1]]$date
+
 dates <-
   excess_cases1[[1]][[1]][[1]]$date
   
@@ -122,46 +126,76 @@ result.object <-
        'pred'=pred[,,1],
        'unexplained.cases'=unexplained.cases[,,1],
        'unexplained.log.rr'=unexplained.log.rr[,,1])
-
+rr <-  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "resid1")
 # saveRDS(result.object,'extracted.output.ilinet.rds')
 ```
 
-```{r, fig.width=5, fig.height=10}
-rr <- sort(exp(unexplained.log.rr[232,,1]), decreasing=T)
-
-par(mfrow=c(1,1))
-plot(y=1:length(rr),x=rr, yaxt='n', col='white')
-abline(v=1, lty=2)
-text(y=1:length(rr),x=rr, names(rr), yaxt='n', cex=0.5)
-```
 
 ```{r, fig.width=10, fig.height=10}
 par(mfrow=c(4,4), mar=c(2,2,1,1))
 
 dates <- result.object$dates
 states <- dimnames(pred)[[2]]
+week.select.index<-180:length(dates)
 for(i in 1:dim(pred)[2]){
-  plot(dates[180:233],
-       pred[180:233,i,1]/denom[180:233,i,1],
+  yrange1<-range(c(pred[week.select.index,i,1]/denom[week.select.index,i,1],obs[week.select.index,i,1]/denom[week.select.index,i,1],lpi[week.select.index,i,1]/denom[week.select.index,i,1],upi[week.select.index,i,1]/denom[week.select.index,i,1] ))
+
+  plot(dates[week.select.index],
+       pred[week.select.index,i,1]/denom[week.select.index,i,1],
        type='l',
        col='red',
        bty='l',
+       ylim=yrange1,
        main=states[i])
 
-  points(dates[180:233],
-         obs[180:233,i,1]/denom[180:233,i,1],
+  points(dates[week.select.index],
+         obs[week.select.index,i,1]/denom[week.select.index,i,1],
          type='l',
          col='black')
 
-  polygon(c(dates[180:233],
-            rev(dates[180:233])),
-          c(lpi[180:233,i,1]/denom[180:233,i,1],
-            rev(upi[180:233,i,1]/denom[180:233,i,1])),
+  polygon(c(dates[week.select.index],
+            rev(dates[week.select.index])),
+          c(lpi[week.select.index,i,1]/denom[week.select.index,i,1],
+            rev(upi[week.select.index,i,1]/denom[week.select.index,i,1])),
           col = rgb(1, 0, 0, alpha = 0.1),
           border = NA)
 }
 ```
 
+```{r}
+date.mmwrdates <- mmwr_week(dates1)
+mmwr.epiyr<- date.mmwrdates$mmwr_year
+mmwr.epiyr[date.mmwrdates$mmwr_week<=26] <- mmwr.epiyr[date.mmwrdates$mmwr_week<=26] - 1
+
+mmwr.epiwk <- date.mmwrdates$mmwr_week
+mmwr.epiwk[date.mmwrdates$mmwr_week>=27]<-date.mmwrdates$mmwr_week[date.mmwrdates$mmwr_week>=27] - 52
+mmwr.epiwk <- mmwr.epiwk +26
+check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
+```
+
+```{r, fig.width=8, fig.height=7}
+
+  par(mfrow=c(4,4))
+rr2<-rr[,,1]
+for(i in 1:dim(pred)[2]){
+    y.range1<-c(0,5)
+    ds2<-cbind.data.frame('epiwk'=mmwr.epiwk,'epiyr'=mmwr.epiyr, rr=rr2[,i])
+    ds2.c<-dcast(ds2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+    cols1<-c(rep('grey',(ncol(ds2.c)-2) ),'red')
+    matplot(ds2.c$epiwk         ,
+       exp(ds2.c[,-1]),
+       type='l',
+       col=cols1,
+       ylim=y.range1,
+       bty='l',
+       lty=1,
+       ylab='Observed/Expected',
+       main=paste(states[i]))
+    abline(h=1, col='black')
+    }
+```
 
 
 

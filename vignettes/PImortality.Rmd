@@ -1,0 +1,245 @@
+---
+title: "Using ExcessILI with US P&I mortality data"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+author: "Dan Weinberger"
+date: "4/3/2020"
+---
+
+```{r, include = F}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ExcessILI)
+library(cdcfluview)
+library(reshape2)
+library(ggplot2)
+library(RColorBrewer)
+library(plotly)
+library(MMWRweek)
+```
+
+## Overview
+
+The goal for this package is to facilitate the formatting of line list data
+from syndromic surveillance datasets into time series and then the analysis of
+these data to detect increases above the seasonal baseline. For US data, there
+is an option to automatically adjust the data for state-specific flu activity
+(using data from [NREVSS](https://www.cdc.gov/surveillance/nrevss/index.html)
+and/or state-specific RSV activity (based on Google search volume). The user
+can either start with line list data or formatted time series data
+
+In this example, we will analyze [ILINet](https://wwwn.cdc.gov/ILINet/) data
+with a simple seasonal baseline, adjusting for flu and year-to-year variations.
+The model is fit through end-of-February 2020 and then extrapolated forward
+based on the time of year and the amount of influenza activity. Influenza
+activity is captured by using the proportion of tests that were positive from
+the NREVSS system (log transformed in model) 
+
+
+
+```{r}
+## Download the mortality data
+
+pi.data <- pi_mortality(coverage_area='state')
+
+```
+
+```{r}
+#Format and fill mssings with 0s
+
+pi.data$state <- state.abb[match(pi.data$region_name, state.name)]
+pi.data$state[pi.data$region_name == 'New York City'] <- 'NYC'
+spl1<-split(pi.data, pi.data$state)
+min.state <- lapply(spl1, function(x){ x$miss.x<-min(x$total_pni)
+return(x)
+                })
+pi.data.clean <- do.call('rbind.data.frame',min.state)
+pi.data.clean <- pi.data.clean[!is.na(pi.data.clean$miss.x),]
+```
+
+```{r}
+#Run analysis
+excess_deaths1.adjusted <-
+  excessCases(ds = pi.data.clean,
+              datevar       = "wk_start",
+              statevar      = "state",
+              denom.var     = "all_deaths",
+              adj.flu       = "none",
+              use.syndromes = c("total_pni"),
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+```
+
+
+```{r, echo=F}
+ #dashboardPlot(excess_deaths1.adjusted)
+```
+
+
+## Plot observed weekly death rate vs baseline
+
+
+```{r}
+### Extract the quantities of interest
+
+#Which syndrome do you want to plot, and over what time range?
+
+syndrome.select <- 'total_pni' #which syndrome do you want to plot?
+n.days<-52  #How many days to plot?
+ds <- excess_deaths1.adjusted
+```
+ 
+```{r}
+#Extract the data needed to plot from the results
+
+dates1 <-
+  ds[[1]][[1]][[1]]$date
+  
+unexplained.cases <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "unexplained.cases")
+
+unexplained.log.rr <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "resid1")
+
+denom <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "denom")
+
+
+upi <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "upi")
+
+lpi <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "lpi")
+
+obs <-
+  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "y")
+
+pred<-  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "pred")
+
+rr <-  excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "resid1")
+```
+
+Generate the plots
+
+```{r}
+n.days <- 52
+select.indices <- (length(dates1)-n.days):length(dates1)
+dates<-dates1[select.indices]
+states <- dimnames(pred)[[2]]
+ages <- dimnames(pred)[[3]]
+```
+
+
+```{r, fig.width=8, fig.height=7}
+
+  par(mfrow=c(4,4))
+
+for(i in 1:dim(pred)[2]){
+  for(j in 1:dim(pred)[3]){
+    y.range1<-range(c( pred[select.indices,i,j]/denom[select.indices,i,j],obs[select.indices,i,j]/denom[select.indices,i,j], upi[select.indices,i,j]/denom[select.indices,i,j],0))
+  plot(dates,
+       pred[select.indices,i,j]/denom[select.indices,i,j],
+       type='l',
+       col='red',
+       ylim=y.range1,
+       bty='l',
+       ylab='Proportion',
+       main=paste(states[i],ages[j]))
+
+  points(dates,
+         obs[select.indices,i,j]/denom[select.indices,i,j],
+         type='l',
+         col='black')
+
+  polygon(c(dates,
+            rev(dates)),
+          c(lpi[select.indices,i,j]/denom[select.indices,i,j],
+            rev(upi[select.indices,i,j]/denom[select.indices,i,j])),
+          col = rgb(1, 0, 0, alpha = 0.1),
+          border = NA)
+  }
+}
+```
+## Observed/expected
+```{r, eval=F, echo=F}
+n.cols=100
+set.seed(123)
+rr2 <- as.data.frame(rr[,,1])
+rr2$date <-dates1
+nice.cols <-  colorRampPalette(brewer.pal(11, "Set3"))(ncol(rr2))
+nice.cols<-sample(nice.cols)
+
+meltdf <- melt(rr2, id.vars = 'date')
+meltdf$rr<-exp(meltdf$value)
+p1<-ggplot(meltdf,aes(x=date,y=rr,
+                      color=variable,
+                      group=variable)) +
+ geom_line() +  
+  theme_bw() + 
+  ggtitle("Excess P&I mortality") +
+   labs(y="Observed/Expected")+
+  theme(panel.border = element_blank()) + scale_color_manual(values = nice.cols)+
+  scale_x_date(date_labels = "%b-%Y")
+ggplotly(p1)
+```
+
+
+```{r, echo=F}
+rr2<-rr[,,1]
+date.mmwrdates <- mmwr_week(dates1)
+mmwr.epiyr<- date.mmwrdates$mmwr_year
+mmwr.epiyr[date.mmwrdates$mmwr_week<=26] <- mmwr.epiyr[date.mmwrdates$mmwr_week<=26] - 1
+
+mmwr.epiwk <- date.mmwrdates$mmwr_week
+mmwr.epiwk[date.mmwrdates$mmwr_week>=27]<-date.mmwrdates$mmwr_week[date.mmwrdates$mmwr_week>=27] - 52
+mmwr.epiwk <- mmwr.epiwk +26
+check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
+```
+
+```{r, fig.width=8, fig.height=7}
+
+  par(mfrow=c(4,4))
+
+for(i in 1:dim(pred)[2]){
+    y.range1<-c(0,2)
+    ds2<-cbind.data.frame('epiwk'=mmwr.epiwk,'epiyr'=mmwr.epiyr, rr=rr2[,i])
+    ds2.c<-dcast(ds2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
+    cols1<-c(rep('grey',(ncol(ds2.c)-2) ),'red')
+    matplot(ds2.c$epiwk         ,
+       exp(ds2.c[,-1]),
+       type='l',
+       col=cols1,
+       ylim=y.range1,
+       bty='l',
+       lty=1,
+       ylab='Observed/Expected',
+       main=paste(states[i]))
+    abline(h=1, col='black')
+    }
+```
+
+
