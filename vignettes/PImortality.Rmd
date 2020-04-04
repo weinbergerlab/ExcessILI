@@ -290,7 +290,7 @@ for(i in 1:length(common.states)){
        bty='l',
        lty=1,
        ylab='Observed/Expected',
-       main=paste(states[i], ' Deaths(red),','ILI(blue)' ))
+       main=paste(common.states[i], ' Deaths(red),','ILI(blue)' ))
 
   es2<-cbind.data.frame('epiwk'=mmwr.epiwk.ili,'epiyr'=mmwr.epiyr.ili, rr=rr2.ili.comp[,i])
     es2.c<-dcast(es2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
