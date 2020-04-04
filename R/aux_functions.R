@@ -128,8 +128,9 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 
 
 ## Evaluate results after controlling for flu and RSV
+#' @importFrom magrittr %>%
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
-                     extrapolation.date, adj.flu, adj.rsv)
+                     extrapolation.date, adj.flu, adj.rsv, covs=character())
 {
   date.string       <- as.Date(dimnames(ds)[[1]])
   month             <- lubridate::month(date.string)
@@ -152,6 +153,10 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   
   # Same for all ages and boroughs
   sqrt.rsv <- sqrt(clean.array.citywide[, , age.test, "rsv.var"])  
+
+  # Extract the columns of the covariates.
+  covs_for_glm <-
+    purrr::map(covs, ~clean.array.citywide[, , age.test, .]) %>% setNames(covs)
   
   # Get rid of any zeroes in the data, to play nice with logarithms
   if( min(clean.array.citywide[, , age.test, "flu.var"], na.rm=T) == 0 ){
@@ -161,10 +166,12 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   
   # Same for all ages and boroughs
   flu <- clean.array.citywide[, , age.test, "flu.var"]
+  
   cont.correct <- 0
-  if(min(flu, na.rm=T)==0 ){
-    cont.correct <- min(flu[flu!=0], na.rm=T)/2 
-  }
+
+  if (min(flu, na.rm = T) == 0)
+    cont.correct <- min(flu[flu != 0], na.rm = T)/2 
+
   log.flu = log(flu + cont.correct)  
   
   # Fill in missing observations for flu at end of TS with most recent
@@ -175,6 +182,10 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   # observed values
   sqrt.rsv <- zoo::na.locf(sqrt.rsv, na.rm = F)  
   
+  # Fill in missing observations for covs at end of TS with most recent
+  # observed values. NOTE: this may not be appropriate!
+  covs_for_glm <- purrr::map(covs_for_glm, zoo::na.locf, na.rm = F)
+
   t2 <- 1:length(y.age)
   
   if (time.res == "day") {
@@ -190,71 +201,65 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   sin3 <- sin(2*pi * t2 * 3/period)
   cos3 <- cos(2*pi * t2 * 3/period)
   
-  log.offset <- log(clean.array.citywide[, , age.test, denom.var]+ 0.5)
+  log.offset <- log(clean.array.citywide[, , age.test, denom.var] + 0.5)
   
-  ds.glm <-
-    cbind.data.frame(
-      date = date.string,
-      day.of.year = day.of.year,
-      y.age = y.age[1, ],
-      y.age.fit = y.age.fit,
-      sqrt.rsv,
-      log.flu,
-      day.of.week,
-      t2,
-      epiyr.index.f, 
-      sin1, sin2, cos1, cos2, sin3, cos3,
-      log.offset
+  vars_for_glm <-
+    list(
+      date          = date.string,
+      day.of.year   = day.of.year,
+      y.age         = y.age[1, ],
+      y.age.fit     = y.age.fit,
+      sqrt.rsv      = sqrt.rsv,
+      log.flu       = log.flu,
+      day.of.week   = day.of.week,
+      t2            = t2,
+      epiyr.index.f = epiyr.index.f, 
+      log.offset    = log.offset,
+      sin1=sin1, sin2=sin2, cos1=cos1, cos2=cos2, sin3=sin3, cos3=cos3
     )
   
+  # Splice together the two lists of varialbes that we would like to have in
+  # the dataframe that ultimately passed to 'glm'.
+  ds.glm <- do.call(cbind.data.frame, purrr::splice(vars_for_glm, covs_for_glm))
+
   ds.glm <- ds.glm[!is.na(ds.glm$sqrt.rsv) & !is.na(ds.glm$log.flu), ]
   ds.glm$epiyr.index.f <- factor(ds.glm$epiyr.index.f)
-  # ds.glm<-ds.glm[complete.cases(ds.glm),]
-  
-  if(adj.flu=='none' & adj.rsv=='none'){
-    if (time.res == "day") {
-      covars <- paste("epiyr.index.f", 
-                      "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }else{
-      covars <- paste("epiyr.index.f",
-                      "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }
-  }else if(adj.flu=='none' & adj.rsv!='none'){
-    if (time.res == "day") {
-      covars <- paste("epiyr.index.f*sqrt.rsv", 
-               "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }else{
-      covars <- paste("epiyr.index.f*sqrt.rsv", 
-                      "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }
-  }else if(adj.flu!='none' & adj.rsv=='none'){
-    if (time.res == "day") {
-      covars <- paste("epiyr.index.f*log.flu", 
-                      "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }else{
-      covars <- paste("epiyr.index.f*log.flu", 
-                      "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-    }
-  }else if(adj.flu!='none' & adj.rsv!='none'){
-      if (time.res == "day") {
-        covars <- paste("epiyr.index.f*log.flu","epiyr.index.f*sqrt.rsv", 
-                        "day.of.week", "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-      }else{
-        covars <- paste("epiyr.index.f*log.flu", "epiyr.index.f*sqrt.rsv",
-                        "sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep="+")
-      }
-  }
 
-    form1 <- as.formula(
-      paste0(paste("y.age.fit ~",covars))
-    )
-    
-    # Rsv effect varies by epiyr
-    form2 <- as.formula(
-      paste0(paste("y.age ~",covars))
-    )
-    
+  ###########################################
+  # Model specification
+  ###########################################
+
+  # Term 1a,1b adjust for flu and RSV. If both of them aren't specified, 
+  # then only one 'epiyr.index.f' is to be specified.
+  covars.term1a <- ifelse(adj.flu == 'none', 'epiyr.index.f', 'epiyr.index.f*log.flu')
+  covars.term1b <- ifelse(adj.rsv == 'none', 'epiyr.index.f', 'epiyr.index.f*sqrt.rsv')
+
+  covars.term1  <- ifelse(identical(covars.term1a, covars.term1b),
+                          covars.term1a, 
+                          paste(covars.term1a, covars.term1b, sep=" + "))
+
+  # If the data has day-resolution, use it as one of the mock variables
+  covars.term2  <- ifelse(time.res == 'day', 'day.of.week', NA)
+
+  # Sinusoidals
+  covars.term3  <- paste("sin1", "cos1", "sin2", "cos2","sin3","cos3" , sep=" + ")
+
+  # Add in user-specified covariates, if available
+  covars.term4  <- ifelse(length(covs > 0), paste(covs, collapse = " + "), NA)
+
+  # Concatenate everything together as a string
+  covars <- c(covars.term1, covars.term2, covars.term3, covars.term4)
+
+  covars_str <- paste(covars[!is.na(covars)], collapse=" + ")
+  
+  # Rsv effect varies by epiyr
+  form1 <- as.formula(paste0("y.age.fit ~ ", covars_str))
+  form2 <- as.formula(paste0("y.age ~ ",     covars_str))
  
+  ###########################################
+  # Model fitting
+  ###########################################
+
   if (sum(ds.glm$y.age, na.rm=T) >= 100) {
     mod1 <- glm(form1,
                 data = ds.glm,
@@ -307,7 +312,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            unexplained.cases = unexplained.cases, 
            denom             = exp(ds.glm$log.offset),
            sparse.group      = F)
-  }else{
+  } else {
     out.list <-
       list(date              = ds.glm$date,
            y                 = ds.glm$y.age,

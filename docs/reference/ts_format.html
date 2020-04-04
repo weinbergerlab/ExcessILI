@@ -135,6 +135,7 @@
   <span class='no'>statevar</span>,
   <span class='kw'>sub.statevar</span> <span class='kw'>=</span> <span class='st'>"none"</span>,
   <span class='kw'>agevar</span> <span class='kw'>=</span> <span class='st'>"none"</span>,
+  <span class='kw'>covs</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span>(),
   <span class='no'>syndromes</span>,
   <span class='kw'>resolution</span> <span class='kw'>=</span> <span class='st'>"day"</span>,
   <span class='kw'>remove.final</span> <span class='kw'>=</span> <span class='no'>F</span>
@@ -172,6 +173,12 @@ identifier? (e.g., county, borough)</p></td>
       <th>agevar</th>
       <td><p>A string. What variable contains the age group? Use 'none'
 if there is no age grouping in the data</p></td>
+    </tr>
+    <tr>
+      <th>covs</th>
+      <td><p>A character vector. Which, if any, variables in <code>ds</code> should
+be treated as covariates in fitting the baseline model? Default is to not
+consider any variables in <code>ds</code> to be covariates.</p></td>
     </tr>
     <tr>
       <th>syndromes</th>

@@ -10,6 +10,7 @@ excessCases(
   statevar = "state",
   agevar = "none",
   datevar,
+  covs = character(),
   use.syndromes,
   denom.var,
   adj.flu = "none",
@@ -19,7 +20,7 @@ excessCases(
 )
 }
 \arguments{
-\item{ds}{A dataframe, with a format similar to the one produced by the
+\item{ds}{A data.frame, with a format similar to the one produced by the
 \code{\link{ts_format}} function. There should be a row for each time
 period (week or day), location (e.g. state, county), and age category.
 There must be a column for date (\code{YYYY-MM-DD}), age category,
@@ -39,6 +40,10 @@ age group? Use \code{'none'} if there is no age grouping in the data}
 
 \item{datevar}{A string. Which variable in the input data frame contains
 the date?}
+
+\item{covs}{A character vector. Which, if any, variables in \code{ds} should
+be treated as covariates in fitting the baseline model? Default is to not
+consider any variables in \code{ds} to be covariates.}
 
 \item{use.syndromes}{A vector with the variable names for syndromes to be
 tested (e.g., \code{c('ILI','respiratory')} ).}
