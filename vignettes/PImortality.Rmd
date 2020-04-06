@@ -24,14 +24,17 @@ library(ExcessILI)
 library(cdcfluview)
 library(reshape2)
 library(ggplot2)
+library(lubridate)
 library(RColorBrewer)
 library(plotly)
 library(MMWRweek)
+library(readr)
+
 ```
 
 ## Overview
 
-In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjustign for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward
+In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward
 based on the time of year.
 
 
@@ -40,6 +43,97 @@ based on the time of year.
 ## Download the mortality data
 
 pi.data <- pi_mortality(coverage_area='state')
+
+```
+
+```{r}
+#download the NREVSS data
+nrevvs.state <- cdcfluview::who_nrevss(region = c("state"))
+  
+  clin <- nrevvs.state[["clinical_labs"]]
+  
+  data(cdcfluview::hhs_regions)
+  
+  cw.file <- cdcfluview::hhs_regions
+  
+  clin2 <- merge(clin, cw.file,
+                 by.x = "region",
+                 by.y = "state_or_territory")
+  
+  clin2.subsetvars <- 
+    c('region', 'region_number',
+      'year', 'week', 'wk_date',
+      'total_a','total_b',
+      'total_specimens')
+  
+  clin2 <- clin2[, clin2.subsetvars]
+  
+  names(clin2)[1:2] <- c("state", "hhs_region")
+  
+  nrevvs_hhs <- cdcfluview::who_nrevss(region = c("hhs"))
+  
+  clin.hhs <- nrevvs_hhs[["clinical_labs"]]
+  clin.hhs.subsetvars <-
+    c('region',
+      'wk_date',
+      "total_a",'total_b',
+      'total_specimens')
+  
+  clin.hhs <- clin.hhs[, clin.hhs.subsetvars]
+  clin.hhs$region <- as.numeric(gsub("Region ", "", clin.hhs$region))
+  
+  names(clin.hhs) <-
+    c("hhs_region",
+      "wk_date",
+      "hhs_total_a",'hhs_total_b',
+      'hhs_total_specimens')
+  
+  clin3 <- merge(clin2, clin.hhs,
+                 by = c("hhs_region", "wk_date"))
+  
+  clin3$total_a[is.na(clin3$total_a)] <-
+    clin3$hhs_total_a[is.na(clin3$total_a)]
+  
+  clin3$total_b[is.na(clin3$total_b)] <-
+    clin3$hhs_total_b[is.na(clin3$total_b)]
+  
+  clin3$total_specimens[is.na(clin3$total_specimens)] <-
+    clin3$hhs_total_specimens[is.na(clin3$total_specimens)]
+  
+  clin3$state.abb <- state.abb[match(clin3$state, state.name)]
+  
+  names(clin3) <-
+    c("hhs_region",
+      "wk_date",
+      "state_name",
+      "MMWRyear", "MMWRweek",
+      "total_a",'total_b',
+      'total_specimens',
+      'total_a_hhs', "total_b_hhs",
+      'total_specimens_hhs',
+      "state")
+  
+  clin3$total_a         <- as.numeric(clin3$total_a)
+  clin3$total_b         <- as.numeric(clin3$total_b)
+  clin3$total_specimens <- as.numeric(clin3$total_specimens)
+  clin3$flu_pct_adj     <- (clin3$total_a + clin3$total_b + 0.5) / 
+    (clin3$total_specimens + 0.5)
+  clin3$fluN            <- clin3$total_a + clin3$total_b + 0.5
+  clin3$flu.var         <- clin3$flu_pct_adj
+  
+  clin4<-clin3[,c('state','flu_pct_adj', 'wk_date')]
+  
+  clin4.lag1<-clin4
+  clin4.lag1$wk_date <- clin4$wk_date + days(7)
+  names(clin4.lag1) <-c('state','flu_pct_adj_lag1','wk_date')
+  
+  clin4.lag2<-clin4
+  clin4.lag2$wk_date <- clin4$wk_date + days(14)
+   names(clin4.lag2) <-c('state','flu_pct_adj_lag2','wk_date')
+   
+clin4.lags <- merge(clin4, clin4.lag1, by=c('state','wk_date'))
+clin4.lags <- merge(clin4.lags, clin4.lag2, by=c('state','wk_date'))
+
 
 ```
 
@@ -54,16 +148,34 @@ return(x)
                 })
 pi.data.clean <- do.call('rbind.data.frame',min.state)
 pi.data.clean <- pi.data.clean[!is.na(pi.data.clean$miss.x),]
+
+pi.data.clean2<- merge( pi.data.clean,clin4.lags, by.x=c('wk_start', 'state'), by.y=c('wk_date','state'))
+
+pi.data.clean2<- pi.data.clean2[order(pi.data.clean2$state, pi.data.clean2$wk_end),]
+```
+
+```{r, eval=F}
+#What is most appropriate lag to use for NREVSS data?
+pi.data.clean2.spl <- split(pi.data.clean2, pi.data.clean2$state)
+cor.lags <- sapply(pi.data.clean2.spl, function(x){
+   cor(x[,c("percent_pni","flu_pct_adj",'flu_pct_adj_lag1','flu_pct_adj_lag2')])
+ }, simplify='array')
+matplot(cor.lags['percent_pni',-1,], type='l')
+
+#Is lag of 0,1,or 2 the best?...shows 1 weeks lag best in 20 states,  2 week lag best in 3 states
+table(apply(cor.lags['percent_pni',-1,],2, function(x) which(max(x)==x)))
+
 ```
 
 ```{r, include=F}
 #Run analysis
 excess_deaths1.adjusted <-
-  excessCases(ds = pi.data.clean,
+  excessCases(ds = pi.data.clean2,
               datevar       = "wk_start",
               statevar      = "state",
               denom.var     = "all_deaths",
-              adj.flu       = "none",
+              adj.flu       = "flu_pct_adj_lag1",
+              #covs=c("flu_pct_adj", "flu_pct_adj_lag1", "flu_pct_adj_lag2"),
               use.syndromes = c("total_pni"),
               extrapolation.date = "2020-03-01",
               time.res='week')
@@ -129,10 +241,14 @@ pred<-  excessExtract(ds = ds,
 rr <-  excessExtract(ds = ds,
                 syndrome = syndrome.select,
                 extract.quantity = "resid1")
+
+excess_deaths <- excessExtract(ds = ds,
+                syndrome = syndrome.select,
+                extract.quantity = "unexplained.cases")
 ```
 
-## Observed weekly death rate vs seasonal baseline (+/-95%PI)
-
+## Observed weekly death rate vs seasonal baseline (+/-95% Prediction Interval) 
+ 
 ```{r}
 n.days <- 52
 select.indices <- (length(dates1)-n.days):length(dates1)
@@ -141,6 +257,7 @@ states <- dimnames(pred)[[2]]
 ages <- dimnames(pred)[[3]]
 ```
 
+The black line shows the observed proportion of deaths that were due to Pneumonia & Influenza (P&I) per week. The red line and shaded area represent the 95% Prediction Interval. The latest data is for the week ending `r  max(dates1)+7`.
 
 ```{r, fig.width=8, fig.height=7}
 
@@ -174,28 +291,6 @@ for(i in 1:dim(pred)[2]){
 ```
 
 ## Observed deaths/expected deaths by state
-```{r, eval=F, echo=F}
-n.cols=100
-set.seed(123)
-rr2 <- as.data.frame(rr[,,1])
-rr2$date <-dates1
-nice.cols <-  colorRampPalette(brewer.pal(11, "Set3"))(ncol(rr2))
-nice.cols<-sample(nice.cols)
-
-meltdf <- melt(rr2, id.vars = 'date')
-meltdf$rr<-exp(meltdf$value)
-p1<-ggplot(meltdf,aes(x=date,y=rr,
-                      color=variable,
-                      group=variable)) +
- geom_line() +  
-  theme_bw() + 
-  ggtitle("Excess P&I mortality") +
-   labs(y="Observed/Expected")+
-  theme(panel.border = element_blank()) + scale_color_manual(values = nice.cols)+
-  scale_x_date(date_labels = "%b-%Y")
-ggplotly(p1)
-```
-
 
 ```{r, echo=F}
 rr2<-rr[,,1]
@@ -208,6 +303,8 @@ mmwr.epiwk[date.mmwrdates$mmwr_week>=27]<-date.mmwrdates$mmwr_week[date.mmwrdate
 mmwr.epiwk <- mmwr.epiwk +26
 check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
 ```
+
+These plots show the Observed/Expected number of deaths due to pneumonia and influenza in each week for the 2019-20 year (red) compared to previous years (gray). Values close to 1 indicate that the values for that week are close to what would be expected based on the time of year and influenza activity.
 
 ```{r, fig.width=8, fig.height=7}
 
@@ -231,7 +328,9 @@ for(i in 1:dim(pred)[2]){
     }
 ```
 
-## Compare Excess P*I mortality vs Excess ILI
+## Compare Excess P&I mortality vs Excess ILI
+
+Here we compare the observed vs expected number of deaths due to pneumonia and influenza in each week compare to the observed vs expected number of outpatient visits for influenza-like illness (ILI) in each week. we would expect ILI (blue line) to increase earlier than deaths (red line)
 ```{r, include=F}
 ili.data <- ilinet(region = c("state"))
 ili.data$state <- state.abb[match(ili.data$region, state.name)]
@@ -301,4 +400,43 @@ for(i in 1:length(common.states)){
 
 ```
 
+```{r, echo=F, eval=F}
+## excess deaths
+
+excess_deaths2 <- excess_deaths[dates1 >= as.Date('2020-02-02'),,1]
+excess_deaths.state <- apply(excess_deaths2,2,sum)
+cumsum_excess_deaths_state <- apply(excess_deaths2,2,cumsum)
+matplot(cumsum_excess_deaths_state, type='l', bty='l')
+
+```
+
+```{r, echo=F}
+urlfile="https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv"
+
+nyt<-as.data.frame(read_csv(url(urlfile)))
+    nyt$state <- state.abb[match(nyt$state, state.name)]
+nyt.spl<-split(nyt, nyt$state)
+nyt.spl2 <- lapply(nyt.spl, function(x){
+  x$new.cases<- x$cases
+  x$new.deaths<- x$deaths
+    for(i in 2: nrow(x)){
+    x$new.deaths[i]<- x$deaths[i] - x$deaths[i-1]
+    x$new.cases[i]<- x$cases[i] - x$cases[i-1]
+    }
+  return(x)
+}  )   
+nyt2 <- do.call('rbind.data.frame', nyt.spl2)
+    
+  nyt2$date <- floor_date(nyt2$date, 'week')
+
+  nyt.m <- melt( nyt2[,c('date','state','new.cases','new.deaths')], id.vars = c('state', 'date'))
+nyt.c <- acast( nyt.m, variable~date ~ state, fun.aggregate = sum)
+
+nyt.mmwr <- MMWRweek(as.Date(dimnames(nyt.c)[[2]]))
+#nyt <- cbind.data.frame( nyt, nyt.mmwr)
+
+#View(nyt.c['new.deaths',,])
+
+
+```
 

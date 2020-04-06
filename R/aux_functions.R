@@ -306,6 +306,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                      (preds.stage2.q[, "50%"] + 0.5))
     
     unexplained.cases <- ds.glm$y.age - preds.stage2.q[, "50%"]
+    
     out.list <-
       list(date              = ds.glm$date,
            y                 = ds.glm$y.age,

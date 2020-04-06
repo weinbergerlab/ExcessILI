@@ -93,22 +93,25 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<p>In this example, we will analyze increases of pneumonia and influenza (P&amp;I) above the seasonal baseline, adjustign for year-to-year variations in incidence. We use the weekly data published by the <a href="https://gis.cdc.gov/grasp/fluview/mortality.html">CDC</a> data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.</p>
+<p>In this example, we will analyze increases of pneumonia and influenza (P&amp;I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the <a href="https://gis.cdc.gov/grasp/fluview/mortality.html">CDC</a> data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.</p>
 </div>
-<div id="observed-weekly-death-rate-vs-seasonal-baseline--95pi" class="section level2">
+<div id="observed-weekly-death-rate-vs-seasonal-baseline--95-prediction-interval" class="section level2">
 <h2 class="hasAnchor">
-<a href="#observed-weekly-death-rate-vs-seasonal-baseline--95pi" class="anchor"></a>Observed weekly death rate vs seasonal baseline (+/-95%PI)</h2>
-<p><img src="PImortality_files/figure-html/unnamed-chunk-9-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-9-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-9-3.png" width="768"></p>
+<a href="#observed-weekly-death-rate-vs-seasonal-baseline--95-prediction-interval" class="anchor"></a>Observed weekly death rate vs seasonal baseline (+/-95% Prediction Interval)</h2>
+<p>The black line shows the observed proportion of deaths that were due to Pneumonia &amp; Influenza (P&amp;I) per week. The red line and shaded area represent the 95% Prediction Interval. The latest data is for the week ending 2020-03-22.</p>
+<p><img src="PImortality_files/figure-html/unnamed-chunk-11-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-11-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-11-3.png" width="768"></p>
 </div>
 <div id="observed-deathsexpected-deaths-by-state" class="section level2">
 <h2 class="hasAnchor">
 <a href="#observed-deathsexpected-deaths-by-state" class="anchor"></a>Observed deaths/expected deaths by state</h2>
-<p><img src="PImortality_files/figure-html/unnamed-chunk-12-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-12-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-12-3.png" width="768"></p>
+<p>These plots show the Observed/Expected number of deaths due to pneumonia and influenza in each week for the 2019-20 year (red) compared to previous years (gray). Values close to 1 indicate that the values for that week are close to what would be expected based on the time of year and influenza activity.</p>
+<p><img src="PImortality_files/figure-html/unnamed-chunk-13-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-13-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-13-3.png" width="768"></p>
 </div>
 <div id="compare-excess-pi-mortality-vs-excess-ili" class="section level2">
 <h2 class="hasAnchor">
-<a href="#compare-excess-pi-mortality-vs-excess-ili" class="anchor"></a>Compare Excess P*I mortality vs Excess ILI</h2>
-<p><img src="PImortality_files/figure-html/unnamed-chunk-14-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-14-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-14-3.png" width="768"></p>
+<a href="#compare-excess-pi-mortality-vs-excess-ili" class="anchor"></a>Compare Excess P&amp;I mortality vs Excess ILI</h2>
+<p>Here we compare the observed vs expected number of deaths due to pneumonia and influenza in each week compare to the observed vs expected number of outpatient visits for influenza-like illness (ILI) in each week. we would expect ILI (blue line) to increase earlier than deaths (red line)</p>
+<p><img src="PImortality_files/figure-html/unnamed-chunk-15-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-15-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-15-3.png" width="768"></p>
 </div>
   </div>
 
