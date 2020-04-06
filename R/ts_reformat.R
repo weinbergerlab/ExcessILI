@@ -94,6 +94,11 @@ ts_format <-
     att(all(covs %in% names(line.list)))
 
   att(is.character(syndromes))
+  att(length(syndromes) >= 1)
+  att(all(purrr::map(names(syndromes),
+                     ~(is.numeric(line.list[,.]) ||
+                       is.logical(line.list[,.])))))
+
   att(is.string(resolution))
   att(any(resolution %in% c('day', 'week', 'month')))
   att(is.logical(remove.final))
@@ -104,7 +109,7 @@ ts_format <-
   ds1[, datevar] <- as.Date(ds1[,datevar])
   ds1[, datevar] <- lubridate::floor_date(ds1[, datevar], unit=resolution)
   
-  ds1$all.visits <- 1
+  ds1$all.visits <- 1 # Hack to make sure we have total visit counts
   
   if(!(sub.statevar %in% names(ds1))){
     ds1$sub.statevar <- ds1[,statevar]
