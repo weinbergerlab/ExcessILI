@@ -31,6 +31,9 @@ devtools::install_github("weinbergerlab/ExcessILI")
 - For an example of how to use the analysis functions with CDC ILINet
   data, see `vignette("ILINet")`.
 
+- For preliminary results on pneumonia and influenza mortality increases 
+  above the seasonal baseline, visit `vignette("PImortality")`
+
 # Resources
 
 - [Ask a question](mailto:daniel.weinberger@yale.edu?subject=ExcessILI)

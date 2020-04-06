@@ -440,3 +440,19 @@ nyt.mmwr <- MMWRweek(as.Date(dimnames(nyt.c)[[2]]))
 
 ```
 
+## Excess all-cause deaths
+
+Now instead of modeling the proportion of deaths that were due to pneumonia and influenza, we will model all-caused deaths
+```{rr}
+#Run analysis
+pi.data.clean2$one <- 1
+excess_deaths1.ac <-
+  excessCases(ds = pi.data.clean2,
+              datevar       = "wk_start",
+              statevar      = "state",
+              denom.var     = "all_deaths",
+              adj.flu       = "flu_pct_adj_lag1",
+              #covs=c("flu_pct_adj", "flu_pct_adj_lag1", "flu_pct_adj_lag2"),
+              use.syndromes = c("total_pni"),
+              extrapolation.date = "2020-03-01",
+              time.res='week')

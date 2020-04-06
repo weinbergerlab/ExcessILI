@@ -146,6 +146,7 @@
   <span class='kw'>statevar</span> <span class='kw'>=</span> <span class='st'>"state"</span>,
   <span class='kw'>agevar</span> <span class='kw'>=</span> <span class='st'>"none"</span>,
   <span class='no'>datevar</span>,
+  <span class='kw'>covs</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span>(),
   <span class='no'>use.syndromes</span>,
   <span class='no'>denom.var</span>,
   <span class='kw'>adj.flu</span> <span class='kw'>=</span> <span class='st'>"none"</span>,
@@ -159,7 +160,7 @@
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>ds</th>
-      <td><p>A dataframe, with a format similar to the one produced by the
+      <td><p>A data.frame, with a format similar to the one produced by the
 <code><a href='ts_format.html'>ts_format</a></code> function. There should be a row for each time
 period (week or day), location (e.g. state, county), and age category.
 There must be a column for date (<code>YYYY-MM-DD</code>), age category,
@@ -187,6 +188,12 @@ age group? Use <code>'none'</code> if there is no age grouping in the data</p></
       <th>datevar</th>
       <td><p>A string. Which variable in the input data frame contains
 the date?</p></td>
+    </tr>
+    <tr>
+      <th>covs</th>
+      <td><p>A character vector. Which, if any, variables in <code>ds</code> should
+be treated as covariates in fitting the baseline model? Default is to not
+consider any variables in <code>ds</code> to be covariates.</p></td>
     </tr>
     <tr>
       <th>use.syndromes</th>
@@ -261,7 +268,8 @@ included in the regression model when fitting the seasonal baseline.</p></td>
 <p><code>denom</code>: denominator used in the model</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'> <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>cdcfluview</span>)</div><div class='output co'>#&gt; <span class='warning'>Warning: package 'cdcfluview' was built under R version 3.6.3</span></div><div class='input'> <span class='no'>ili.data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/cdcfluview/man/ilinet.html'>ilinet</a></span>(<span class='kw'>region</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"state"</span>))
+    <pre class="examples"><div class='input'> <span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>cdcfluview</span>)
+ <span class='no'>ili.data</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/pkg/cdcfluview/man/ilinet.html'>ilinet</a></span>(<span class='kw'>region</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"state"</span>))
  <span class='no'>ili.data</span>$<span class='no'>state</span> <span class='kw'>&lt;-</span> <span class='no'>state.abb</span>[<span class='fu'><a href='https://rdrr.io/r/base/match.html'>match</a></span>(<span class='no'>ili.data</span>$<span class='no'>region</span>, <span class='no'>state.name</span>)]
 
  <span class='no'>ili.data</span> <span class='kw'>&lt;-</span> <span class='no'>ili.data</span>[, <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"state"</span>, <span class='st'>"week_start"</span>, <span class='st'>"ilitotal"</span>, <span class='st'>"total_patients"</span>)]
@@ -274,11 +282,7 @@ included in the regression model when fitting the seasonal baseline.</p></td>
                <span class='kw'>statevar</span> <span class='kw'>=</span> <span class='st'>"state"</span>,
                <span class='kw'>denom.var</span> <span class='kw'>=</span> <span class='st'>"total_patients"</span>,
                <span class='kw'>use.syndromes</span> <span class='kw'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span>(<span class='st'>"ilitotal"</span>),
-               <span class='kw'>time.res</span> <span class='kw'>=</span> <span class='st'>"week"</span>)</div><div class='output co'>#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"
-#&gt; [1] "epiyr.index.f + sin1 + cos1 + sin2 + cos2 + sin3 + cos3"</div></pre>
+               <span class='kw'>time.res</span> <span class='kw'>=</span> <span class='st'>"week"</span>)</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -294,7 +298,7 @@ included in the regression model when fitting the seasonal baseline.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>
