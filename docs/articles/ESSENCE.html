@@ -75,7 +75,7 @@
 
       
 
-      </header><div class="row">
+      </header><script src="ESSENCE_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Going from line list data to an interactive app</h1>
@@ -100,12 +100,11 @@
 <h2 class="hasAnchor">
 <a href="#getting-started" class="anchor"></a>Getting started</h2>
 <p>This package is not available on CRAN, so it needs to be installed directly from Github. Make sure you have the ‘devtools’ package installed.</p>
-<div class="sourceCode" id="cb1"><html><body><pre class="r"># Install development version from GitHub
-library(devtools)
-devtools::install_github("weinbergerlab/ExcessILI")</pre></body></html></div>
-<div class="sourceCode" id="cb2"><html><body><pre class="r">library(ExcessILI)
-library(cdcfluview)
-#&gt; Warning: package 'cdcfluview' was built under R version 3.6.3</pre></body></html></div>
+<div class="sourceCode" id="cb1"><html><body><pre class="r"><span class="co"># Install development version from GitHub</span>
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">devtools</span>)
+<span class="kw pkg">devtools</span><span class="kw ns">::</span><span class="fu"><a href="https://devtools.r-lib.org//reference/remote-reexports.html">install_github</a></span>(<span class="st">"weinbergerlab/ExcessILI"</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb2"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">ExcessILI</span>)
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">cdcfluview</span>)</pre></body></html></div>
 <p><strong>We recommend installing the cdcfluview package to take full advantage of the ExcessILI package. If you are using the Enterpise version of RStudio on the BioSense platform, cdcfluview might not install correctly.</strong></p>
 <p><code>cdcfluview</code>’s dependencies require the packages <code>gdal</code> and <code>udunits</code>, which cannot be installed using R’s package manager. If <code>cdcfluview</code> installation fails for this reason, you’ll need to install these by hand. For installation of these two packages on OS X, we recommend using a package manager such as <a href="https://brew.sh">brew</a>.</p>
 <div class="sourceCode" id="cb3"><html><body><pre class="r">brew install gdal udunits</pre></body></html></div>
@@ -114,64 +113,81 @@ library(cdcfluview)
 <h2 class="hasAnchor">
 <a href="#prepare-the-data" class="anchor"></a>Prepare the data</h2>
 <p>We ultimately want to have a dataset that looks like this, where we have a line for each case, a column for the state (2 digit state), a column for smaller geographic levels if any (e.g., counties, hospitals), a column for the age group, the day of admissions (in a YYY-MM-DD date format), and flags for whether the admission was related to a syndrome of interest, such as “ILI” or “respiratory”. You should have a row in your data for every admission, <em>regardless of the cause.</em></p>
-<div class="sourceCode" id="cb4"><html><body><pre class="r">head(ds1)
-#&gt;   state      adate    agegrp ili resp   borough
-#&gt; 1    NY 2020-05-12   v. 65+y   0    0 Manhattan
-#&gt; 2    NY 2020-03-04   v. 65+y   1    0 Manhattan
-#&gt; 3    NY 2019-12-25   v. 65+y   0    0 Manhattan
-#&gt; 4    NY 2019-01-28 ii. 5-17y   0    0 Manhattan
-#&gt; 5    NY 2019-06-02   v. 65+y   0    0 Manhattan
-#&gt; 6    NY 2019-11-25 ii. 5-17y   0    0 Manhattan</pre></body></html></div>
+<div class="sourceCode" id="cb4"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">ds1</span>)
+<span class="co">#&gt;   state      adate    agegrp ili resp   borough</span>
+<span class="co">#&gt; 1    NY 2020-05-12   v. 65+y   0    0 Manhattan</span>
+<span class="co">#&gt; 2    NY 2020-03-04   v. 65+y   1    0 Manhattan</span>
+<span class="co">#&gt; 3    NY 2019-12-25   v. 65+y   0    0 Manhattan</span>
+<span class="co">#&gt; 4    NY 2019-01-28 ii. 5-17y   0    0 Manhattan</span>
+<span class="co">#&gt; 5    NY 2019-06-02   v. 65+y   0    0 Manhattan</span>
+<span class="co">#&gt; 6    NY 2019-11-25 ii. 5-17y   0    0 Manhattan</span></pre></body></html></div>
 </div>
 <div id="format-line-list-into-a-time-series" class="section level2">
 <h2 class="hasAnchor">
 <a href="#format-line-list-into-a-time-series" class="anchor"></a>Format line list into a time series</h2>
 <p>We can aggregate by day or week using the function <code><a href="../reference/ts_format.html">ts_format()</a></code></p>
-<div class="sourceCode" id="cb5"><html><body><pre class="r">ts1</pre></body></html></div>
-<div class="sourceCode" id="cb6"><html><body><pre class="r">head(ts1[,c('agegrp','adate','state','borough', 'ili', 'resp', 'all.visits')])
-#&gt;   agegrp      adate state   borough ili resp all.visits
-#&gt; 1 i. u5y 2019-01-01    NY     Bronx   0    4         41
-#&gt; 2 i. u5y 2019-01-01    NY Manhattan   0    2         17
-#&gt; 3 i. u5y 2019-01-02    NY     Bronx   3    2         55
-#&gt; 4 i. u5y 2019-01-02    NY Manhattan   2    1         20
-#&gt; 5 i. u5y 2019-01-03    NY     Bronx   0    2         48
-#&gt; 6 i. u5y 2019-01-03    NY Manhattan   2    1         17</pre></body></html></div>
+<div class="sourceCode" id="cb5"><html><body><pre class="r"><span class="no">ts1</span><span class="kw">&lt;-</span><span class="fu"><a href="../reference/ts_format.html">ts_format</a></span>(<span class="kw">line.list</span><span class="kw">=</span><span class="no">ds1</span>,
+               <span class="kw">datevar</span><span class="kw">=</span><span class="st">'adate'</span>,
+               <span class="kw">agevar</span><span class="kw">=</span><span class="st">'agegrp'</span>,
+               <span class="kw">statevar</span><span class="kw">=</span><span class="st">'state'</span>,
+               <span class="kw">sub.statevar</span> <span class="kw">=</span> <span class="st">'borough'</span>,
+               <span class="kw">syndromes</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'ili'</span>,<span class="st">'resp'</span>),
+               <span class="kw">resolution</span><span class="kw">=</span><span class="st">'day'</span>)</pre></body></html></div>
+<div class="sourceCode" id="cb6"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/utils/head.html">head</a></span>(<span class="no">ts1</span>[,<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">'agegrp'</span>,<span class="st">'adate'</span>,<span class="st">'state'</span>,<span class="st">'borough'</span>, <span class="st">'ili'</span>, <span class="st">'resp'</span>, <span class="st">'all.visits'</span>)])
+<span class="co">#&gt;   agegrp      adate state   borough ili resp all.visits</span>
+<span class="co">#&gt; 1 i. u5y 2019-01-01    NY     Bronx   0    4         41</span>
+<span class="co">#&gt; 2 i. u5y 2019-01-01    NY Manhattan   0    2         17</span>
+<span class="co">#&gt; 3 i. u5y 2019-01-02    NY     Bronx   3    2         55</span>
+<span class="co">#&gt; 4 i. u5y 2019-01-02    NY Manhattan   2    1         20</span>
+<span class="co">#&gt; 5 i. u5y 2019-01-03    NY     Bronx   0    2         48</span>
+<span class="co">#&gt; 6 i. u5y 2019-01-03    NY Manhattan   2    1         17</span></pre></body></html></div>
 <p>As an example of how to prepare line list data to be used in the ts_format function, starting from ESSENCE data, here is code from Sara Chronister:</p>
-<div class="sourceCode" id="cb7"><html><body><pre class="r">ds1 %
-         # extract date only from C_Visit_Date_Time
-  mutate(Visit_Date = as.Date(C_Visit_Date_Time),
-         # fill in missing HasBeenI with 0
-         ifelse(is.na(HasBeenI),0,HasBeenI),
-         # concatenate all _flat variables into one classification variable
-         classification = paste(Category_flat,SubCategory_flat,CCDDCategory_flat,sep=";"),
-         # flag for COVID-like illness
-         COVIDlike = ifelse(str_detect(CCDDCategory_flat,"Fever and Cough-Sob-DiffBr neg Influenza DD v1"),1,0),
-         # flag for influenza-like illness
-         ili = ifelse(str_detect(CCDDCategory_flat,"ILI CCDD v1"),1,0),
-         # flag for cough
-         cough = ifelse(str_detect(SubCategory_flat,"Cough"),1,0),
-         # flag for respiratory
-         resp = ifelse(str_detect(Category_flat,"Resp"),1,0),
-         # age groups
-         Age = as.numeric(Age),
-         agegrp = case_when(Age&gt;=0 &amp; Age&lt;20~"00-19Y",
-                            Age&gt;=20 &amp; Age&lt;45~"20-44Y",
-                            Age&gt;=45 &amp; Age&lt;65~"45-64Y",
-                            Age&gt;=65 &amp; Age&lt;150~"65+Y"),
-         agegrp = ifelse(is.na(agegrp),"UNK",agegrp),
-         # state variable (for use when multiple counties are pulled in)
-         state = 'AZ',
-         county = str_remove(HospitalRegion,"AZ_"),
-         ALL = "ALL") %&gt;%
-  filter(agegrp!="UNK")</pre></body></html></div>
+<div class="sourceCode" id="cb7"><html><body><pre class="r"><span class="no">ds1</span> <span class="kw">&lt;-</span> <span class="no">all_visits</span> <span class="kw">%&gt;%</span>
+         <span class="co"># extract date only from C_Visit_Date_Time</span>
+  <span class="fu">mutate</span>(<span class="kw">Visit_Date</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span>(<span class="no">C_Visit_Date_Time</span>),
+         <span class="co"># fill in missing HasBeenI with 0</span>
+         <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">HasBeenI</span>),<span class="fl">0</span>,<span class="no">HasBeenI</span>),
+         <span class="co"># concatenate all _flat variables into one classification variable</span>
+         <span class="kw">classification</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="no">Category_flat</span>,<span class="no">SubCategory_flat</span>,<span class="no">CCDDCategory_flat</span>,<span class="kw">sep</span><span class="kw">=</span><span class="st">";"</span>),
+         <span class="co"># flag for COVID-like illness</span>
+         <span class="kw">COVIDlike</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="fu">str_detect</span>(<span class="no">CCDDCategory_flat</span>,<span class="st">"Fever and Cough-Sob-DiffBr neg Influenza DD v1"</span>),<span class="fl">1</span>,<span class="fl">0</span>),
+         <span class="co"># flag for influenza-like illness</span>
+         <span class="kw">ili</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="fu">str_detect</span>(<span class="no">CCDDCategory_flat</span>,<span class="st">"ILI CCDD v1"</span>),<span class="fl">1</span>,<span class="fl">0</span>),
+         <span class="co"># flag for cough</span>
+         <span class="kw">cough</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="fu">str_detect</span>(<span class="no">SubCategory_flat</span>,<span class="st">"Cough"</span>),<span class="fl">1</span>,<span class="fl">0</span>),
+         <span class="co"># flag for respiratory</span>
+         <span class="kw">resp</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="fu">str_detect</span>(<span class="no">Category_flat</span>,<span class="st">"Resp"</span>),<span class="fl">1</span>,<span class="fl">0</span>),
+         <span class="co"># age groups</span>
+         <span class="kw">Age</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/numeric.html">as.numeric</a></span>(<span class="no">Age</span>),
+         <span class="kw">agegrp</span> <span class="kw">=</span> <span class="fu">case_when</span>(<span class="no">Age</span><span class="kw">&gt;=</span><span class="fl">0</span> <span class="kw">&amp;</span> <span class="no">Age</span><span class="kw">&lt;</span><span class="fl">20</span>~<span class="st">"00-19Y"</span>,
+                            <span class="no">Age</span><span class="kw">&gt;=</span><span class="fl">20</span> <span class="kw">&amp;</span> <span class="no">Age</span><span class="kw">&lt;</span><span class="fl">45</span>~<span class="st">"20-44Y"</span>,
+                            <span class="no">Age</span><span class="kw">&gt;=</span><span class="fl">45</span> <span class="kw">&amp;</span> <span class="no">Age</span><span class="kw">&lt;</span><span class="fl">65</span>~<span class="st">"45-64Y"</span>,
+                            <span class="no">Age</span><span class="kw">&gt;=</span><span class="fl">65</span> <span class="kw">&amp;</span> <span class="no">Age</span><span class="kw">&lt;</span><span class="fl">150</span>~<span class="st">"65+Y"</span>),
+         <span class="kw">agegrp</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html">ifelse</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/NA.html">is.na</a></span>(<span class="no">agegrp</span>),<span class="st">"UNK"</span>,<span class="no">agegrp</span>),
+         <span class="co"># state variable (for use when multiple counties are pulled in)</span>
+         <span class="kw">state</span> <span class="kw">=</span> <span class="st">'AZ'</span>,
+         <span class="kw">county</span> <span class="kw">=</span> <span class="fu">str_remove</span>(<span class="no">HospitalRegion</span>,<span class="st">"AZ_"</span>),
+         <span class="kw">ALL</span> <span class="kw">=</span> <span class="st">"ALL"</span>) <span class="kw">%&gt;%</span>
+  <span class="fu"><a href="https://rdrr.io/r/stats/filter.html">filter</a></span>(<span class="no">agegrp</span><span class="kw">!=</span><span class="st">"UNK"</span>)</pre></body></html></div>
 </div>
 <div id="run-the-analysis" class="section level2">
 <h2 class="hasAnchor">
 <a href="#run-the-analysis" class="anchor"></a>Run the analysis</h2>
 <p>Now that we have the formatted time series, we are ready to run the analysis. You can either just fit a seasonal baseline with harmonic waves (default), or you can adjust for influenza activity. If you were able to install the cdcfluview package and have data from the US, you can automatically adjust for influenza activity using data on influenza positive tests from NREVSS. If not, you can merge in your own influenza data with the time series formatted in the steps above, and specify the name of the flu variable.</p>
 <p>We need to specify the names of the relevant variables in the dataset ds1. We will fit the regression through the end of Feb 2020 and then extrapolate forward based on the seasonal baseline and observed flu activity. We adjust for flu using the ‘auto’ option, which will download the latest NREVSS testing data</p>
-<div class="sourceCode" id="cb8"><html><body><pre class="r">excess_cases1  Warning in data(cdcfluview::hhs_regions): data set
-#&gt; 'cdcfluview::hhs_regions' not found</pre></body></html></div>
+<div class="sourceCode" id="cb8"><html><body><pre class="r"><span class="no">excess_cases1</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="../reference/excessCases.html">excessCases</a></span>(<span class="kw">ds</span> <span class="kw">=</span> <span class="no">ds1</span>,
+              <span class="kw">datevar</span>       <span class="kw">=</span> <span class="st">"ddate"</span>,
+              <span class="kw">agevar</span>        <span class="kw">=</span> <span class="st">"agec"</span>,
+              <span class="kw">statevar</span>      <span class="kw">=</span> <span class="st">"state"</span>,
+              <span class="kw">sub.statevar</span>  <span class="kw">=</span> <span class="st">"borough"</span>,
+              <span class="kw">denom.var</span>     <span class="kw">=</span> <span class="st">"denom"</span>,
+              <span class="kw">use.syndromes</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"ili"</span>, <span class="st">"resp"</span>),
+              <span class="kw">adj.flu</span>       <span class="kw">=</span> <span class="st">'auto'</span>, <span class="co">#adjust using NREVSS data</span>
+              <span class="kw">extrapolation.date</span> <span class="kw">=</span> <span class="st">"2020-03-01"</span>,
+              <span class="kw">time.res</span><span class="kw">=</span><span class="st">'day'</span>)
+<span class="co">#&gt; Warning in data(cdcfluview::hhs_regions): data set 'cdcfluview::hhs_regions' not</span>
+<span class="co">#&gt; found</span></pre></body></html></div>
 </div>
 <div id="generate-an-interactive-dashboard" class="section level2">
 <h2 class="hasAnchor">
@@ -188,22 +204,67 @@ library(cdcfluview)
 <h3 class="hasAnchor">
 <a href="#extract-the-quantities-of-interest" class="anchor"></a>Extract the quantities of interest</h3>
 <p>Which syndrome do you want to plot, and over what time range?</p>
-<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">syndrome.select</span> <span class="kw">&lt;-</span> <span class="st">'ili'</span> <span class="co">#which syndrome do you want to plot?</span>
+<div class="sourceCode" id="cb10"><html><body><pre class="r"><span class="no">syndrome.select</span> <span class="kw">&lt;-</span> <span class="st">'ili'</span> <span class="co">#which syndrome do you want to plot?</span>
 <span class="no">n.days</span> <span class="kw">&lt;-</span> <span class="fl">365</span>  <span class="co">#How many days to plot?</span></pre></body></html></div>
 <p>Extract the data needed to plot from the results</p>
-<div class="sourceCode" id="cb11"><html><body><pre class="r">library(magrittr)
-library(purrr)
-#&gt; 
-#&gt; Attaching package: 'purrr'
-#&gt; The following object is masked from 'package:magrittr':
-#&gt; 
-#&gt;     set_names
+<div class="sourceCode" id="cb11"><html><body><pre class="r"><span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">magrittr</span>)
+<span class="fu"><a href="https://rdrr.io/r/base/library.html">library</a></span>(<span class="no">purrr</span>)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Attaching package: 'purrr'</span>
+<span class="co">#&gt; The following object is masked from 'package:magrittr':</span>
+<span class="co">#&gt; </span>
+<span class="co">#&gt;     set_names</span>
 
-dates %
-           setNames(resultsNames)</pre></body></html></div>
+<span class="no">dates</span> <span class="kw">&lt;-</span>
+  <span class="no">excess_cases1</span><span class="kw">[[</span><span class="fl">1</span>]]<span class="kw">[[</span><span class="fl">1</span>]]<span class="kw">[[</span><span class="fl">1</span>]]$<span class="no">date</span>
+
+<span class="no">resultsNames</span> <span class="kw">&lt;-</span>
+  <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="st">"unexplained.cases"</span>, <span class="st">"resid1"</span>, <span class="st">"denom"</span>, <span class="st">"upi"</span>, <span class="st">"lpi"</span>, <span class="st">"y"</span>, <span class="st">"pred"</span>)
+
+<span class="co"># Extract various results of interest from 'excess_cases1' using</span>
+<span class="co"># 'excessExtract'</span>
+<span class="no">results</span> <span class="kw">&lt;-</span> <span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html">map</a></span>(<span class="no">resultsNames</span>,
+               ~<span class="fu"><a href="../reference/excessExtract.html">excessExtract</a></span>(<span class="kw">extract.quantity</span> <span class="kw">=</span> <span class="no">.</span>,
+                              <span class="kw">ds</span> <span class="kw">=</span> <span class="no">excess_cases1</span>,
+                              <span class="kw">syndrome</span> <span class="kw">=</span> <span class="no">syndrome.select</span>)) <span class="kw">%&gt;%</span>
+           <span class="fu"><a href="https://rdrr.io/r/stats/setNames.html">setNames</a></span>(<span class="no">resultsNames</span>)</pre></body></html></div>
 <p>Generate the plots</p>
 <div class="sourceCode" id="cb12"><html><body><pre class="r">
-select.indices </pre></body></html></div>
+<span class="no">select.indices</span> <span class="kw">&lt;-</span> (<span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="no">dates</span>)-<span class="no">n.days</span>):<span class="fu"><a href="https://rdrr.io/r/base/length.html">length</a></span>(<span class="no">dates</span>)
+<span class="no">dates</span>          <span class="kw">&lt;-</span> <span class="no">dates</span>[<span class="no">select.indices</span>]
+<span class="no">states</span>         <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html">dimnames</a></span>(<span class="no">results</span>$<span class="no">pred</span>)<span class="kw">[[</span><span class="fl">2</span>]]
+<span class="no">ages</span>           <span class="kw">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/dimnames.html">dimnames</a></span>(<span class="no">results</span>$<span class="no">pred</span>)<span class="kw">[[</span><span class="fl">3</span>]]
+
+<span class="kw">for</span>(<span class="no">i</span> <span class="kw">in</span> <span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">results</span>$<span class="no">pred</span>)[<span class="fl">2</span>]){
+  <span class="fu"><a href="https://rdrr.io/r/graphics/par.html">par</a></span>(<span class="kw">mfrow</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="fl">2</span>,<span class="fl">3</span>))
+
+  <span class="kw">for</span>(<span class="no">j</span> <span class="kw">in</span> <span class="fl">1</span>:<span class="fu"><a href="https://rdrr.io/r/base/dim.html">dim</a></span>(<span class="no">results</span>$<span class="no">pred</span>)[<span class="fl">3</span>]){
+    <span class="no">results</span>$<span class="no">y.range1</span> <span class="kw">&lt;-</span>
+      <span class="fu"><a href="https://rdrr.io/r/base/range.html">range</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">results</span>$<span class="no">pred</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>],
+              <span class="no">results</span>$<span class="no">y</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>],
+              <span class="no">results</span>$<span class="no">upi</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>],<span class="fl">0</span>))
+
+    <span class="fu"><a href="https://rdrr.io/r/graphics/plot.html">plot</a></span>(<span class="no">dates</span>,
+         <span class="no">results</span>$<span class="no">pred</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>],
+         <span class="kw">type</span><span class="kw">=</span><span class="st">'l'</span>,
+         <span class="kw">col</span><span class="kw">=</span><span class="st">'red'</span>,
+         <span class="kw">ylim</span><span class="kw">=</span><span class="no">results</span>$<span class="no">y.range1</span>,
+         <span class="kw">bty</span><span class="kw">=</span><span class="st">'l'</span>,
+         <span class="kw">ylab</span><span class="kw">=</span><span class="st">'N cases'</span>,
+         <span class="kw">main</span><span class="kw">=</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html">paste</a></span>(<span class="no">states</span>[<span class="no">i</span>],<span class="no">ages</span>[<span class="no">j</span>]))
+
+    <span class="fu"><a href="https://rdrr.io/r/graphics/points.html">points</a></span>(<span class="no">dates</span>,
+           <span class="no">results</span>$<span class="no">y</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>],
+           <span class="kw">type</span><span class="kw">=</span><span class="st">'l'</span>,
+           <span class="kw">col</span><span class="kw">=</span><span class="st">'black'</span>)
+
+    <span class="fu"><a href="https://rdrr.io/r/graphics/polygon.html">polygon</a></span>(<span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">dates</span>, <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span>(<span class="no">dates</span>)),
+            <span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span>(<span class="no">results</span>$<span class="no">lpi</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>],
+              <span class="fu"><a href="https://rdrr.io/r/base/rev.html">rev</a></span>(<span class="no">results</span>$<span class="no">upi</span>[<span class="no">select.indices</span>,<span class="no">i</span>,<span class="no">j</span>])),
+            <span class="kw">col</span> <span class="kw">=</span> <span class="fu"><a href="https://rdrr.io/r/grDevices/rgb.html">rgb</a></span>(<span class="fl">1</span>, <span class="fl">0</span>, <span class="fl">0</span>, <span class="kw">alpha</span> <span class="kw">=</span> <span class="fl">0.1</span>),
+            <span class="kw">border</span> <span class="kw">=</span> <span class="fl">NA</span>)
+  }
+}</pre></body></html></div>
 <p><img src="ESSENCE_files/figure-html/unnamed-chunk-14-1.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-2.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-3.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-4.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-5.png" width="960"><img src="ESSENCE_files/figure-html/unnamed-chunk-14-6.png" width="960"></p>
 </div>
 </div>
@@ -224,7 +285,7 @@ select.indices </pre></body></html></div>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
 </div>
 
       </footer>
