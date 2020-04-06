@@ -34,8 +34,7 @@ library(readr)
 
 ## Overview
 
-In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward
-based on the time of year.
+In this example, we will analyze increases of pneumonia and influenza (P&I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the  [CDC](https://gis.cdc.gov/grasp/fluview/mortality.html) We fit a simple seasonal baseline using harmonics, and adjust for year-to-year variations. Influenza activity is adjusted for as well using data from NREVSS (percent of tests positive for influenza in the previous week). The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.
 
 
 

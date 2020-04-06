@@ -75,7 +75,7 @@
 
       
 
-      </header><script src="PImortality_files/header-attrs-2.1/header-attrs.js"></script><div class="row">
+      </header><div class="row">
   <div class="col-md-9 contents">
     <div class="page-header toc-ignore">
       <h1 data-toc-skip>Using ExcessILI with US P&amp;I mortality data</h1>
@@ -93,11 +93,7 @@
 <div id="overview" class="section level2">
 <h2 class="hasAnchor">
 <a href="#overview" class="anchor"></a>Overview</h2>
-<<<<<<< HEAD
-<p>In this example, we will analyze increases of pneumonia and influenza (P&amp;I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the <a href="https://gis.cdc.gov/grasp/fluview/mortality.html">CDC</a> data. with a simple seasonal baseline, and year-to-year variations.The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.</p>
-=======
-<p>In this example, we will analyze increases of pneumonia and influenza (P&amp;I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the <a href="https://gis.cdc.gov/grasp/fluview/mortality.html">CDC</a> data, with a simple seasonal baseline, and year-to-year variations. The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.</p>
->>>>>>> 1c51ec3d745da03e3a28b17f97bcb9514f0ead65
+<p>In this example, we will analyze increases of pneumonia and influenza (P&amp;I) above the seasonal baseline, adjusting for year-to-year variations in incidence. We use the weekly data published by the <a href="https://gis.cdc.gov/grasp/fluview/mortality.html">CDC</a> We fit a simple seasonal baseline using harmonics, and adjust for year-to-year variations. Influenza activity is adjusted for as well using data from NREVSS (percent of tests positive for influenza in the previous week). The model is fit through end-of-February 2020 and then extrapolated forward based on the time of year.</p>
 </div>
 <div id="observed-weekly-death-rate-vs-seasonal-baseline--95-prediction-interval" class="section level2">
 <h2 class="hasAnchor">
@@ -117,6 +113,11 @@
 <p>Here we compare the observed vs expected number of deaths due to pneumonia and influenza in each week compare to the observed vs expected number of outpatient visits for influenza-like illness (ILI) in each week. we would expect ILI (blue line) to increase earlier than deaths (red line)</p>
 <p><img src="PImortality_files/figure-html/unnamed-chunk-15-1.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-15-2.png" width="768"><img src="PImortality_files/figure-html/unnamed-chunk-15-3.png" width="768"></p>
 </div>
+<div id="excess-all-cause-deaths" class="section level2">
+<h2 class="hasAnchor">
+<a href="#excess-all-cause-deaths" class="anchor"></a>Excess all-cause deaths</h2>
+<p>Now instead of modeling the proportion of deaths that were due to pneumonia and influenza, we will model all-caused deaths</p>
+</div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -134,7 +135,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.9000.</p>
 </div>
 
       </footer>
