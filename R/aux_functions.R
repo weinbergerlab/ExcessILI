@@ -192,6 +192,8 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     period = 365.25
   } else if (time.res == "week") {
     period = 52.1775
+  }  else if (time.res =='month'){ 
+    period=12 
   }
   
   sin1 <- sin(2*pi * t2/period)
