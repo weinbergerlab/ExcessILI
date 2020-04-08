@@ -297,9 +297,10 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
       t(apply(preds.stage2, 1,
               quantile,
               probs = c(0.025, 0.5, 0.975)))
+    
     preds.stage2.var <-
       apply(preds.stage2, 1,
-              var)
+              var, na.rm=T)
     
     resid1 <- log( (ds.glm$y.age + 0.5) / 
                      (preds.stage2.q[, "50%"] + 0.5))
