@@ -2,7 +2,7 @@
 title: "Using ExcessILI with US P&I mortality data"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteIndexEntry{Using ExcessILI with US P&I mortality data}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 author: "Dan Weinberger"

@@ -63,88 +63,95 @@ dashboardPlot <- function(all.glm.res){
 
       for(i in i.select){
         for( j in j.select){
-            if (input$set.prop == "Counts") {
+          if (input$set.prop == "Counts") {
 
-              y <- obs.ili[date.idxs, j, i]
+            y <- obs.ili[date.idxs, j, i]
 
-              pred     <- ili2.pred    [date.idxs, j, i]
-              pred.lcl <- ili2.pred.lcl[date.idxs, j, i]
-              pred.ucl <- ili2.pred.ucl[date.idxs, j, i]
+            pred     <- ili2.pred    [date.idxs, j, i]
+            pred.lcl <- ili2.pred.lcl[date.idxs, j, i]
+            pred.ucl <- ili2.pred.ucl[date.idxs, j, i]
 
-              if (identical(input$set.axis, F)) {
-                maxval <-
-                  max(c(ili2.pred.lcl[date.idxs, j, i],
-                        ili2.pred.ucl[date.idxs, j, i],
-                        ili2.pred    [date.idxs, j, i],
-                        obs.ili      [date.idxs, j, i]),
-                      na.rm = T)
+            if (identical(input$set.axis, F)) {
+              maxval <-
+                max(c(ili2.pred.lcl[date.idxs, j, i],
+                      ili2.pred.ucl[date.idxs, j, i],
+                      ili2.pred    [date.idxs, j, i],
+                      obs.ili      [date.idxs, j, i]),
+                    na.rm = T)
 
-                y.range <- c(0, maxval)
+              y.range <- c(0, maxval)
 
-              } else {
-                maxval <-
-                  max(c(ili2.pred.lcl[date.idxs, j, ],
-                        ili2.pred.ucl[date.idxs, j, ],
-                        ili2.pred    [date.idxs, j, ],
-                        obs.ili      [date.idxs, j, ]),
-                      na.rm = T)
-
-                y.range <- c(0, maxval)
-
-              }
-            } else if (input$set.prop == "Proportion") {
-              common.denom <- denom[date.idxs, j, i]
-
-              y        <- obs.ili      [date.idxs, j, i] / common.denom
-              pred     <- ili2.pred    [date.idxs, j, i] / common.denom
-              pred.lcl <- ili2.pred.lcl[date.idxs, j, i] / common.denom
-              pred.ucl <- ili2.pred.ucl[date.idxs, j, i] / common.denom
-              
-              if (input$set.axis == F) {
-                y.range <- c(0, max(y, na.rm = T))
-              } else {
-                y.range <- c(0, max(plot.prop[date.idxs, j, ], na.rm = T))
-              }
             } else {
-              y        <- obs.ili[date.idxs, j, i]/ili2.pred    [date.idxs, j, i]
-              pred     <- obs.ili[date.idxs, j, i]/ili2.pred    [date.idxs, j, i]
-              pred.lcl <- obs.ili[date.idxs, j, i]/ili2.pred.lcl[date.idxs, j, i]
-              pred.ucl <- obs.ili[date.idxs, j, i]/ili2.pred.ucl[date.idxs, j, i]
+              maxval <-
+                max(c(ili2.pred.lcl[date.idxs, j, ],
+                      ili2.pred.ucl[date.idxs, j, ],
+                      ili2.pred    [date.idxs, j, ],
+                      obs.ili      [date.idxs, j, ]),
+                    na.rm = T)
 
-              if (input$set.axis == F) {
-                y.range <- range(y, na.rm = T)
-                y.range[is.infinite(y.range)] <- 10
-              } else {
-                y.range <- c(0.2, 4)
-              }
+              y.range <- c(0, maxval)
+
             }
+          } else if (input$set.prop == "Proportion") {
+            common.denom <- denom[date.idxs, j, i]
 
-            plot(dates[date.idxs],
-                 y,
-                 type = "n",
-                 bty  = "l",
-                 ylab = "Fitted", 
-                 main = paste(j, i),
-                 ylim = y.range)
+            y        <- obs.ili      [date.idxs, j, i] / common.denom
+            pred     <- ili2.pred    [date.idxs, j, i] / common.denom
+            pred.lcl <- ili2.pred.lcl[date.idxs, j, i] / common.denom
+            pred.ucl <- ili2.pred.ucl[date.idxs, j, i] / common.denom
+            
+            if (input$set.axis == F) {
+              y.range <- c(0, max(y, na.rm = T))
+            } else {
+              # y.range <- c(0, max(plot.prop[date.idxs, j, ], na.rm = T))
+              y.range <- c(0, 0) # Will be set later
+            }
+          } else {
+            y        <- obs.ili[date.idxs, j, i]/ili2.pred    [date.idxs, j, i]
+            pred     <- obs.ili[date.idxs, j, i]/ili2.pred    [date.idxs, j, i]
+            pred.lcl <- obs.ili[date.idxs, j, i]/ili2.pred.lcl[date.idxs, j, i]
+            pred.ucl <- obs.ili[date.idxs, j, i]/ili2.pred.ucl[date.idxs, j, i]
 
-            polygon(c(dates[date.idxs], rev(dates[date.idxs])),
-                    c(pred.lcl, rev(pred.ucl)),
-                    col = rgb(1, 0, 0, alpha = 0.1), 
-                    border = NA)
-
-            lines(dates[date.idxs],
-                  pred,
-                  type = "l",
-                  col = "red",
-                  lty = 1, 
-                  lwd = 1.5)
-
-            lines(dates[date.idxs], y, lwd = 1.5)
-
-            if (input$set.prop == "Observed/Expected") {
-              abline(h = 1, col = "gray", lty = 2)
+            if (input$set.axis == F) {
+              y.range <- range(y, na.rm = T)
+              y.range[is.infinite(y.range)] <- 10
+            } else {
+              y.range <- c(0.2, 4)
             }
           }
+
+          if (input$set.axis == T && input$set.prop == "Proportion")
+            y.range <- c(0, max(y[date.idxs], 
+                                pred[date.idxs],
+                                pred.lcl[date.idxs],
+                                pred.ucl[date.idxs]))
+
+          plot(dates[date.idxs],
+               y,
+               type = "n",
+               bty  = "l",
+               ylab = "Fitted", 
+               main = paste(j, i),
+               ylim = y.range)
+
+          polygon(c(dates[date.idxs], rev(dates[date.idxs])),
+                  c(pred.lcl, rev(pred.ucl)),
+                  col = rgb(1, 0, 0, alpha = 0.1), 
+                  border = NA)
+
+          lines(dates[date.idxs],
+                pred,
+                type = "l",
+                col = "red",
+                lty = 1, 
+                lwd = 1.5)
+
+          lines(dates[date.idxs], y, lwd = 1.5)
+
+          if (input$set.prop == "Observed/Expected") {
+            abline(h = 1, col = "gray", lty = 2)
+          }
+        }
       }
     } ,
 

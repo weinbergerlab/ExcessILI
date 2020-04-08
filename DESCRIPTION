@@ -1,7 +1,7 @@
 Package: ExcessILI
 Title: A package and RShiny app to examine excess ILI from syndromic
     surveillance data
-Version: 0.1
+Version: 0.2
 Authors@R: c(
     person("Daniel", "Weinberger",
       email = "daniel.weinberger@yale.edu",
