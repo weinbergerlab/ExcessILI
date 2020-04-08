@@ -103,7 +103,7 @@ ts_format <-
   att(any(resolution %in% c('day', 'week', 'month')))
   att(is.logical(remove.final))
   
-  ds1 <- line.list
+  ds1 <- as.data.frame(line.list)
   
   # Parse dates into Date objects, and floor to the nearest day
   ds1[, datevar] <- as.Date(ds1[,datevar])
