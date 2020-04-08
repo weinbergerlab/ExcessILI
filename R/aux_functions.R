@@ -192,6 +192,8 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     period = 365.25
   } else if (time.res == "week") {
     period = 52.1775
+  }  else if (time.res =='month'){ 
+    period=12 
   }
   
   sin1 <- sin(2*pi * t2/period)
@@ -295,6 +297,9 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
       t(apply(preds.stage2, 1,
               quantile,
               probs = c(0.025, 0.5, 0.975)))
+    preds.stage2.var <-
+      apply(preds.stage2, 1,
+              var)
     
     resid1 <- log( (ds.glm$y.age + 0.5) / 
                      (preds.stage2.q[, "50%"] + 0.5))
@@ -312,6 +317,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            log.flu           = ds.glm$log.flu,
            unexplained.cases = unexplained.cases, 
            denom             = exp(ds.glm$log.offset),
+           pred.var          = preds.stage2.var,
            sparse.group      = F)
   } else {
     out.list <-
@@ -325,6 +331,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            log.flu           = ds.glm$log.flu,
            unexplained.cases = NA, 
            denom             = exp(ds.glm$log.offset),
+           pred.var          = NA,
            sparse.grp        = T)
   }  
   return(out.list)
