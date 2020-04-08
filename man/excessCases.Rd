@@ -4,10 +4,20 @@
 \alias{excessCases}
 \title{Fits a baseline to case data}
 \usage{
-excessCases(ds, sub.statevar = "none", statevar = "state",
-  agevar = "none", datevar, covs = character(), use.syndromes,
-  denom.var, adj.flu = "none", adj.rsv = "none", time.res = "day",
-  extrapolation.date = "2020-03-01")
+excessCases(
+  ds,
+  sub.statevar = "none",
+  statevar = "state",
+  agevar = "none",
+  datevar,
+  covs = character(),
+  use.syndromes,
+  denom.var,
+  adj.flu = "none",
+  adj.rsv = "none",
+  time.res = "day",
+  extrapolation.date = "2020-03-01"
+)
 }
 \arguments{
 \item{ds}{A data.frame, with a format similar to the one produced by the
