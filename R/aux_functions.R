@@ -297,6 +297,9 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
       t(apply(preds.stage2, 1,
               quantile,
               probs = c(0.025, 0.5, 0.975)))
+    preds.stage2.var <-
+      apply(preds.stage2, 1,
+              var)
     
     resid1 <- log( (ds.glm$y.age + 0.5) / 
                      (preds.stage2.q[, "50%"] + 0.5))
@@ -314,6 +317,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            log.flu           = ds.glm$log.flu,
            unexplained.cases = unexplained.cases, 
            denom             = exp(ds.glm$log.offset),
+           pred.var          = preds.stage2.var,
            sparse.group      = F)
   } else {
     out.list <-
@@ -327,6 +331,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            log.flu           = ds.glm$log.flu,
            unexplained.cases = NA, 
            denom             = exp(ds.glm$log.offset),
+           pred.var          = NA,
            sparse.grp        = T)
   }  
   return(out.list)

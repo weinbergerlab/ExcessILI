@@ -92,6 +92,8 @@
 #' \code{unexplained.cases}: observed-expected(fitted)
 #'
 #' \code{denom}: denominator used in the model
+#' 
+#' \code{pred.var}: variance of the prediction interval
 #'
 #' @examples
 #'  library(cdcfluview)
