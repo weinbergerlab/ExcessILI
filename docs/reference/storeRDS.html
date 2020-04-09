@@ -45,7 +45,9 @@ basepath/fname. The name given to the file will be of the form
 DATE.rds, where DATE is of the format
 %Y_%m_%d_%H_%M.  An error will be thrown if basepath does
 not exist. However, if basepath/fname does not exist, an attempt will
-be made to create it. The DATE is the current time." />
+be made to create it. The DATE is the current time. Intended to be
+used with retrieveRDS. See mostRecentTimestamp
+for an usage example." />
 
 
 
@@ -137,7 +139,9 @@ be made to create it. The DATE is the current time." />
 <code>DATE.rds</code>, where <code>DATE</code> is of the format
 <code>%Y_%m_%d_%H_%M</code>.  An error will be thrown if <code>basepath</code> does
 not exist. However, if <code>basepath/fname</code> does not exist, an attempt will
-be made to create it. The <code>DATE</code> is the current time.</p>
+be made to create it. The <code>DATE</code> is the current time. Intended to be
+used with <code>retrieveRDS</code>. See <code>mostRecentTimestamp</code>
+for an usage example.</p>
     </div>
 
     <pre class="usage"><span class='fu'>storeRDS</span>(<span class='no'>obj</span>, <span class='no'>fname</span>, <span class='kw'>basepath</span> <span class='kw'>=</span> <span class='st'>"."</span>)</pre>

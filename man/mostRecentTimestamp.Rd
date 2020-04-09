@@ -7,12 +7,13 @@
 mostRecentTimestamp(fname, basepath = ".")
 }
 \arguments{
-\item{fname}{The name of the directory in \code{'basepath'} where various
-revisions of the file are stored. I.e., \code{'file.txt'} should be a
-directory, with revisions of the true \code{'file.txt'} stored inside of
+\item{fname}{The name of the directory in \code{basepath} where various
+revisions of the file are stored. I.e., \code{file.txt} should be a
+directory, with revisions of the true \code{file.txt} stored inside of
 it.}
 
-\item{basepath}{A string. The path which stores 'basepath'. Default '.'}
+\item{basepath}{A string. The path which stores the \code{fname} directory.
+Default '.'}
 }
 \value{
 A POSIXct object specifying the \code{mtime} of the most recently
@@ -27,15 +28,19 @@ if \code{basepath/fname} does not exist, an attempt will be made to create
 it. The \code{DATE} is the current time.
 }
 \examples{
+library(lubridate)
+
 saveRDS(mtcars, 'cars')
 saveRDS(mtcars, 'cars')
+
 # Some time elapses...
 
 # Decide if the latest version of 'mtcars' is "too old"
-if (interval(mostRecentTimestamp('mtcars'), lubridate::now())) > lubridate::hours(24)) {
+if (mostRecentTimestamp('mtcars') \%--\% now() > hours(24)) {
   # Store a "new" version
   saveRDS(mtcars, 'cars')
 } else {
   cached_mtcars <- retrieveRDS('mtcars')
 }
+
 }

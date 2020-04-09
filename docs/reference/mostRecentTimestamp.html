@@ -147,14 +147,15 @@ it. The <code>DATE</code> is the current time.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fname</th>
-      <td><p>The name of the directory in <code>'basepath'</code> where various
-revisions of the file are stored. I.e., <code>'file.txt'</code> should be a
-directory, with revisions of the true <code>'file.txt'</code> stored inside of
+      <td><p>The name of the directory in <code>basepath</code> where various
+revisions of the file are stored. I.e., <code>file.txt</code> should be a
+directory, with revisions of the true <code>file.txt</code> stored inside of
 it.</p></td>
     </tr>
     <tr>
       <th>basepath</th>
-      <td><p>A string. The path which stores 'basepath'. Default '.'</p></td>
+      <td><p>A string. The path which stores the <code>fname</code> directory.
+Default '.'</p></td>
     </tr>
     </table>
 
@@ -164,7 +165,20 @@ it.</p></td>
   modified file in <code>basepath/fname</code></p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"></pre>
+    <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>lubridate</span>)
+
+<span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'cars'</span>)
+<span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'cars'</span>)
+
+<span class='co'># Some time elapses...</span>
+
+<span class='co'># Decide if the latest version of 'mtcars' is "too old"</span>
+<span class='kw'>if</span> (<span class='fu'>mostRecentTimestamp</span>(<span class='st'>'mtcars'</span>) <span class='kw'>%--%</span> <span class='fu'><a href='http://lubridate.tidyverse.org/reference/now.html'>now</a></span>() <span class='kw'>&gt;</span> <span class='fu'><a href='http://lubridate.tidyverse.org/reference/period.html'>hours</a></span>(<span class='fl'>24</span>)) {
+  <span class='co'># Store a "new" version</span>
+  <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'cars'</span>)
+} <span class='kw'>else</span> {
+  <span class='no'>cached_mtcars</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='retrieveRDS.html'>retrieveRDS</a></span>(<span class='st'>'mtcars'</span>)
+}</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">

@@ -7,19 +7,20 @@
 retrieveRDS(fname, basepath = ".", goalDate = Sys.time())
 }
 \arguments{
-\item{fname}{The name of the directory in \code{'basepath'} where various
-revisions of the file are stored. I.e., \code{'file.txt'} should be a
-directory, with revisions of the true \code{'file.txt'} stored inside of
+\item{fname}{The name of the directory in \code{basepath} where various
+revisions of the file are stored. I.e., \code{file.txt} should be a
+directory, with revisions of the true \code{file.txt} stored inside of
 it.}
 
-\item{basepath}{A string. The path which stores 'basepath'. Default '.'}
+\item{basepath}{A string. The path which stores \code{fname}. Default
+\code{'.'}}
 
 \item{goalDate}{The 'goal' date for the revision we are trying to retrieve.
 Whichever file is closest in time to the 'goal' date will be selected}
 }
 \description{
-Retrieves an RDS file stored in \code{'basepath'/'fname'} that has
-the closest modification date to 'goalDate'. If no such file exists, an
+Retrieves an RDS file stored in \code{basepath/fname} that has
+the closest modification date to \code{goalDate}. If no such file exists, an
 error will be thrown.
 }
 \examples{

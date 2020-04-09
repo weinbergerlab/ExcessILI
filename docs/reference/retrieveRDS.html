@@ -40,8 +40,8 @@
 
 
 <meta property="og:title" content="Retrieve an RDS modified nearest to a specific date — retrieveRDS" />
-<meta property="og:description" content="Retrieves an RDS file stored in 'basepath'/'fname' that has
-the closest modification date to 'goalDate'. If no such file exists, an
+<meta property="og:description" content="Retrieves an RDS file stored in basepath/fname that has
+the closest modification date to goalDate. If no such file exists, an
 error will be thrown." />
 
 
@@ -129,8 +129,8 @@ error will be thrown." />
     </div>
 
     <div class="ref-description">
-    <p>Retrieves an RDS file stored in <code>'basepath'/'fname'</code> that has
-the closest modification date to 'goalDate'. If no such file exists, an
+    <p>Retrieves an RDS file stored in <code>basepath/fname</code> that has
+the closest modification date to <code>goalDate</code>. If no such file exists, an
 error will be thrown.</p>
     </div>
 
@@ -141,14 +141,15 @@ error will be thrown.</p>
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>fname</th>
-      <td><p>The name of the directory in <code>'basepath'</code> where various
-revisions of the file are stored. I.e., <code>'file.txt'</code> should be a
-directory, with revisions of the true <code>'file.txt'</code> stored inside of
+      <td><p>The name of the directory in <code>basepath</code> where various
+revisions of the file are stored. I.e., <code>file.txt</code> should be a
+directory, with revisions of the true <code>file.txt</code> stored inside of
 it.</p></td>
     </tr>
     <tr>
       <th>basepath</th>
-      <td><p>A string. The path which stores 'basepath'. Default '.'</p></td>
+      <td><p>A string. The path which stores <code>fname</code>. Default
+<code>'.'</code></p></td>
     </tr>
     <tr>
       <th>goalDate</th>
@@ -159,11 +160,11 @@ Whichever file is closest in time to the 'goal' date will be selected</p></td>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'><a href='storeRDS.html'>storeRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'mtcars'</span>)</div><div class='output co'>#&gt; <span class='message'>Wrote object to ./mtcars/2020_04_09_18_18.rds</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span>(<span class='no'>mtcars</span>, <span class='fu'>retrieveRDS</span>(<span class='st'>'mtcars'</span>))</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
-<span class='fu'><a href='storeRDS.html'>storeRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'mtcars'</span>, <span class='kw'>basepath</span><span class='kw'>=</span><span class='st'>'.'</span>)</div><div class='output co'>#&gt; <span class='message'>Wrote object to ./mtcars/2020_04_09_18_18.rds</span></div><div class='input'><span class='no'>mtcars2</span> <span class='kw'>&lt;-</span> <span class='no'>mtcars</span>
+    <pre class="examples"><div class='input'><span class='fu'><a href='storeRDS.html'>storeRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'mtcars'</span>)</div><div class='output co'>#&gt; <span class='message'>Wrote object to ./mtcars/2020_04_09_19_18.rds</span></div><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span>(<span class='no'>mtcars</span>, <span class='fu'>retrieveRDS</span>(<span class='st'>'mtcars'</span>))</div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
+<span class='fu'><a href='storeRDS.html'>storeRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'mtcars'</span>, <span class='kw'>basepath</span><span class='kw'>=</span><span class='st'>'.'</span>)</div><div class='output co'>#&gt; <span class='message'>Wrote object to ./mtcars/2020_04_09_19_18.rds</span></div><div class='input'><span class='no'>mtcars2</span> <span class='kw'>&lt;-</span> <span class='no'>mtcars</span>
 <span class='no'>mtcars2</span>[,<span class='st'>'cyl'</span>] <span class='kw'>&lt;-</span> <span class='fl'>1</span>
-<span class='fu'><a href='storeRDS.html'>storeRDS</a></span>(<span class='no'>mtcars2</span>, <span class='st'>'mtcars'</span>)</div><div class='output co'>#&gt; <span class='message'>Wrote object to ./mtcars/2020_04_09_18_18.rds</span></div><div class='input'><span class='no'>mtcars_retrieved</span> <span class='kw'>&lt;-</span> <span class='fu'>retrieveRDS</span>(<span class='st'>'mtcars'</span>, <span class='kw'>goalDate</span> <span class='kw'>=</span> <span class='kw pkg'>lubridate</span><span class='kw ns'>::</span><span class='fu'><a href='http://lubridate.tidyverse.org/reference/now.html'>now</a></span>() - <span class='kw pkg'>lubridate</span><span class='kw ns'>::</span><span class='fu'><a href='http://lubridate.tidyverse.org/reference/period.html'>hours</a></span>(<span class='fl'>1</span>))
-<span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span>(<span class='no'>mtcars</span>, <span class='no'>mtcars_retrieved</span>) <span class='co'># TRUE</span></div><div class='output co'>#&gt; [1] TRUE</div><div class='input'>
+<span class='fu'><a href='storeRDS.html'>storeRDS</a></span>(<span class='no'>mtcars2</span>, <span class='st'>'mtcars'</span>)</div><div class='output co'>#&gt; <span class='message'>Wrote object to ./mtcars/2020_04_09_19_18.rds</span></div><div class='input'><span class='no'>mtcars_retrieved</span> <span class='kw'>&lt;-</span> <span class='fu'>retrieveRDS</span>(<span class='st'>'mtcars'</span>, <span class='kw'>goalDate</span> <span class='kw'>=</span> <span class='kw pkg'>lubridate</span><span class='kw ns'>::</span><span class='fu'><a href='http://lubridate.tidyverse.org/reference/now.html'>now</a></span>() - <span class='kw pkg'>lubridate</span><span class='kw ns'>::</span><span class='fu'><a href='http://lubridate.tidyverse.org/reference/period.html'>hours</a></span>(<span class='fl'>1</span>))
+<span class='fu'><a href='https://rdrr.io/r/base/identical.html'>identical</a></span>(<span class='no'>mtcars</span>, <span class='no'>mtcars_retrieved</span>) <span class='co'># TRUE</span></div><div class='output co'>#&gt; [1] FALSE</div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
