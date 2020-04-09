@@ -31,7 +31,7 @@ storeRDS(mtcars, 'mtcars', basepath='.')
 mtcars2 <- mtcars
 mtcars2[,'cyl'] <- 1
 storeRDS(mtcars2, 'mtcars')
-mtcars_retrieved <- retrieveRDS('mtcars', goalDate = lubridate::now() - lubridate::hours(1))
-identical(mtcars, mtcars_retrieved) # TRUE
+mtcars_retrieved <- retrieveRDS('mtcars', goalDate = lubridate::now())
+identical(mtcars, mtcars_retrieved)
 
 }
