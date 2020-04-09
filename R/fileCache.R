@@ -2,16 +2,17 @@ now <- lubridate::now()
 
 #' Retrieve the path of a file modified nearest to a specific date
 #' 
-#' Retrieves the path of a file stored in \code{'basepath'/'fname'} that has
-#' the closest modification date to 'goalDate'. If no such file exists, an
+#' Retrieves the path of a file stored in \code{basepath/fname} that has
+#' the closest modification date to \code{goalDate}. If no such file exists, an
 #' error will be thrown.
 #'
-#' @param fname The name of the directory in \code{'basepath'} where various
-#'   revisions of the file are stored. I.e., \code{'file.txt'} should be a
-#'   directory, with revisions of the true \code{'file.txt'} stored inside of
+#' @param fname The name of the directory in \code{basepath} where various
+#'   revisions of the file are stored. I.e., \code{file.txt} should be a
+#'   directory, with revisions of the true \code{file.txt} stored inside of
 #'   it.
 #'
-#' @param basepath A string. The path which stores 'basepath'. Default '.'
+#' @param basepath A string. The path which stores \code{fname}. Default
+#'   \code{'.'}
 #'
 #' @param goalDate The 'goal' date for the revision we are trying to retrieve.
 #'   Whichever file is closest in time to the 'goal' date will be selected
@@ -57,15 +58,15 @@ retrievePath <- function(fname, basepath='.', goalDate=lubridate::now()) {
     abs
 
   # Find the index, and return it
-  idx <- dplyr::first(which(absDeltas == min(absDeltas)))
+  idx <- which(absDeltas == min(absDeltas))[1]
 
   fullPaths[idx]
 }
 
 #' Retrieve an RDS modified nearest to a specific date
 #' 
-#' Retrieves an RDS file stored in \code{'basepath'/'fname'} that has
-#' the closest modification date to 'goalDate'. If no such file exists, an
+#' Retrieves an RDS file stored in \code{basepath/fname} that has
+#' the closest modification date to \code{goalDate}. If no such file exists, an
 #' error will be thrown.
 #'
 #' @inheritParams retrievePath
@@ -92,7 +93,9 @@ retrieveRDS <- function(fname, basepath='.', goalDate=Sys.time())
 #' \code{DATE.rds}, where \code{DATE} is of the format
 #' \code{\%Y_\%m_\%d_\%H_\%M}.  An error will be thrown if \code{basepath} does
 #' not exist. However, if \code{basepath/fname} does not exist, an attempt will
-#' be made to create it. The \code{DATE} is the current time.
+#' be made to create it. The \code{DATE} is the current time. Intended to be
+#' used with \link{\code{retrieveRDS}}. See \link{\code{mostRecentTimestamp}}
+#' for an usage example.
 #' 
 #' @param fname The name of the directory in \code{basepath} where various
 #'   revisions of the file are stored. I.e., \code{file.txt} should be a
@@ -147,28 +150,33 @@ storeRDS <- function(obj, fname, basepath='.') {
 #' if \code{basepath/fname} does not exist, an attempt will be made to create
 #' it. The \code{DATE} is the current time.
 #' 
-#' @param fname The name of the directory in \code{'basepath'} where various
-#'   revisions of the file are stored. I.e., \code{'file.txt'} should be a
-#'   directory, with revisions of the true \code{'file.txt'} stored inside of
+#' @param fname The name of the directory in \code{basepath} where various
+#'   revisions of the file are stored. I.e., \code{file.txt} should be a
+#'   directory, with revisions of the true \code{file.txt} stored inside of
 #'   it.
 #'
-#' @param basepath A string. The path which stores 'basepath'. Default '.'
+#' @param basepath A string. The path which stores the \code{fname} directory.
+#'   Default '.'
 #'
 #' @return A POSIXct object specifying the \code{mtime} of the most recently
 #'   modified file in \code{basepath/fname}
 #'
 #' @examples
+#' library(lubridate)
+#'
 #' saveRDS(mtcars, 'cars')
 #' saveRDS(mtcars, 'cars')
+#' 
 #' # Some time elapses...
 #' 
 #' # Decide if the latest version of 'mtcars' is "too old"
-#' if (interval(mostRecentTimestamp('mtcars'), lubridate::now())) > lubridate::hours(24)) {
+#' if (mostRecentTimestamp('mtcars') %--% now() > hours(24)) {
 #'   # Store a "new" version
 #'   saveRDS(mtcars, 'cars')
 #' } else {
 #'   cached_mtcars <- retrieveRDS('mtcars')
 #' }
+#'
 #' @export
 mostRecentTimestamp <- function(fname, basepath='.') {
 
