@@ -100,6 +100,7 @@ head(ds1)
 We can aggregate by day or week using the function `ts_format()`
 
 ```{r}
+ds1<-as.tibble(ds1)
 ts1<-ts_format(line.list=ds1,
                datevar='adate',
                agevar='agegrp',

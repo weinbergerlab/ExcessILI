@@ -103,7 +103,7 @@ ts_format <-
   att(any(resolution %in% c('day', 'week', 'month')))
   att(is.logical(remove.final))
   
-  ds1 <- line.list
+  ds1 <- as.data.frame(line.list)
   
   # Parse dates into Date objects, and floor to the nearest day
   ds1[, datevar] <- as.Date(ds1[,datevar])
@@ -116,6 +116,11 @@ ts_format <-
     sub.statevar <-'sub.statevar'
   }
   
+  if(!(agevar %in% names(ds1))){
+    ds1$agevar <- 1
+    agevar <-'agevar'
+  }
+  
   id_vars       <- c(agevar, datevar, statevar, sub.statevar)
   included_vars <- c(id_vars, syndromes, 'all.visits', covs)
 
@@ -125,7 +130,7 @@ ts_format <-
   
   # remove last day from the dataset,assuming it is incomplete
   if (remove.final)
-    ds1.molten <- filter(ds1.molten, datevar < last.date)
+    ds1.molten <- filter(ds1.molten, ds1.molten[,datevar] < last.date)
   
   as.formula(
     paste0( paste(id_vars, collapse=" + "), ' ~ ', 'variable' )
