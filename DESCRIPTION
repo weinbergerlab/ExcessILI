@@ -41,6 +41,7 @@ Imports:
     MMWRweek,
     gtrendsR,
     shiny,
+    dplyr,
     pbapply,
     zoo,
     MASS,

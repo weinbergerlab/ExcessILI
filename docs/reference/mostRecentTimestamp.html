@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Function reference • ExcessILI</title>
+<title>Identify the timestamp of the most recently modified file in the file cache — mostRecentTimestamp • ExcessILI</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,13 @@
 
 
 
-<meta property="og:title" content="Function reference" />
+<meta property="og:title" content="Identify the timestamp of the most recently modified file in the file cache — mostRecentTimestamp" />
+<meta property="og:description" content="Given an R object, attempts to store it in the directory
+basepath/fname. The name given to the file will be of the form
+DATE.rds, where DATE is of the format 
+An error will be thrown if basepath does not exist. However,
+if basepath/fname does not exist, an attempt will be made to create
+it. The DATE is the current time." />
 
 
 
@@ -58,7 +64,7 @@
   </head>
 
   <body data-spy="scroll" data-target="#toc">
-    <div class="container template-reference-index">
+    <div class="container template-reference-topic">
       <header>
       <div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -118,123 +124,48 @@
       </header>
 
 <div class="row">
-  <div class="contents col-md-9">
+  <div class="col-md-9 contents">
     <div class="page-header">
-      <h1>Reference</h1>
+    <h1>Identify the timestamp of the most recently modified file in the file cache</h1>
+    
+    <div class="hidden name"><code>mostRecentTimestamp.Rd</code></div>
     </div>
 
-    <table class="ref-index">
+    <div class="ref-description">
+    <p>Given an R object, attempts to store it in the directory
+<code>basepath/fname</code>. The name given to the file will be of the form
+<code>DATE.rds</code>, where <code>DATE</code> is of the format <!-- %Y_%m_%d_%H_%M. -->
+An error will be thrown if <code>basepath</code> does not exist. However,
+if <code>basepath/fname</code> does not exist, an attempt will be made to create
+it. The <code>DATE</code> is the current time.</p>
+    </div>
 
-    <colgroup>
-      
-      <col class="alias" />
-      <col class="title" />
-    </colgroup>
+    <pre class="usage"><span class='fu'>mostRecentTimestamp</span>(<span class='no'>fname</span>, <span class='kw'>basepath</span> <span class='kw'>=</span> <span class='st'>"."</span>)</pre>
 
-    <tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-data-preprocessing" class="hasAnchor"><a href="#section-data-preprocessing" class="anchor"></a>Data preprocessing</h2>
-          <p class="section-desc"><p>Transform line-list data into a model-compatible format</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="ts_format.html">ts_format()</a></code> </p>
-        </td>
-        <td><p>Format line list data into time series</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-data-archival" class="hasAnchor"><a href="#section-data-archival" class="anchor"></a>Data archival</h2>
-          <p class="section-desc"><p>Archive any relevant data for filesystem-level caching, or for keeping track of backfilled syndromic/case/mortality data.</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="storeRDS.html">storeRDS()</a></code> </p>
-        </td>
-        <td><p>Store an R object into the file cache</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="retrieveRDS.html">retrieveRDS()</a></code> </p>
-        </td>
-        <td><p>Retrieve an RDS modified nearest to a specific date</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="retrievePath.html">retrievePath()</a></code> </p>
-        </td>
-        <td><p>Retrieve the path of a file modified nearest to a specific date</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="mostRecentTimestamp.html">mostRecentTimestamp()</a></code> </p>
-        </td>
-        <td><p>Identify the timestamp of the most recently modified file in the file cache</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-analysis" class="hasAnchor"><a href="#section-analysis" class="anchor"></a>Analysis</h2>
-          <p class="section-desc"><p>Functions for fitting syndromic data to a seasonal baseline and extacting various features of model results</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="excessCases.html">excessCases()</a></code> </p>
-        </td>
-        <td><p>Fits a baseline to case data</p></td>
-      </tr><tr>
-        
-        <td>
-          <p><code><a href="excessExtract.html">excessExtract()</a></code> </p>
-        </td>
-        <td><p>Helper function to format the results from excessCases</p></td>
-      </tr>
-    </tbody><tbody>
-      <tr>
-        <th colspan="2">
-          <h2 id="section-visualizing-results" class="hasAnchor"><a href="#section-visualizing-results" class="anchor"></a>Visualizing results</h2>
-          <p class="section-desc"><p>Launch an RShiny server to visualize results interactively</p></p>
-        </th>
-      </tr>
-      
-      
-    </tbody><tbody>
-      
-      
-      <tr>
-        
-        <td>
-          <p><code><a href="dashboardPlot.html">dashboardPlot()</a></code> </p>
-        </td>
-        <td><p>Create interactive Shiny app to explore results</p></td>
-      </tr>
-    </tbody>
+    <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
+    <table class="ref-arguments">
+    <colgroup><col class="name" /><col class="desc" /></colgroup>
+    <tr>
+      <th>fname</th>
+      <td><p>The name of the directory in <code>'basepath'</code> where various
+revisions of the file are stored. I.e., <code>'file.txt'</code> should be a
+directory, with revisions of the true <code>'file.txt'</code> stored inside of
+it.</p></td>
+    </tr>
+    <tr>
+      <th>basepath</th>
+      <td><p>A string. The path which stores 'basepath'. Default '.'</p></td>
+    </tr>
     </table>
-  </div>
 
+    <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
+
+    <p>A POSIXct object specifying the <code>mtime</code> of the most recently
+  modified file in <code>basepath/fname</code></p>
+
+    <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
+    <pre class="examples"></pre>
+  </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
       <h2 data-toc-skip>Contents</h2>
