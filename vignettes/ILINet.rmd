@@ -2,7 +2,7 @@
 title: "Using ExcessILI with ILINet"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Using ExcessILI}
+  %\VignetteIndexEntry{Using ExcessILI with ILINet}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 author: "Dan Weinberger"

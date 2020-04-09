@@ -36,9 +36,9 @@ nrevss_flu_import <- function() {
   
   clin <- nrevvs.state[["clinical_labs"]]
   
-  data(cdcfluview::hhs_regions)
+  data(hhs_regions)
   
-  cw.file <- cdcfluview::hhs_regions
+  cw.file <- hhs_regions
   
   clin2 <- merge(clin, cw.file,
                  by.x = "region",

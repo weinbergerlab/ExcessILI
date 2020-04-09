@@ -1,5 +1,5 @@
 ---
-title: "Going from line list data to an interactive app"
+title: "Using ExcessILI with ESSENCE/line-list data"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Using ESSENCE data}
