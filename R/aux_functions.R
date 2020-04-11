@@ -276,7 +276,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     v.cov.mat[is.na(v.cov.mat)] <- 0
     
     pred.coefs.reg.mean <-
-      MASS::mvrnorm(n = 100,
+      MASS::mvrnorm(n = 100000,
                     mu = coef1,
                     Sigma = v.cov.mat)
     
