@@ -26,7 +26,7 @@ Given an R object, attempts to store it in the directory
 \code{\%Y_\%m_\%d_\%H_\%M}.  An error will be thrown if \code{basepath} does
 not exist. However, if \code{basepath/fname} does not exist, an attempt will
 be made to create it. The \code{DATE} is the current time. Intended to be
-used with \link{\code{retrieveRDS}}. See \link{\code{mostRecentTimestamp}}
+used with \code{\link{retrieveRDS}}. See \code{\link{mostRecentTimestamp}}
 for an usage example.
 }
 \examples{
