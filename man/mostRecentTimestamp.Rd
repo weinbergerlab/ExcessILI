@@ -20,12 +20,8 @@ A POSIXct object specifying the \code{mtime} of the most recently
   modified file in \code{basepath/fname}
 }
 \description{
-Given an R object, attempts to store it in the directory
-\code{basepath/fname}. The name given to the file will be of the form
-\code{DATE.rds}, where \code{DATE} is of the format %Y_%m_%d_%H_%M.
-An error will be thrown if \code{basepath} does not exist. However,
-if \code{basepath/fname} does not exist, an attempt will be made to create
-it. The \code{DATE} is the current time.
+Returns the timestamp of the most recently modified file. If no such file
+exists, or if the directory \code{basepath/fname} doesn't exist, returns NA.
 }
 \examples{
 library(lubridate)

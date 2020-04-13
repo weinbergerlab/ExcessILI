@@ -143,12 +143,8 @@ storeRDS <- function(obj, fname, basepath='.') {
 
 #' Identify the timestamp of the most recently modified file in the file cache
 #' 
-#' Given an R object, attempts to store it in the directory
-#' \code{basepath/fname}. The name given to the file will be of the form
-#' \code{DATE.rds}, where \code{DATE} is of the format %Y_%m_%d_%H_%M.
-#' An error will be thrown if \code{basepath} does not exist. However,
-#' if \code{basepath/fname} does not exist, an attempt will be made to create
-#' it. The \code{DATE} is the current time.
+#' Returns the timestamp of the most recently modified file. If no such file
+#' exists, or if the directory \code{basepath/fname} doesn't exist, returns NA.
 #' 
 #' @param fname The name of the directory in \code{basepath} where various
 #'   revisions of the file are stored. I.e., \code{file.txt} should be a
@@ -187,7 +183,7 @@ mostRecentTimestamp <- function(fname, basepath='.') {
   # Make sure that this path is a directory I.e., archive/fname.txt needs to 
   # be a folder, not regular file.
   if (!dir.exists(fullpath))
-    stop(sprintf("Path %s doesn't exist, or isn't a directory", fullpath))
+    return(NA)
 
   # Get all the files in this directory
   dirListing <- list.files(fullpath)

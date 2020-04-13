@@ -40,12 +40,8 @@
 
 
 <meta property="og:title" content="Identify the timestamp of the most recently modified file in the file cache — mostRecentTimestamp" />
-<meta property="og:description" content="Given an R object, attempts to store it in the directory
-basepath/fname. The name given to the file will be of the form
-DATE.rds, where DATE is of the format 
-An error will be thrown if basepath does not exist. However,
-if basepath/fname does not exist, an attempt will be made to create
-it. The DATE is the current time." />
+<meta property="og:description" content="Returns the timestamp of the most recently modified file. If no such file
+exists, or if the directory basepath/fname doesn't exist, returns NA." />
 
 
 
@@ -132,12 +128,8 @@ it. The DATE is the current time." />
     </div>
 
     <div class="ref-description">
-    <p>Given an R object, attempts to store it in the directory
-<code>basepath/fname</code>. The name given to the file will be of the form
-<code>DATE.rds</code>, where <code>DATE</code> is of the format <!-- %Y_%m_%d_%H_%M. -->
-An error will be thrown if <code>basepath</code> does not exist. However,
-if <code>basepath/fname</code> does not exist, an attempt will be made to create
-it. The <code>DATE</code> is the current time.</p>
+    <p>Returns the timestamp of the most recently modified file. If no such file
+exists, or if the directory <code>basepath/fname</code> doesn't exist, returns NA.</p>
     </div>
 
     <pre class="usage"><span class='fu'>mostRecentTimestamp</span>(<span class='no'>fname</span>, <span class='kw'>basepath</span> <span class='kw'>=</span> <span class='st'>"."</span>)</pre>
@@ -166,9 +158,9 @@ Default '.'</p></td>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'><a href='https://rdrr.io/r/base/library.html'>library</a></span>(<span class='no'>lubridate</span>)</div><div class='output co'>#&gt; <span class='message'></span>
-#&gt; <span class='message'>Attaching package: ‘lubridate’</span></div><div class='output co'>#&gt; <span class='message'>The following object is masked from ‘package:base’:</span>
+#&gt; <span class='message'>Attaching package: ‘lubridate’</span></div><div class='output co'>#&gt; <span class='message'>The following objects are masked from ‘package:base’:</span>
 #&gt; <span class='message'></span>
-#&gt; <span class='message'>    date</span></div><div class='input'>
+#&gt; <span class='message'>    date, intersect, setdiff, union</span></div><div class='input'>
 <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'cars'</span>)
 <span class='fu'><a href='https://rdrr.io/r/base/readRDS.html'>saveRDS</a></span>(<span class='no'>mtcars</span>, <span class='st'>'cars'</span>)
 
@@ -196,7 +188,7 @@ Default '.'</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
 </div>
 
       </footer>
