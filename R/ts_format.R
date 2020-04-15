@@ -129,9 +129,9 @@ ts_format <-
   last.date <- max(ds1.molten[,datevar])
   
   # remove last day from the dataset,assuming it is incomplete
-  if (remove.final)
-    ds1.molten <- filter(ds1.molten, ds1.molten[,datevar] < last.date)
-
+  if (remove.final){
+    ds1.molten <- dplyr::filter(ds1.molten, ds1.molten[,datevar] < last.date)
+  }
   
   as.formula(
     paste0( paste(id_vars, collapse=" + "), ' ~ ', 'variable' )
