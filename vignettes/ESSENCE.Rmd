@@ -9,11 +9,14 @@ author: "Dan Weinberger"
 date: "3/25/2020"
 ---
 
-```{r, include = FALSE}
+```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
+library(magrittr)
+library(purrr)
+
 ```
 
 ## Overview
@@ -211,9 +214,6 @@ n.days <- 365  #How many days to plot?
 Extract the data needed to plot from the results
 
 ```{r}
-library(magrittr)
-library(purrr)
-
 dates <-
   excess_cases1[[1]][[1]][[1]]$date
   

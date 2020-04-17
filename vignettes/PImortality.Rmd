@@ -51,7 +51,7 @@ nrevvs.state <- cdcfluview::who_nrevss(region = c("state"))
   
   clin <- nrevvs.state[["clinical_labs"]]
   
-  data(cdcfluview::hhs_regions)
+  #data(cdcfluview::hhs_regions)
   
   cw.file <- cdcfluview::hhs_regions
   

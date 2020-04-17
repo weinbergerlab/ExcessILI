@@ -4,17 +4,9 @@
 \alias{ts_format}
 \title{Format line list data into time series}
 \usage{
-ts_format(
-  line.list,
-  datevar,
-  statevar,
-  sub.statevar = "none",
-  agevar = "none",
-  covs = character(),
-  syndromes,
-  resolution = "day",
-  remove.final = F
-)
+ts_format(line.list, datevar, statevar, sub.statevar = "none",
+  agevar = "none", covs = character(), syndromes, resolution = "day",
+  remove.final = F)
 }
 \arguments{
 \item{line.list}{A dataframe containing one line for each case (e.g., ED
