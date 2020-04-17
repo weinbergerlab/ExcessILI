@@ -186,7 +186,12 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   # observed values. NOTE: this may not be appropriate!
   covs_for_glm <- purrr::map(covs_for_glm, zoo::na.locf, na.rm = F)
 
-  t2 <- 1:length(y.age)
+  #t2 <- 1:length(y.age)
+  if(time.res %in% c('day', 'week')){
+    t2 <- as.vector(difftime(min(date.string), date.string,units=time.res))
+  }else if(time.res=='month'){
+    t2 <- round(as.vector(difftime(min(date.string), date.string,units='day'))/30)
+  }
   
   if (time.res == "day") {
     period = 365.25
