@@ -2,3 +2,29 @@ destination: docs
 template:
   params:
     bootswatch: flatly
+reference:
+- title: Data preprocessing
+  desc:  Transform line-list data into a model-compatible format
+- contents:
+  - ts_format
+
+- title: Data archival
+  desc:  Archive any relevant data for filesystem-level caching, or for
+         keeping track of backfilled syndromic/case/mortality data.
+- contents:
+  - storeRDS
+  - retrieveRDS
+  - retrievePath
+  - mostRecentTimestamp
+
+- title: Analysis
+  desc:  Functions for fitting syndromic data to a seasonal baseline and
+         extacting various features of model results
+- contents:
+  - excessCases
+  - excessExtract
+
+- title: Visualizing results
+  desc: Launch an RShiny server to visualize results interactively
+- contents:
+  - dashboardPlot
