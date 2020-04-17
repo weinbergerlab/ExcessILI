@@ -141,6 +141,18 @@ rr <-  excessExtract(ds = excess_cases1,
 # saveRDS(result.object,'extracted.output.ilinet.rds')
 ```
 
+
+```{r echo=F, eval=F}
+#Extract ILI data
+ili.log.rr <- 
+  unexplained.log.rr[,,1]
+ili.log.rr <- 
+  as.data.frame(ili.log.rr)
+ili.log.rr$date <- dates1
+write.csv(ili.log.rr,'C:/Users/dmw63/Desktop/ili.log.rr.csv')
+
+```
+
 ```{r}
 n.days <- 52
 select.indices <- (length(dates1)-n.days):length(dates1)
