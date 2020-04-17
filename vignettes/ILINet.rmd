@@ -157,7 +157,12 @@ ages <- dimnames(pred)[[3]]
 dates <- result.object$dates
 states <- dimnames(pred)[[2]]
 week.select.index<-select.indices
-for(i in 1:dim(pred)[2]){
+
+plot.state.rank <- cbind.data.frame(state.index=1:dim(rr)[2],state.rank= rank(-rr[dim(rr)[1],,1]))
+plot.state.rank <- plot.state.rank[order(plot.state.rank$state.rank),]
+plot.state.indices <- plot.state.rank$state.index
+
+for(i in plot.state.indices){
   yrange1<-range(c(pred[week.select.index,i,1]/denom[week.select.index,i,1],obs[week.select.index,i,1]/denom[week.select.index,i,1],lpi[week.select.index,i,1]/denom[week.select.index,i,1],upi[week.select.index,i,1]/denom[week.select.index,i,1] ))
 
   plot(dates[week.select.index],
@@ -201,7 +206,7 @@ check<-cbind.data.frame(date.mmwrdates,mmwr.epiwk, mmwr.epiyr)
 
   par(mfrow=c(4,4))
 rr2<-rr[,,1]
-for(i in 1:dim(pred)[2]){
+for(i in plot.state.indices){
     y.range1<-c(0,5)
     ds2<-cbind.data.frame('epiwk'=mmwr.epiwk,'epiyr'=mmwr.epiyr, rr=rr2[,i])
     ds2.c<-dcast(ds2, epiwk~epiyr, value.var='rr', fun.aggregate = mean)
