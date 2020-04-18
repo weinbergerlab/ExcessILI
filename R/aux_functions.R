@@ -188,9 +188,9 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
 
   #t2 <- 1:length(y.age)
   if(time.res %in% c('day', 'week')){
-    t2 <- as.vector(difftime(min(date.string), date.string,units=time.res))
+    t2 <- as.vector( date.string,difftime(min(date.string), units=time.res))
   }else if(time.res=='month'){
-    t2 <- round(as.vector(difftime(min(date.string), date.string,units='day'))/30)
+    t2 <- round(as.vector(date.string,difftime(min(date.string),units='day'))/30)
   }
   
   if (time.res == "day") {
