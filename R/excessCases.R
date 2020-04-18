@@ -94,6 +94,13 @@
 #' \code{denom}: denominator used in the model
 #' 
 #' \code{pred.var}: variance of the prediction interval
+#' 
+#' \code{sum.pred.iter}: Sum of fitted values, from the extrapolation date to end of the time series, provides a full set of random draws
+#' 
+#' \code{pred.iter}: fitted values for each time point, with the full set of random draws
+#' 
+#' \code{sum.obs}: Sum of observed values from the extrapolation date to end of the time series
+#' 
 #'
 #' @examples
 #'  library(cdcfluview)

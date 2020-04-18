@@ -149,6 +149,9 @@ ili.log.rr <-
 ili.log.rr <- 
   as.data.frame(ili.log.rr)
 ili.log.rr$date <- dates1
+library(MMWRweek)
+ili.mmwrweek <- MMWRweek(dates1)
+ili.log.rr <- cbind(ili.log.rr, ili.mmwrweek)
 write.csv(ili.log.rr,'C:/Users/dmw63/Desktop/ili.log.rr.csv')
 
 ```

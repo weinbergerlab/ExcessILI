@@ -281,7 +281,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     v.cov.mat[is.na(v.cov.mat)] <- 0
     
     pred.coefs.reg.mean <-
-      MASS::mvrnorm(n = 1000,
+      MASS::mvrnorm(n = 100,
                     mu = coef1,
                     Sigma = v.cov.mat)
     
@@ -291,12 +291,12 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     preds.stage1.regmean <- apply(preds.stage1.regmean, 2,
                                   function(x) x + ds.glm$log.offset)
     
-    preds.stage2 <- rpois(n = length(preds.stage1.regmean) * 5,
+    preds.stage2 <- rpois(n = length(preds.stage1.regmean) * 100,
                           exp(preds.stage1.regmean))
     
     preds.stage2 <- matrix(preds.stage2,
                            nrow = nrow(preds.stage1.regmean),
-                           ncol = ncol(preds.stage1.regmean) * 5)
+                           ncol = ncol(preds.stage1.regmean) * 100)
     
     preds.stage2.q <-
       t(apply(preds.stage2, 1,
@@ -306,6 +306,14 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     preds.stage2.var <-
       apply(preds.stage2, 1,
               var, na.rm=T)
+    
+    eval.indices <- 
+      which(ds.glm$date >= extrapolation.date)
+    
+    sum.pred.iter <- apply(preds.stage2[eval.indices,], 2,
+          sum, na.rm=T)
+
+    sum.obs <- ds.glm$y.age[eval.indices]
     
     resid1 <- log( (ds.glm$y.age + 0.5) / 
                      (preds.stage2.q[, "50%"] + 0.5))
@@ -324,6 +332,9 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            unexplained.cases = unexplained.cases, 
            denom             = exp(ds.glm$log.offset),
            pred.var          = preds.stage2.var,
+           sum.pred.iter     = sum.pred.iter,
+           pred.iter         = preds.stage2,
+           sum.obs           = sum.obs,
            sparse.group      = F)
   } else {
     out.list <-
@@ -338,6 +349,9 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            unexplained.cases = NA, 
            denom             = exp(ds.glm$log.offset),
            pred.var          = NA,
+           sum.pred.iter     = NA,
+           pred.iter         = NA,
+           sum.obs           = sum.obs,
            sparse.grp        = T)
   }  
   return(out.list)
