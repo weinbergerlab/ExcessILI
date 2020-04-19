@@ -7,7 +7,7 @@
 excessCases(ds, sub.statevar = "none", statevar = "state",
   agevar = "none", datevar, covs = character(), use.syndromes,
   denom.var, adj.flu = "none", adj.rsv = "none", time.res = "day",
-  extrapolation.date = "2020-03-01")
+  model.type = "poisson", extrapolation.date = "2020-03-01")
 }
 \arguments{
 \item{ds}{A data.frame, with a format similar to the one produced by the
@@ -59,6 +59,8 @@ influenza.}
 
 \item{time.res}{One of \code{c("day", "week", "month")}. What is the data
 binned by?}
+
+\item{model.type}{Poisson or negative binomial model c('poisson','negbin'), default:poisson}
 
 \item{extrapolation.date}{The model is fit up to this date, and then
 extrapolated for all future dates. Defaults to \code{"2020-03-01"}}

@@ -77,6 +77,52 @@ excess_cases1 <-
               time.res='week')
 ```
 
+```{r, echo=F, include=F, eval=F}
+excess_cases1 <-
+  excessCases(ds = ili.data,
+              datevar       = "week_start", 
+              statevar      = "state",
+              denom.var     = "total_patients",
+              adj.flu       = "none",
+              use.syndromes = c("ilitotal"),
+              extrapolation.date = "2020-03-01",
+              time.res='week')
+## Run the main analysis function, adjusting for flu using NREVSS data
+excess_cases.nb <-
+  excessCases(ds = ili.data,
+              datevar       = "week_start", 
+              statevar      = "state",
+              denom.var     = "total_patients",
+              adj.flu       = "none",
+              use.syndromes = c("ilitotal"),
+              extrapolation.date = "2020-03-01",
+              model.type = 'negbin',
+              time.res='week')
+pred1 <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "pred")
+pred2 <-
+  excessExtract(ds = excess_cases.nb,
+                syndrome = "ilitotal",
+                extract.quantity = "pred")
+
+pred.var1 <-
+  excessExtract(ds = excess_cases1,
+                syndrome = "ilitotal",
+                extract.quantity = "upi")
+pred.var2 <-
+  excessExtract(ds = excess_cases.nb,
+                syndrome = "ilitotal",
+                extract.quantity = "upi")
+
+plot(pred1, pred2)
+abline(a=0, b=1)
+plot(pred.var1, pred.var2)
+abline(a=0, b=1)
+
+```
+
 
 ```{r, echo=F}
 ## Plot the results in an interactive dashboard
