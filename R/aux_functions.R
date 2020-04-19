@@ -130,7 +130,7 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 ## Evaluate results after controlling for flu and RSV
 #' @importFrom magrittr %>%
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
-                     extrapolation.date, adj.flu, adj.rsv, covs=character())
+                     extrapolation.date, adj.flu, adj.rsv, covs=character(), model.type)
 {
   date.string       <- as.Date(dimnames(ds)[[1]])
   month             <- lubridate::month(date.string)
@@ -254,8 +254,10 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   # Add in user-specified covariates, if available
   covars.term4  <- ifelse(length(covs > 0), paste(covs, collapse = " + "), NA)
 
+  offset.term <- "offset(log.offset)"
+  
   # Concatenate everything together as a string
-  covars <- c(covars.term1, covars.term2, covars.term3, covars.term4)
+  covars <- c(covars.term1, covars.term2, covars.term3, covars.term4, offset.term)
 
   covars_str <- paste(covars[!is.na(covars)], collapse=" + ")
   
@@ -268,11 +270,15 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   ###########################################
 
   if (sum(ds.glm$y.age, na.rm=T) >= 100) {
+    
+    if(model.type=='poisson'){
     mod1 <- glm(form1,
                 data = ds.glm,
-                family = poisson(link = "log"),
-                offset = log.offset)
-    
+                family = poisson(link = "log"))
+    }else{
+    mod1 <- MASS::glm.nb(form1,
+                     data = ds.glm)
+    }
     # 500 samples total
     coef1               <- coef(mod1)
     coef1[is.na(coef1)] <- 0
@@ -291,9 +297,13 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     preds.stage1.regmean <- apply(preds.stage1.regmean, 2,
                                   function(x) x + ds.glm$log.offset)
     
+    if(model.type=='poisson'){
     preds.stage2 <- rpois(n = length(preds.stage1.regmean) * 100,
                           exp(preds.stage1.regmean))
-    
+    }else{
+    preds.stage2 <- rnbinom(n = length(preds.stage1.regmean) * 100,
+                            size = mod1$theta, mu = exp(preds.stage1.regmean))
+    }
     preds.stage2 <- matrix(preds.stage2,
                            nrow = nrow(preds.stage1.regmean),
                            ncol = ncol(preds.stage1.regmean) * 100)

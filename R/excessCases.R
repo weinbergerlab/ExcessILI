@@ -70,6 +70,8 @@
 #' @param extrapolation.date The model is fit up to this date, and then
 #'   extrapolated for all future dates. Defaults to \code{"2020-03-01"}
 #'
+#' @param model.type Poisson or negative binomial model c('poisson','negbin'), default:poisson
+#'
 #' @return A list of lists with an entry for each syndrome, and sub-lists by
 #'   age group and geography:
 #'
@@ -131,6 +133,7 @@ excessCases <-
            adj.flu='none',
            adj.rsv='none',
            time.res='day',
+           model.type='poisson',
            extrapolation.date='2020-03-01') {
 
   att       <- assertthat::assert_that
@@ -273,6 +276,7 @@ excessCases <-
         adj.flu   = adj.flu,
         adj.rsv   = adj.rsv,
         covs      = covs,
+        model.type = model.type,
         denom.var = denom.var,
         time.res  = time.res,
         extrapolation.date = extrapolation.date
