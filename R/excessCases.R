@@ -103,6 +103,7 @@
 #' 
 #' \code{sum.obs}: Sum of observed values from the extrapolation date to end of the time series
 #' 
+#' \code{disp}: deviance/DF
 #'
 #' @examples
 #'  library(cdcfluview)

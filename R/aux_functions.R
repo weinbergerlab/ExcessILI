@@ -286,6 +286,8 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     v.cov.mat                   <- vcov(mod1)
     v.cov.mat[is.na(v.cov.mat)] <- 0
     
+    disp <- mod1$deviance/mod1$df.residual
+    
     pred.coefs.reg.mean <-
       MASS::mvrnorm(n = 100,
                     mu = coef1,
@@ -345,6 +347,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            sum.pred.iter     = sum.pred.iter,
            pred.iter         = preds.stage2,
            sum.obs           = sum.obs,
+           disp               = disp,
            sparse.group      = F)
   } else {
     out.list <-
@@ -362,6 +365,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
            sum.pred.iter     = NA,
            pred.iter         = NA,
            sum.obs           = sum.obs,
+           disp              = NA,
            sparse.grp        = T)
   }  
   return(out.list)
