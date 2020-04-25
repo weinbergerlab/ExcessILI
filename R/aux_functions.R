@@ -289,7 +289,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     disp <- mod1$deviance/mod1$df.residual
     
     pred.coefs.reg.mean <-
-      MASS::mvrnorm(n = 1000,
+      MASS::mvrnorm(n = 10000,
                     mu = coef1,
                     Sigma = v.cov.mat)
     
@@ -300,15 +300,15 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                                   function(x) x + ds.glm$log.offset)
     
     if(model.type=='poisson'){
-    preds.stage2 <- rpois(n = length(preds.stage1.regmean) * 10,
+    preds.stage2 <- rpois(n = length(preds.stage1.regmean) * 1,
                           exp(preds.stage1.regmean))
     }else{
-    preds.stage2 <- rnbinom(n = length(preds.stage1.regmean) * 100,
+    preds.stage2 <- rnbinom(n = length(preds.stage1.regmean) * 1,
                             size = mod1$theta, mu = exp(preds.stage1.regmean))
     }
     preds.stage2 <- matrix(preds.stage2,
                            nrow = nrow(preds.stage1.regmean),
-                           ncol = ncol(preds.stage1.regmean) * 100)
+                           ncol = ncol(preds.stage1.regmean) * 1)
     
     preds.stage2.q <-
       t(apply(preds.stage2, 1,
