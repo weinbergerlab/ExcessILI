@@ -170,7 +170,7 @@ table(apply(cor.lags['percent_pni',-1,],2, function(x) which(max(x)==x)))
 #Run analysis
 excess_deaths1.adjusted <-
   excessCases(ds = pi.data.clean2,
-              datevar       = "wk_start",
+              datevar       = "week_start",
               statevar      = "state",
               denom.var     = "all_deaths",
               adj.flu       = "flu_pct_adj_lag1",
