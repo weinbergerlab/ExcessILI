@@ -130,7 +130,8 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 ## Evaluate results after controlling for flu and RSV
 #' @importFrom magrittr %>%
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
-                     extrapolation.date, adj.flu, adj.rsv, covs=character(), model.type)
+                     extrapolation.date,sum.dates, adj.flu, adj.rsv, covs=character(), model.type, seedN,
+                     stage1.samples, stage2.samples)
 {
   date.string       <- as.Date(dimnames(ds)[[1]])
   month             <- lubridate::month(date.string)
@@ -288,8 +289,9 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
     
     disp <- mod1$deviance/mod1$df.residual
     
+    set.seed (seedN)
     pred.coefs.reg.mean <-
-      MASS::mvrnorm(n = 100,
+      MASS::mvrnorm(n = stage1.samples,
                     mu = coef1,
                     Sigma = v.cov.mat)
     
@@ -300,15 +302,15 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                                   function(x) x + ds.glm$log.offset)
     
     if(model.type=='poisson'){
-    preds.stage2 <- rpois(n = length(preds.stage1.regmean) * 100,
+    preds.stage2 <- rpois(n = length(preds.stage1.regmean) * stage2.samples,
                           exp(preds.stage1.regmean))
     }else{
-    preds.stage2 <- rnbinom(n = length(preds.stage1.regmean) * 100,
+    preds.stage2 <- rnbinom(n = length(preds.stage1.regmean) * stage2.samples,
                             size = mod1$theta, mu = exp(preds.stage1.regmean))
     }
     preds.stage2 <- matrix(preds.stage2,
                            nrow = nrow(preds.stage1.regmean),
-                           ncol = ncol(preds.stage1.regmean) * 100)
+                           ncol = ncol(preds.stage1.regmean) * stage2.samples)
     
     preds.stage2.q <-
       t(apply(preds.stage2, 1,
@@ -320,7 +322,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
               var, na.rm=T)
     
     eval.indices <- 
-      which(ds.glm$date >= extrapolation.date)
+      which(ds.glm$date >= sum.dates)
     
     sum.pred.iter <- apply(preds.stage2[eval.indices,], 2,
           sum, na.rm=T)

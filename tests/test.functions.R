@@ -49,8 +49,8 @@ excess.rr <-
 
 
 par(mfrow=c(1,1))
-matplot(exp(excess.rr[,,1]), type='l')
-matplot(unexplained.cases[,-2,1], type='l')
+matplot(exp(excess.rr[,'Citywide',5]), type='l')
+matplot(unexplained.cases[,'Citywide',5], type='l')
 
 #Try out ts format package
 n.obs<-10000

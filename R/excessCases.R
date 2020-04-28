@@ -72,6 +72,14 @@
 #'
 #' @param model.type Poisson or negative binomial model c('poisson','negbin'), default:poisson
 #'
+#' @param seedN What seed to use for random sampling. Defaults to 123
+#' 
+#' @param sum.dates At which date should we start summing the observed and predicted cases.  Defaults to '2020-03-01'
+#' 
+#' @param stage1.samples How many samples should be drawn for the 1st stage multivariate normal (default=100)
+#' 
+#' @param stage2.samples How many samples should be drawn for the 2nd stage Poisson sampling (default=100)
+#'
 #' @return A list of lists with an entry for each syndrome, and sub-lists by
 #'   age group and geography:
 #'
@@ -135,7 +143,12 @@ excessCases <-
            adj.rsv='none',
            time.res='day',
            model.type='poisson',
-           extrapolation.date='2020-03-01') {
+           extrapolation.date='2020-03-01',
+           seedN = 123,
+           sum.dates='2020-03-01',
+           stage1.samples = 100,
+           stage2.samples = 100
+           ) {
 
   att       <- assertthat::assert_that
   is.string <- assertthat::is.string
@@ -280,7 +293,11 @@ excessCases <-
         model.type = model.type,
         denom.var = denom.var,
         time.res  = time.res,
-        extrapolation.date = extrapolation.date
+        extrapolation.date = extrapolation.date,
+        sum.dates = sum.dates,
+        seedN = seedN,
+        stage1.samples = stage1.samples,
+        stage2.samples = stage2.samples
       )
 
       names(model.result) <- geos
