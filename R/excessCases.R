@@ -143,9 +143,9 @@ excessCases <-
            adj.rsv='none',
            time.res='day',
            model.type='poisson',
-           extrapolation.date='2020-03-01',
+           extrapolation.date=as.Date('2020-03-01'),
            seedN = 123,
-           sum.dates='2020-03-01',
+           sum.dates=as.Date('2020-03-01'),
            stage1.samples = 100,
            stage2.samples = 100
            ) {
