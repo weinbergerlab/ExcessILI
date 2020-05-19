@@ -278,8 +278,7 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                 family = poisson(link = "log"))
     }else{
     mod1 <- MASS::glm.nb(form1,
-                     data = ds.glm,
-                     control = glm.control(maxit = 500))
+                     data = ds.glm)
     }
     # 500 samples total
     coef1               <- coef(mod1)
