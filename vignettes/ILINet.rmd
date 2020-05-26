@@ -66,10 +66,12 @@ ili.data <- ili.data[ili.data$state %in% state.select,]
 
 ```{r, echo=F, include=F}
 ## Run the main analysis function, adjusting for flu using NREVSS data
+ili.data$age <-1
 excess_cases1 <-
   excessCases(ds = ili.data,
               datevar       = "week_start", 
               statevar      = "state",
+              agevar        = 'age',
               denom.var     = "total_patients",
               adj.flu       = "auto",
               use.syndromes = c("ilitotal"),
@@ -283,6 +285,17 @@ for(i in plot.state.indices){
        main=paste(states[i]))
     abline(h=1, col='black')
     }
+```
+
+
+```{r}
+dashboardPlotOe(excess_cases1,
+                            datevar='date',  
+                            agevar='age',
+                            statevar='state',  
+                            outcome='ilitotal', 
+                            yaxis='state',
+                            facet='age')
 ```
 
 

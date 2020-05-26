@@ -268,3 +268,15 @@ for(i in 1:dim(results$pred)[2]){
   }
 }
 ```
+
+Interactive heatmap
+```{r}
+dashboardPlotOe(excess_cases1,
+                            datevar='date',  
+                            agevar='agec',
+                            statevar='state',  
+                            outcome='resp', 
+                            yaxis='agec',
+                            facet='state')
+```
+

@@ -23,6 +23,9 @@ Authors@R: c(
       role  = "ctb"),
     person("Forrest", "Crawford",
       email = "forrest.crawford@yale.edu",
+      role  = "ctb"),
+    person("Amy", "Graves",
+      email = "agraves@aledade.com",
       role  = "ctb")
     ) 
 Description: Estimate excess ILI from syndromic data
