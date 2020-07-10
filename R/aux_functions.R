@@ -131,12 +131,16 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 #' @importFrom magrittr %>%
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                      extrapolation.date,sum.dates, adj.flu, adj.rsv, covs=character(), model.type, seedN,
-                     stage1.samples, stage2.samples)
+                     stage1.samples, stage2.samples,extend.epiyear)
 {
   date.string       <- as.Date(dimnames(ds)[[1]])
   month             <- lubridate::month(date.string)
   epiyr             <- lubridate::year(date.string)
   epiyr[month <= 6] <- epiyr[month <= 6] - 1
+  if(extend.epiyear){
+    epiyr[epiyr==max(epiyr)] <- epiyr[epiyr==max(epiyr)] - 1
+  }
+  
   epiyr.index       <- epiyr - min(epiyr) + 1
   weekN             <- MMWRweek::MMWRweek(date.string)[, "MMWRweek"]
   day.of.year       <- lubridate::yday(date.string)

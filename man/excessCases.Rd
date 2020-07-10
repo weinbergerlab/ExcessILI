@@ -7,9 +7,9 @@
 excessCases(ds, sub.statevar = "none", statevar = "state",
   agevar = "none", datevar, covs = character(), use.syndromes,
   denom.var, adj.flu = "none", adj.rsv = "none", time.res = "day",
-  model.type = "poisson", extrapolation.date = "2020-03-01",
-  seedN = 123, sum.dates = "2020-03-01", stage1.samples = 100,
-  stage2.samples = 100)
+  model.type = "poisson", extrapolation.date = as.Date("2020-03-01"),
+  seedN = 123, sum.dates = as.Date("2020-03-01"),
+  stage1.samples = 100, stage2.samples = 100, extend.epiyear = FALSE)
 }
 \arguments{
 \item{ds}{A data.frame, with a format similar to the one produced by the
@@ -74,6 +74,8 @@ extrapolated for all future dates. Defaults to \code{"2020-03-01"}}
 \item{stage1.samples}{How many samples should be drawn for the 1st stage multivariate normal (default=100)}
 
 \item{stage2.samples}{How many samples should be drawn for the 2nd stage Poisson sampling (default=100)}
+
+\item{extend.epiyear}{If data extends past the epidemiological year when extrapolation.date is set, set to TRUE. Default: FALSE}
 
 \item{flu.import}{A logical scalar. Import the latest influenza testing data
 from the CDC NREVSS system? If TRUE, the data will be downloaded and merge

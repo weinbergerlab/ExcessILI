@@ -80,6 +80,8 @@
 #' 
 #' @param stage2.samples How many samples should be drawn for the 2nd stage Poisson sampling (default=100)
 #'
+#' @param extend.epiyear If data extends past the epidemiological year when extrapolation.date is set, set to TRUE. Default: FALSE
+#'
 #' @return A list of lists with an entry for each syndrome, and sub-lists by
 #'   age group and geography:
 #'
@@ -147,7 +149,8 @@ excessCases <-
            seedN = 123,
            sum.dates=as.Date('2020-03-01'),
            stage1.samples = 100,
-           stage2.samples = 100
+           stage2.samples = 100,
+           extend.epiyear=FALSE
            ) {
 
   att       <- assertthat::assert_that
@@ -297,7 +300,8 @@ excessCases <-
         sum.dates = sum.dates,
         seedN = seedN,
         stage1.samples = stage1.samples,
-        stage2.samples = stage2.samples
+        stage2.samples = stage2.samples,
+        extend.epiyear=extend.epiyear
       )
 
       names(model.result) <- geos
