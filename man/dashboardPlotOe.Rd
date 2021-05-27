@@ -4,8 +4,15 @@
 \alias{dashboardPlotOe}
 \title{Create interactive Shiny app to view Observed/Expected output over time by geography and by age}
 \usage{
-dashboardPlotOe(excess_output, datevar, agevar, statevar, outcome, yaxis,
-  facet)
+dashboardPlotOe(
+  excess_output,
+  datevar,
+  agevar,
+  statevar,
+  outcome,
+  yaxis,
+  facet
+)
 }
 \arguments{
 \item{excess_output}{Provide the object returned by the function

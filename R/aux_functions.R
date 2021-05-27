@@ -131,7 +131,7 @@ reshape_ds <- function(ds2, agevar, datevar, sub.statevar) {
 #' @importFrom magrittr %>%
 glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
                      extrapolation.date,sum.dates, adj.flu, adj.rsv, covs=character(), model.type, seedN,
-                     stage1.samples, stage2.samples,extend.epiyear)
+                     stage1.samples, stage2.samples,extend.epiyear,adj.month.days)
 {
   date.string       <- as.Date(dimnames(ds)[[1]])
   month             <- lubridate::month(date.string)
@@ -152,6 +152,8 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   y.age                <- t(clean.array.citywide[, , age.test, syndrome])
   n.dates              <- length(y.age)
   y.age.fit            <- y.age[1, ]
+  
+  #If use 
   
   # Extrapolate last 1 months
   y.age.fit[date.string >= as.Date(extrapolation.date)] <- NA  
@@ -213,7 +215,12 @@ glm.func <- function(ds, x.test, age.test, denom.var, syndrome, time.res,
   sin3 <- sin(2*pi * t2 * 3/period)
   cos3 <- cos(2*pi * t2 * 3/period)
   
-  log.offset <- log(clean.array.citywide[, , age.test, denom.var] + 0.5)
+  if(time.res=='month' & adj.month.days==T){
+    days.months <- days_in_month(date.string)
+    log.offset <- log(clean.array.citywide[, , age.test, denom.var]/days.months*30.3 + 0.5)
+  }else{
+    log.offset <- log(clean.array.citywide[, , age.test, denom.var] + 0.5)
+  }
   
   vars_for_glm <-
     list(
