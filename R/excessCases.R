@@ -82,6 +82,8 @@
 #'
 #' @param extend.epiyear If data extends past the epidemiological year when extrapolation.date is set, set to TRUE. Default: FALSE
 #'
+#' @param adj.month.days If using monthly data, adjust for number of days in the month? (Defaults to TRUE)
+#'
 #' @return A list of lists with an entry for each syndrome, and sub-lists by
 #'   age group and geography:
 #'
@@ -150,7 +152,8 @@ excessCases <-
            sum.dates=as.Date('2020-03-01'),
            stage1.samples = 100,
            stage2.samples = 100,
-           extend.epiyear=FALSE
+           extend.epiyear=FALSE,
+           adj.month.days=TRUE
            ) {
 
   att       <- assertthat::assert_that
@@ -301,7 +304,8 @@ excessCases <-
         seedN = seedN,
         stage1.samples = stage1.samples,
         stage2.samples = stage2.samples,
-        extend.epiyear=extend.epiyear
+        extend.epiyear=extend.epiyear,
+        adj.month.days=adj.month.days
       )
 
       names(model.result) <- geos

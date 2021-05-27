@@ -33,8 +33,8 @@ for an usage example.
 saveRDS(mtcars, 'cars')
 saveRDS(mtcars, 'cars')
 # Now the filesystem has, in '.':
-# ├── mtcars
-# │   ├── 2020_04_09_16_40.rds
-# │   ├── 2020_04_09_16_41.rds
+# â”œâ”€â”€ mtcars
+# â”‚Â Â  â”œâ”€â”€ 2020_04_09_16_40.rds
+# â”‚Â Â  â”œâ”€â”€ 2020_04_09_16_41.rds
 
 }
